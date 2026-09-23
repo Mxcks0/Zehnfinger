@@ -163,6 +163,22 @@
       board: async () => (await pl([where('abc', '>', 0), orderBy('abc'), limit(30)])).docs.map(s => ({ ...plain(s), ms: s.data().abc }))
     };
 
+    /* ---------- Weltrangliste: Bestenlisten über alle Spieler ----------
+       f = Feldpfad im Spielerprofil (z. B. 'stats.bestWpm'), asc = kleiner ist besser (Zeiten) */
+    const getPath = (o, f) => f.split('.').reduce((x, k) => x == null ? x : x[k], o);
+    window.fbWorld = {
+      async top(f, asc){
+        const q = asc ? [where(f, '>', 0), orderBy(f), limit(20)] : [where(f, '>', 0), orderBy(f, 'desc'), limit(20)];
+        return (await pl(q)).docs.map(s => ({ ...plain(s), val: getPath(s.data(), f) }));
+      },
+      // Eigener Platz: wie viele sind besser? (Zählabfrage, lädt keine Profile)
+      async rank(f, asc, v){
+        const c = q => getCountFromServer(query(collection(db, 'players'), ...q)).then(s => s.data().count);
+        const [better, total] = await Promise.all([c(asc ? [where(f, '>', 0), where(f, '<', v)] : [where(f, '>', v)]), c([where(f, '>', 0)])]);
+        return { rank: better + 1, total };
+      }
+    };
+
     /* ---------- Team-Liga: alle Spieler, die in einem Team sind ---------- */
     window.fbTeamLeague = async () => (await pl([where('team', '!=', ''), limit(1000)])).docs.map(plain);
 
@@ -2247,6 +2263,13 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .pkey.hit{animation:pkhit .25s}
 @keyframes pkhit{40%{transform:translateY(4px);background:#B9F2D2}}
 @media (max-width:760px){.abc-wrap{grid-template-columns:1fr}}
+/* Weltrangliste */
+.wr-cats{margin:0 0 14px;padding:0;border:0}
+.wr-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:14px;align-items:start}
+.wr-grid h3{margin:0 0 8px}
+.wr-rank{font-size:52px;font-weight:800;line-height:1;color:var(--caret);font-variant-numeric:tabular-nums;margin:6px 0 4px}
+.wr-pct{font-weight:700;margin:10px 0 0}
+@media (max-width:760px){.wr-grid{grid-template-columns:1fr}.wr-me{order:-1}}
 </style>
 </head>
 <body class="locked">
@@ -5748,6 +5771,8 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-23.6',d:'23.09.2026',items:[
+    '🌍 Weltrangliste unter „Liga“: schnellste WPM, höchstes Level, meiste XP, längste Streak, Alphabet-Sprint, Tipp-Dungeon und Tippdle – mit deinem eigenen Platz']},
   {v:'2026-09-23.5',d:'23.09.2026',items:[
     '🟩 Tippdle: das tägliche Worträtsel – teile dein Ergebnis!',
     '🗡️ Tipp-Dungeon: kämpf dich durch Räume voller Monster und sammle Verbesserungen',
@@ -6065,6 +6090,7 @@ function showLeaguePending(){
   const close=()=>{m.remove();refreshMe();if(activity)return;setHandler(null)};$('#lgok',m).onclick=close;setHandler({char(){},enter:close,esc:close});
 }
 function viewLeague(){
+  if(lgTab==="world")return viewWorld();
   leagueRollover();
   const d=Store.data,L=d.league,[n,icon,color]=LEAGUES[L.idx],rows=standings(false),rank=rows.findIndex(r=>r.me)+1;
   const leftMs=Math.max(0,periodStart()+PERIOD_MS-Date.now()),lh=Math.floor(leftMs/36e5),lm=Math.ceil((leftMs%36e5)/6e4);
@@ -6073,7 +6099,7 @@ function viewLeague(){
   /* Freunde in anderen Ligen: nach Stufe gruppiert, damit man sieht, wen man einholen oder abwehren muss */
   const byLg=new Map();Social.friends.forEach(f=>{const i=leagueIdxOf(f.stats);if(i!==L.idx)byLg.set(i,[...(byLg.get(i)||[]),f])});
   const elsewhere=[...byLg.entries()].sort((a,b)=>b[0]-a[0]);
-  main.insertAdjacentHTML('beforeend',`<div class="page-head"><h1 class="ph">${icon} Liga</h1><p class="muted">Jeder startet in Bronze. Sammle in der Runde mehr XP als deine Rivalen, um aufzusteigen.</p></div>
+  main.insertAdjacentHTML('beforeend',`${lgHead(`${icon} Liga`,'Jeder startet in Bronze. Sammle in der Runde mehr XP als deine Rivalen, um aufzusteigen.')}
   <div class="league2">
     <div class="lg-left">
       <div class="lg-top panel" style="--lc:${color}">
@@ -6092,6 +6118,42 @@ function viewLeague(){
     <div class="panel lg-table">${rows.map((r,i)=>`<div class="lg-row ${zone(i)}${r.me?' me':''}"><span class="pos">${i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()} <small class="ttl">${esc(myTitle())}</small>`:r.friend?`<span class="ava fr-${esc(r.frame||'none')}">${esc(r.ava)}</span> ${nameHTML(r.n,r.fx)} <small class="ttl">Freund</small>`:`🤖 ${esc(r.n)}`}</span><span class="lp">${r.lp.toLocaleString('de-DE')} XP</span></div>`+(i===2&&L.idx<LEAGUES.length-1?'<div class="lg-cut up">Aufstiegszone</div>':'')+(i===N-3&&L.idx>0?'<div class="lg-cut down">Abstiegszone</div>':'')).join('')}</div>
   </div>`);
 }
+/* ---------- Weltrangliste (Reiter auf der Liga-Seite) ---------- */
+let lgTab='league',worldCat='wpm';
+function lgHead(title,sub){return `<div class="page-head fr-head"><div><h1 class="ph">${title}</h1><p class="muted">${sub}</p></div>
+  <div class="seg" id="lgtab">${[['league','🥇 Liga'],['world','🌍 Weltrangliste']].map(([k,v])=>`<button data-lgt="${k}" aria-pressed="${k===lgTab}">${v}</button>`).join('')}</div></div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-lgt]');if(!b)return;lgTab=b.dataset.lgt;go('league')});
+const WORLD_CATS=[
+  {k:'wpm',i:'⚡',n:'Schnellste WPM',f:'stats.bestWpm',fmt:v=>`${v} WPM`,mine:()=>bestWpm(),ok:v=>v<=250},
+  {k:'lv',i:'⭐',n:'Höchstes Level',f:'rankLv',fmt:v=>{const p=Math.floor(v/100),l=v%100;return `${p?`★${p} `:''}Lv ${l}`},mine:()=>(Store.data.prestige||0)*100+levelInfo(Store.data.xp).level},
+  {k:'xp',i:'✨',n:'Meiste XP',f:'xpAll',fmt:v=>`${fmtN(v)} XP`,mine:()=>(Store.data.xp||0)+(Store.data.prestigeXp||0)},
+  {k:'streak',i:'🔥',n:'Längste Streak',f:'stats.bestStreak',fmt:v=>`${v} ${v===1?'Tag':'Tage'}`,mine:()=>Math.max(Store.data.bestStreak||0,streak(Store.data))},
+  {k:'abc',i:'🔤',n:'Alphabet-Sprint',f:'abc',asc:true,fmt:v=>`${(v/1000).toFixed(2).replace('.',',')} s`,mine:()=>{const v=Store.data.high.abc||0;return v>=1500?v:0}},
+  {k:'dungeon',i:'🗡️',n:'Tipp-Dungeon',f:'stats.high.dungeon',fmt:v=>`${v} ${v===1?'Raum':'Räume'}`,mine:()=>Store.data.high.dungeon||0},
+  {k:'tippdle',i:'🟩',n:'Tippdle gelöst',f:'stats.high.tippdle',fmt:v=>`${v}×`,mine:()=>Store.data.high.tippdle||0}];
+async function viewWorld(){
+  const C=WORLD_CATS.find(c=>c.k===worldCat)||WORLD_CATS[0];
+  main.innerHTML=`${lgHead('🌍 Weltrangliste','Die Besten aller Spieler. Deine Werte werden nach jeder Runde automatisch eingetragen.')}
+    <div class="gfilter wr-cats">${WORLD_CATS.map(c=>`<button data-wc="${c.k}" aria-pressed="${c.k===C.k}">${c.i} ${c.n}</button>`).join('')}</div>
+    <div class="wr-grid"><div class="panel lg-table" id="wrl"><p class="muted small">Wird geladen…</p></div>
+      <div class="panel wr-me" id="wrme"><p class="muted small">Dein Platz wird berechnet…</p></div></div>`;
+  $$('[data-wc]').forEach(b=>b.onclick=()=>{worldCat=b.dataset.wc;viewWorld()});
+  if(!window.fbWorld){$('#wrl').innerHTML='<p class="muted small">Nur mit Anmeldung verfügbar.</p>';return}
+  const me=myUid(),m0=C.mine(),mine=C.ok&&!C.ok(m0)?0:m0;
+  let rows;try{rows=await window.fbWorld.top(C.f,C.asc)}catch(e){console.warn('Weltrangliste:',e);if($('#wrl'))$('#wrl').innerHTML='<p class="muted small">Die Rangliste konnte nicht geladen werden.</p>';return}
+  if(!$('#wrl')||worldCat!==C.k)return;
+  rows=rows.filter(r=>r.uid!==me&&(+r.val||0)>0&&(!C.ok||C.ok(r.val)));if(mine>0)rows.push({uid:me,me:true,val:mine});
+  rows.sort((a,b)=>C.asc?a.val-b.val:b.val-a.val);rows=rows.slice(0,20);
+  $('#wrl').innerHTML=`<h3>${C.i} ${C.n} <span class="muted small">Top ${rows.length}</span></h3>`+(rows.length?rows.map((r,i)=>`<div class="lg-row${r.me?' me':''}"><span class="pos">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()} <small class="ttl">Du</small>`:`${fAva(r)} ${nameHTML(r.name,r.nameFx)}${r.prestige?` <small class="ttl">★${r.prestige}</small>`:''}`}</span><span class="lp">${esc(C.fmt(r.val))}</span></div>`).join('')
+    :'<p class="muted small">Noch keine Einträge. Spiel eine Runde, dann stehst du hier!</p>');
+  const el=$('#wrme');
+  if(!mine){el.innerHTML=`<h3>Dein Platz</h3><p class="muted small">Du hast hier noch keinen Wert. ${C.k==='abc'?'Spiel den Alphabet-Sprint':C.k==='dungeon'?'Wag dich in den Tipp-Dungeon':C.k==='tippdle'?'Löse ein Tippdle':'Spiel eine Runde'}, um in die Liste zu kommen.</p>`;return}
+  try{const {rank,total}=await window.fbWorld.rank(C.f,C.asc,mine);if(!$('#wrme'))return;
+    const pct=total?Math.max(1,Math.round(rank/total*100)):100;
+    el.innerHTML=`<h3>Dein Platz</h3><div class="wr-rank">#${fmtN(rank)}</div><p class="muted small">von ${fmtN(Math.max(total,rank))} Spielern · ${esc(C.fmt(mine))}</p>
+      <p class="wr-pct">${rank===1?'👑 Du bist die Nummer 1!':pct<=10?`🔥 Du gehörst zu den besten ${pct} %!`:`Besser als ${Math.max(0,100-pct)} % aller Spieler`}</p>`}
+  catch(e){console.warn('Weltrangliste Platz:',e);if($('#wrme'))$('#wrme').innerHTML=`<h3>Dein Platz</h3><p class="muted small">${esc(C.fmt(mine))} – Platz konnte nicht berechnet werden.</p>`}}
+
 function histLabel(k){const t=+k;if(!isNaN(t)&&t>1e11){const a=new Date(t),b=new Date(t+PERIOD_MS);return `${a.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})}, ${a.getHours()}–${b.getHours()||24} Uhr`}return 'Woche ab '+new Date(k+'T00:00:00').toLocaleDateString('de-DE')}
 
 /* ---------- Freunde ---------- */
@@ -6119,7 +6181,7 @@ function publicSummary(){
       lessons:d.lessons||{},high:d.high||{},ghosts:flag(d.ghosts),story:flag(d.story),daily,
       league:{week:String(L.week),lp:L.lp||0,idx:L.idx||0,prevWeek:h0?String(h0.week):'',prevLp:h0?(h0.lp||0):0},
       wk:wkXp(),wkPrev:Store.data.wkPrev||null,plays:d.plays||{}},
-    prestige:d.prestige||0,
+    prestige:d.prestige||0,rankLv:(d.prestige||0)*100+li.level,xpAll:(d.xp||0)+(d.prestigeXp||0),
     team:(d.team&&d.team.id)||'',teamName:(d.team&&d.team.name)||'',
     tourKey:(d.tour&&d.tour.k)||'',tour:d.tour?{wpm:d.tour.wpm,acc:d.tour.acc}:{},
     tourPrevKey:(d.tourPrev&&d.tourPrev.k)||'',tourPrev:d.tourPrev?{wpm:d.tourPrev.wpm,acc:d.tourPrev.acc}:{},
