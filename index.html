@@ -2089,6 +2089,15 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .chain i{font-style:normal;opacity:.6}
 .memword .need{color:var(--caret)}
 .typo-s{font-family:var(--mono);font-size:clamp(18px,2.6vw,26px);line-height:1.6;text-align:center;max-width:760px;margin:0}
+/* Teilen-Fenster und Entwickler-Hinweis */
+.shr{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:16px;align-items:start;margin-top:6px}
+.shr img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
+.shr-b{display:grid;gap:8px}
+.shr-b .btn{justify-content:flex-start}
+.shr-b p{margin:4px 0 0}
+.fr-dev{font-size:13px;color:var(--muted);margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line)}
+.fr-dev b{color:var(--text)}
+@media (max-width:560px){.shr{grid-template-columns:1fr}.shr img{max-width:220px;margin:0 auto}}
 </style>
 </head>
 <body class="locked">
@@ -5280,6 +5289,9 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-23.3',d:'23.09.2026',items:[
+    '📋 Ergebnis teilen: Bild jetzt direkt in die Zwischenablage kopieren und überall einfügen',
+    '👋 Unter „Freunde“ findest du jetzt den Entwickler Mxcks0 mit einem Klick']},
   {v:'2026-09-23.2',d:'23.09.2026',items:[
     '🙈 Neues Spiel „Blindflug“: tippen, ohne zu sehen, was du tippst',
     '🔗 Neues Spiel „Wortkette“: jedes Wort beginnt mit dem letzten Buchstaben des vorigen',
@@ -5375,11 +5387,21 @@ async function shareResult(o){
   x.fillStyle='#FFC857';x.font=`600 38px ${ui}`;x.fillText('zehnfingernulllangeweile.de',90,H-160);
   const blob=await new Promise(r=>c.toBlob(r,'image/png'));const file=new File([blob],'zehnfinger-ergebnis.png',{type:'image/png'});
   const link=myUid()?inviteLink():'https://www.zehnfingernulllangeweile.de',text=`${o.game}: ${big}${o.unit?' '+o.unit:''}! Schlägst du das? 😏 ${link}`;
-  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text,title:'Zehnfinger'});return}}catch(e){if(e&&e.name==='AbortError')return}
-  // Kein Teilen möglich (z. B. am PC): Bild herunterladen und Text kopieren
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zehnfinger-ergebnis.png';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
-  try{await navigator.clipboard.writeText(text)}catch(e){}
-  toast('📤','Bild gespeichert','Der Text mit deinem Einladungslink ist kopiert – einfach einfügen und das Bild dazu posten.')}
+  // Auswahlfenster mit Vorschau: teilen (Handy), Bild kopieren, speichern oder Text kopieren
+  const url=URL.createObjectURL(blob),canFiles=!!(navigator.canShare&&navigator.canShare({files:[file]})),canImg=!!(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write);
+  const m=modal(`<h3>📤 Ergebnis teilen</h3><div class="shr"><img src="${url}" alt="Dein Ergebnisbild"><div class="shr-b">
+      ${canFiles?'<button class="btn primary" id="shs">📱 Teilen …</button>':''}
+      ${canImg?`<button class="btn${canFiles?'':' primary'}" id="shc">📋 Bild kopieren</button>`:''}
+      <button class="btn" id="shd">💾 Bild speichern</button><button class="btn" id="sht">🔗 Text kopieren</button>
+      <p class="muted small" id="shm">Tipp: Bild kopieren und dann in WhatsApp, Discord oder Instagram mit Strg+V einfügen.</p></div></div>
+    <div class="acts"><button class="btn ghost" id="shx">Schließen</button></div>`);
+  const msg=t=>{$('#shm',m).textContent=t},close=()=>{m.remove();URL.revokeObjectURL(url)};
+  $('#shx',m).onclick=close;
+  if(canFiles)$('#shs',m).onclick=()=>navigator.share({files:[file],text,title:'Zehnfinger'}).catch(()=>{});
+  if(canImg)$('#shc',m).onclick=async()=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);msg('✅ Bild ist in der Zwischenablage. Jetzt einfach einfügen (Strg+V).');Sound.ok()}
+    catch(e){console.warn('Bild kopieren:',e);msg('Kopieren hat nicht geklappt. Nimm stattdessen „Bild speichern“.')}};
+  $('#shd',m).onclick=()=>{const a=document.createElement('a');a.href=url;a.download='zehnfinger-ergebnis.png';document.body.appendChild(a);a.click();a.remove();msg('✅ Bild gespeichert (Ordner „Downloads“).')};
+  $('#sht',m).onclick=async()=>{try{await navigator.clipboard.writeText(text);msg('✅ Text mit deinem Einladungslink kopiert.')}catch(e){msg(text)}}}
 /* Aus einer Ergebniszeile wie „12 Maulwürfe erwischt, 1.230 Punkte.“ die größte Zahl als Schlagzeile holen */
 function shareFromLines(game,lines){
   const plain=String(lines[0]||'').replace(/<[^>]+>/g,''),nums=(plain.match(/\d[\d.]*/g)||[]).map(s=>+s.replace(/\./g,''));
@@ -5558,6 +5580,7 @@ function viewFriends(){
         <div class="panel"><h3>Freund hinzufügen</h3>
           <div class="fr-search"><input id="frq" placeholder="Benutzername suchen" autocomplete="off" maxlength="20" aria-label="Benutzername suchen" value="${esc(frLastQ)}"><button class="btn primary small" id="frgo">Suchen</button></div>
           <div class="fr-res" id="frres"></div>
+          <p class="fr-dev">👋 Der Entwickler heißt <b>Mxcks0</b> – füg ihn gern hinzu! <button class="linkbtn" id="frdev">Mxcks0 suchen</button></p>
         </div>
         <div class="fr-side" id="frreq"></div>
       </div>
@@ -5568,6 +5591,7 @@ function viewFriends(){
   q.oninput=()=>{clearTimeout(frSearchT);frSearchT=setTimeout(run,350)};
   q.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(frSearchT);run()}};
   $('#frgo').onclick=run;
+  $('#frdev').onclick=()=>{q.value='Mxcks0';clearTimeout(frSearchT);run()};
   renderFriendsLive();
 }
 
