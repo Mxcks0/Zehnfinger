@@ -2272,6 +2272,63 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .gbest{margin:4px 0 0;font-size:13px;color:var(--muted)}
 .gbest b{color:var(--text)}
 .gbest .ava{font-size:14px;margin:0 2px}
+/* Himmel nach Tageszeit (hinter allem, nur zarte Farbe oben) */
+#sky{position:fixed;inset:0;z-index:-2;pointer-events:none;transition:background 2s}
+#sky.sky-morning{background:radial-gradient(120% 55% at 50% -10%,color-mix(in srgb,#FFB38A 22%,transparent),transparent 70%)}
+#sky.sky-day{background:radial-gradient(120% 55% at 50% -10%,color-mix(in srgb,#8EC9FF 20%,transparent),transparent 70%)}
+#sky.sky-evening{background:radial-gradient(120% 60% at 50% -10%,color-mix(in srgb,#FF8A5C 22%,transparent),color-mix(in srgb,#9B6BFF 8%,transparent) 55%,transparent 80%)}
+#sky.sky-night{background:radial-gradient(1.5px 1.5px at 12% 18%,#fff9 50%,transparent 51%),radial-gradient(1px 1px at 27% 8%,#fff8 50%,transparent 51%),radial-gradient(1.5px 1.5px at 43% 22%,#fff7 50%,transparent 51%),radial-gradient(1px 1px at 58% 12%,#fff9 50%,transparent 51%),radial-gradient(1.5px 1.5px at 71% 26%,#fff6 50%,transparent 51%),radial-gradient(1px 1px at 84% 9%,#fff8 50%,transparent 51%),radial-gradient(1px 1px at 93% 31%,#fff7 50%,transparent 51%),radial-gradient(1px 1px at 6% 38%,#fff6 50%,transparent 51%),radial-gradient(120% 55% at 50% -10%,color-mix(in srgb,#4B5BD6 20%,transparent),transparent 70%)}
+:root[data-theme="light"] #sky.sky-night{background:radial-gradient(120% 55% at 50% -10%,color-mix(in srgb,#4B5BD6 14%,transparent),transparent 70%)}
+/* Jahreszeiten-Deko */
+#season{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#season .sp{position:absolute;top:-40px;opacity:.55;animation:spfall linear infinite}
+#season .sp-halloween,#season .sp-easter{animation-name:spfloat;top:auto;bottom:-40px;opacity:.45}
+@keyframes spfall{to{transform:translateY(calc(100vh + 80px)) rotate(200deg)}}
+@keyframes spfloat{0%{transform:translate(0,0)}50%{transform:translate(18px,-55vh)}100%{transform:translate(-10px,calc(-100vh - 80px))}}
+/* Haustier */
+.pet{margin-left:auto;font-size:34px;line-height:1;position:relative;align-self:center;transform-origin:bottom center;user-select:none}
+.pet.happy{animation:pethop .6s}
+.pet.oops{animation:petoops .35s}
+@keyframes pethop{30%{transform:translateY(-14px) rotate(-8deg)}60%{transform:translateY(0) rotate(6deg)}}
+@keyframes petoops{25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+.petb{position:absolute;left:50%;top:-6px;font-size:16px;font-style:normal;animation:petb 1s forwards}
+@keyframes petb{to{transform:translate(-50%,-30px);opacity:0}}
+.petpv{position:relative;font-size:44px}
+.petpv i{position:absolute;right:-12px;top:-4px;font-size:16px;font-style:normal;animation:petb 1.6s infinite}
+/* Glücksrad */
+.strip-wheel.ready b{color:var(--caret)}
+.wheel-wrap{position:relative;width:min(260px,70vw);margin:8px auto 4px}
+.wheel{width:100%;height:auto;display:block;transition:transform 4s cubic-bezier(.17,.67,.12,.99)}
+.wheel text{fill:#1f1b2b}
+.wheel-ptr{position:absolute;left:50%;top:-14px;transform:translateX(-50%);z-index:1;font-size:22px;color:var(--text);text-shadow:0 2px 4px #0008}
+.wheel-res{text-align:center;font-weight:800;font-size:18px;min-height:1.4em;margin:8px 0 0}
+/* Wochen-Boss und Spieler der Woche */
+.comm{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px;margin:0 0 14px}
+.comm:empty{display:none}
+.comm-card{font:inherit;color:var(--text);text-align:left;display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+button.comm-card{cursor:pointer}
+.comm-card.boss{border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}
+.comm-card.boss:hover{border-color:var(--bad)}
+.cb-e{font-size:30px;line-height:1}
+.cb-t{display:grid;gap:3px;min-width:0;flex:1}
+.cb-t b{font-size:14px}
+.cb-t .ava{font-size:14px}
+.hpbar.big{max-width:none;height:8px}
+.hpbar.big i{background:linear-gradient(90deg,var(--bad),#FF9E6B)}
+.boss-big{font-size:64px;line-height:1.1}
+.pu{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.lg-row.click{cursor:pointer}
+.lg-row.click:hover{background:var(--surface2)}
+/* Spielerprofil */
+.pm-top{display:flex;gap:14px;align-items:center;margin-bottom:10px}
+.pm-top .ava{font-size:40px}
+.pm-top h3{margin:0}
+.pm-top p{margin:2px 0 0}
+.cards.compact.pm-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pm-med{display:flex;flex-wrap:wrap;gap:6px}
+.pm-med span{font-size:13px;padding:4px 10px;border-radius:999px;background:var(--surface2)}
+@media (max-width:760px){.comm{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){#season{display:none}.wheel{transition:none}}
 </style>
 </head>
 <body class="locked">
@@ -2641,8 +2698,8 @@ function genProblem(){
 
 /* ---------- Storage ---------- */
 const LS_KEY='zehnfinger.v1';
-const DEFAULT=()=>({v:2,v5:1,lessons:{},history:[],keys:{},high:{},totalSecs:0,count:0,strokes:0,xp:0,ach:{},days:{},bestStreak:0,ghosts:{},daily:{},story:{},coins:0,owned:{kb:['finger'],hand:['flat'],snd:['membrane'],acc:['amber'],font:['jetbrains'],car:['🚗'],ava:['🙂'],bg:['none'],trail:['none'],conf:['classic'],title:['auto'],frame:['none'],fan:['classic'],nfx:['none'],crates:[],unbox:['classic'],wordSkin:['classic'],errorSound:['buzz','knock','beep','none'],cursor:['std'],wordFx:['none'],typist:['modern']},league:{v:4,idx:0,week:'',lp:0,hist:[],pending:null,best:0},
-  settings:{nameFx:'none',unboxFx:'classic',wordSkin:'classic',cursorSkin:'std',wordFx:'none',typist:'modern',kb:true,hands:true,caps:true,own:'',sound:true,keySound:true,goal:10,uiSound:true,volume:.7,uiVolume:.7,soundProfile:'membrane',gameLang:'de',car:'🚗',avatar:'🙂',frame:'none',fanfare:'classic',bg:'none',trail:'none',confettiStyle:'classic',title:'auto',pitchVar:true,spaceSound:true,errSound:'buzz',
+const DEFAULT=()=>({v:2,v5:1,lessons:{},history:[],keys:{},high:{},totalSecs:0,count:0,strokes:0,xp:0,ach:{},days:{},bestStreak:0,ghosts:{},daily:{},story:{},coins:0,owned:{pet:['none'],kb:['finger'],hand:['flat'],snd:['membrane'],acc:['amber'],font:['jetbrains'],car:['🚗'],ava:['🙂'],bg:['none'],trail:['none'],conf:['classic'],title:['auto'],frame:['none'],fan:['classic'],nfx:['none'],crates:[],unbox:['classic'],wordSkin:['classic'],errorSound:['buzz','knock','beep','none'],cursor:['std'],wordFx:['none'],typist:['modern']},league:{v:4,idx:0,week:'',lp:0,hist:[],pending:null,best:0},
+  settings:{pet:'none',music:'off',musicVol:.5,sky:true,season:true,nameFx:'none',unboxFx:'classic',wordSkin:'classic',cursorSkin:'std',wordFx:'none',typist:'modern',kb:true,hands:true,caps:true,own:'',sound:true,keySound:true,goal:10,uiSound:true,volume:.7,uiVolume:.7,soundProfile:'membrane',gameLang:'de',car:'🚗',avatar:'🙂',frame:'none',fanfare:'classic',bg:'none',trail:'none',confettiStyle:'classic',title:'auto',pitchVar:true,spaceSound:true,errSound:'buzz',
     kbTheme:'finger',kbShape:'round',kbSize:'m',kbLabels:true,kbNext:true,handStyle:'flat',skin:'#E8B98F',handSize:'m',
     theme:'dark',accent:'amber',font:'jetbrains',textSize:'m',lines:3,caret:'line',caretBlink:true,spaceDots:true,errMode:'continue',textLen:'m',
     live:{wpm:true,cpm:true,acc:true,combo:true,time:true,bar:true},anim:true,confetti:true,toasts:true,gameSpeed:1},updatedAt:0});
@@ -2798,7 +2855,8 @@ const levelTitle=lv=>TITLES.filter(t=>lv>=t[0]).pop()[1];
 const nextTitle=lv=>TITLES.find(t=>t[0]>lv);
 const countStars=(d,n)=>LESSONS.filter(l=>((d.lessons[l.id]||{}).stars||0)>=n).length;
 const goalDays=d=>Object.values(d.days).filter(v=>v>=d.settings.goal*60).length;
-function streak(d){const g=d.settings.goal*60;let s=0;const dt=new Date();if((d.days[dayKey(dt)]||0)<g)dt.setDate(dt.getDate()-1);while((d.days[dayKey(dt)]||0)>=g){s++;dt.setDate(dt.getDate()-1)}return s}
+/* Tage mit eingesetztem Streak-Schutz (d.frozen) zählen wie geschaffte Tage */
+function streak(d){const g=d.settings.goal*60,ok=k=>(d.days[k]||0)>=g||!!(d.frozen&&d.frozen[k]);let s=0;const dt=new Date();if(!ok(dayKey(dt)))dt.setDate(dt.getDate()-1);while(ok(dayKey(dt))){s++;dt.setDate(dt.getDate()-1)}return s}
 const TYPING=['lesson','free','sixty','timed','race','sudden','ghost','daily','code','ladder','duel','online','tour','blind'];
 const isTyping=c=>c&&TYPING.includes(c.mode);
 const ACH=[
@@ -2888,7 +2946,7 @@ function recordSession(mode,label,st,extra={}){
   d.xp=(d.xp||0)+xp;const s=streak(d);d.bestStreak=Math.max(d.bestStreak||0,s);
   const newAch=checkAch(Object.assign({mode,label,st},extra));
   if(newAch.length){d.xp+=newAch.length*20;xp+=newAch.length*20}
-  wkAdd(xp);d.plays=d.plays||{};d.plays[mode]=(d.plays[mode]||0)+1;
+  wkAdd(xp);wkcAdd(st.ok||0);d.plays=d.plays||{};d.plays[mode]=(d.plays[mode]||0)+1;
   const mast=checkMastery(),wq=wqTrack({mode,st,xp,extra,goalMet:d.days[today]>=g}),chWon=chCheck(mode,extra);
   const levelUp=levelInfo(d.xp).level>beforeLv;
   leagueRollover();const rankBefore=myRank(false);d.league.lp+=xp;const rankAfter=myRank(false);
@@ -3244,14 +3302,16 @@ function viewLessons(){
       <div><b>🔥 ${s}</b><span>${s===1?'Tag':'Tage'} Streak</span></div>
       <div><b>Lv ${li.level}</b><span>${esc(myTitle())}</span></div>
       <button class="strip-lg" id="slg"><b>${LEAGUES[d.league.idx][1]} ${myRank(false)?`Platz ${myRank(false)}`:'Noch nicht dabei'}</b><span>${LEAGUES[d.league.idx][0]}-Liga</span></button>
+      <button class="strip-lg strip-wheel${wheelReady()?' ready':''}" id="swh" title="Glücksrad"><b>🎡 ${wheelReady()?'Drehen!':'Morgen'}</b><span>Glücksrad</span></button>
       <button class="strip-lg" id="swq" title="Wochenaufgaben ansehen"><b>🎯 ${wqCount()}/4</b><span>Wochenaufgaben</span></button>
       <div class="legend mini">${[5,4,3,2,1].map(n=>`<span class="chip" style="--fc:var(--f${n})" title="${FINGER_NAMES[n]}"><i></i>${({5:'Klein',4:'Ring',3:'Mittel',2:'Zeige',1:'Daumen'})[n]}</span>`).join('')}</div>
     </div>
+    <div class="comm" id="comm"></div>
     <div class="courses" role="tablist" aria-label="Kurse">${secStats.map(x=>`<button role="tab" data-c="${x.id}" aria-selected="${x.id===courseSel}"><b>${x.t}</b><span class="cbar"><i style="width:${x.done/x.total*100}%"></i></span><span class="muted small">${x.done}/${x.total} · ${x.d}</span></button>`).join('')}</div>
     <div id="lgrid"></div>
   </section>`;
   firstLoad=false;animRings();
-  $('#cont').onclick=()=>practice(lessonCfg(ri));$('#slg').onclick=()=>go('league');$('#swq').onclick=wqModal;
+  $('#cont').onclick=()=>practice(lessonCfg(ri));$('#slg').onclick=()=>go('league');$('#swq').onclick=wqModal;$('#swh').onclick=wheelModal;renderCommunity();
   $$('.courses button').forEach(b=>b.onclick=()=>{courseSel=b.dataset.c;viewLessons()});
   paged($('#lgrid'),'les-'+courseSel,'lessons',LESSONS.map((l,i)=>[l,i]).filter(([l])=>l.sec===courseSel),card,grid=>$$('.lesson',grid).forEach(b=>b.onclick=()=>practice(lessonCfg(+b.dataset.i))));
 }
@@ -3267,7 +3327,7 @@ function practice(cfg){
     main.innerHTML=`<section${cfg.blind?' class="blindsec"':''}>
       <div class="prac-head"><button class="btn ghost small" id="back">Zurück</button><div><h2>${esc(cfg.title)}${cfg.tab==='games'&&cfg.mode!=='code'&&cfg.mode!=='tour'?langBadge():''}</h2><p class="muted">${esc(cfg.sub||'')}</p></div></div>
       ${cfg.mode==='race'||cfg.mode==='ghost'||cfg.mode==='duel'||cfg.mode==='online'?`<div class="track${cfg.mode==='online'?' online':''}"><div class="lane"><span class="who">Du</span><div class="road"><i class="car" id="cy">${esc(S.car)}</i></div></div><div class="lane"><span class="who">${esc(laneLabel)}</span><div class="road"><i class="car${cfg.mode==='ghost'?' ghostcar':''}" id="cg">${cfg.mode==='ghost'?'👻':cfg.mode==='duel'?'🤖':cfg.mode==='online'?esc(cfg.oppCar||'🚙'):'🚙'}</i></div></div></div>`:''}
-      <div class="live"><div class="st-wpm"><b id="lw">0</b><span>WPM</span></div><div class="st-cpm"><b id="lc">0</b><span>Anschläge/Min</span></div><div class="st-acc"><b id="la">100</b><span>% Genauigkeit</span></div><div class="combo st-combo"><b id="lcb">0</b><span>Serie</span></div><div class="st-time"><b id="lt">${cfg.timeLimit?fmtTime(cfg.timeLimit):'0:00'}</b><span>${cfg.timeLimit?'übrig':'Zeit'}</span></div><div class="bar st-bar"><i id="lp"></i></div></div>
+      <div class="live"><div class="st-wpm"><b id="lw">0</b><span>WPM</span></div><div class="st-cpm"><b id="lc">0</b><span>Anschläge/Min</span></div><div class="st-acc"><b id="la">100</b><span>% Genauigkeit</span></div><div class="combo st-combo"><b id="lcb">0</b><span>Serie</span></div><div class="st-time"><b id="lt">${cfg.timeLimit?fmtTime(cfg.timeLimit):'0:00'}</b><span>${cfg.timeLimit?'übrig':'Zeit'}</span></div><div class="bar st-bar"><i id="lp"></i></div>${S.pet&&S.pet!=='none'?`<div class="pet" id="pet" title="${esc(PET_NAMES[S.pet]||'')}">${esc(S.pet)}</div>`:''}</div>
       <div class="typebox${cfg.code?' codebox':''}${cfg.blind?' blind':''}" id="tb"><div id="tv"></div><div class="focus-hint">Klicke hier und tippe los</div></div>
       <div class="toggles">${cfg.hideHelp?'<span>In dieser Übung ohne Tastatur und Hände</span>':`<label><input type="checkbox" id="tkb" ${S.kb?'checked':''}> Tastatur anzeigen</label><label><input type="checkbox" id="thd" ${S.hands?'checked':''}> Hände anzeigen</label>`}
         <label><input type="checkbox" id="tks" ${S.keySound?'checked':''}> Tippgeräusche</label><span>${['race','ghost','timed','daily','ladder','duel','online','tour'].includes(cfg.mode)?'Fehler musst du korrigieren, bevor es weitergeht. ':S.errMode==='backspace'&&cfg.mode!=='sudden'?'⌫ korrigiert, ':''}Esc bricht ab</span><button class="btn ghost small" id="pset" style="margin-left:auto">Einstellungen</button></div>
@@ -3296,9 +3356,10 @@ function practice(cfg){
       if(cfg.mode==='ghost'&&typer.i>0)myTimes[typer.i-1]=Math.round(performance.now()-typer.start);
       kb.flash(ch,good);lcb.textContent=combo;if(good&&typer.i>0)trailFx(tb,typer.spans[typer.i-1],ch);
       if(good){ch===' '?Sound.space():Sound.key();
+        if(combo>0&&combo%10===0)petReact('happy');
         if(combo>0&&combo%25===0){Sound.combo();lcb.classList.remove('pulse');void lcb.offsetWidth;lcb.classList.add('pulse')}}
       else if(cfg.blind){Sound.key()}   // Blindflug: Fehler bleiben bis zum Ende unsichtbar
-      else{Sound.err();if(cfg.tab==='games'&&cfg.mode!=='sudden')Mash.err();if(!reduced()){tb.classList.remove('shake');void tb.offsetWidth;tb.classList.add('shake')}
+      else{petReact('oops');Sound.err();if(cfg.tab==='games'&&cfg.mode!=='sudden')Mash.err();if(!reduced()){tb.classList.remove('shake');void tb.offsetWidth;tb.classList.add('shake')}
         if(cfg.mode==='sudden')typer.finish()}
     };
     const typer=new Typer($('#tv'),{lang:cfg.code?cfg.lang:null,errMode:()=>cfg.mode==='sudden'||cfg.blind?'continue':['race','ghost','timed','daily','ladder','duel','online','tour'].includes(cfg.mode)?'stop':S.errMode,onNext:ch=>lightHands(hands,kb.highlight(ch)),onUpdate:upd,onKey,onDone:st=>{if(st.progress>=1)Sound.finishText();finish(st)}});
@@ -5033,7 +5094,7 @@ function applySettings(){
   b.classList.add('kbt-'+effKb(),'ws-'+(S.wordSkin||'classic'),'cur-'+(S.cursorSkin||'std'),'ty-'+S.kbTheme,'kbs-'+S.kbShape,'kbz-'+S.kbSize,'hs-'+S.handStyle,'hz-'+S.handSize,'caret-'+S.caret);
   b.classList.add('bgx-'+(S.bg||'none'));if(!S.caretBlink)b.classList.add('opt-noblink');if(!S.kbLabels)b.classList.add('opt-nolabels');if(!S.anim)b.classList.add('opt-noanim');if(!S.spaceDots)b.classList.add('opt-nodots');
   Object.entries(S.live).forEach(([k,v])=>{if(!v)b.classList.add('opt-hide-'+k)});
-  applyBgFx();Cursor.apply();
+  applyBgFx();Cursor.apply();try{applyAmbience();Music.apply()}catch(e){}
 }
 function applyLen(t){const L=Store.data.settings.textLen;
   if(L==='s'&&t.length>120){const i=t.lastIndexOf(' ',120);return t.slice(0,i>60?i:120)}
@@ -5078,7 +5139,7 @@ function viewSettings(){
   const cards=(key,obj,extra)=>`<div class="scards" data-set="${key}">${Object.entries(obj).filter(([v])=>ownsSet(key,v)).map(([v,[n,d]])=>`<button class="scard" data-v="${v}" aria-pressed="${S[key]===v}" title="${esc(d)}"><b>${n}</b>${extra?extra(v):''}</button>`).join('')}${shopLink(key)}</div>`;
   const shopLink=key=>{const c=catOfSet(key);if(!c)return '';const miss=c.items.filter(([id])=>!owns(c.id,id)).length;return miss?`<button class="scard shoplink" data-shop="${c.id}"><b>🛍️ ${miss} weitere</b><span>im Shop</span></button>`:''};
   const ownedRow=(label,cid)=>{const c=SHOP_CATS.find(x=>x.id===cid),own=c.items.filter(([id])=>owns(cid,id));const miss=c.items.length-own.length;
-    return row(label,miss?`<button class="linkbtn" data-shop="${cid}">${miss} weitere im Shop</button>`:'',`<div class="seg" data-set="${c.set}">${own.map(([id])=>`<button data-v="${esc(id)}" aria-pressed="${S[c.set]===id}">${esc(cid==='car'||cid==='ava'?id:itemName(cid,id))}</button>`).join('')}</div>`)};
+    return row(label,miss?`<button class="linkbtn" data-shop="${cid}">${miss} weitere im Shop</button>`:'',`<div class="seg" data-set="${c.set}">${own.map(([id])=>`<button data-v="${esc(id)}" aria-pressed="${S[c.set]===id}">${esc(cid==='car'||cid==='ava'||(cid==='pet'&&id!=='none')?id:itemName(cid,id))}</button>`).join('')}</div>`)};
   const group=(t,body)=>`<section class="sgroup"><h3>${t}</h3>${body}</section>`;
   const LIVE={wpm:'WPM',cpm:'Anschläge/Min',acc:'Genauigkeit',combo:'Serie',time:'Zeit',bar:'Fortschritt'};
   const C={
@@ -5098,6 +5159,8 @@ function viewSettings(){
         ${row('Natürliche Variation','Jeder Anschlag klingt minimal anders',tg('pitchVar'))}
         ${row('Eigener Leertasten-Klang','Tiefer, mit Rasseln',tg('spaceSound'))}
         ${row('Fehlerton','Weitere Fehler-Sounds gibt es im Shop',`<select data-sel="errSound" aria-label="Fehlerton">${Object.entries(ERRSOUNDS).filter(([k])=>ownsSet('errSound',k)).map(([k,v])=>`<option value="${k}" ${S.errSound===k?'selected':''}>${v}</option>`).join('')}</select>`)}`)+
+      group('Hintergrundmusik',`${row('Musik','Ruhige Musik zum Üben, direkt im Browser erzeugt',seg('music',MUSIC_STYLES))}
+        ${row('Musik-Lautstärke','',rg('musicVol'))}`)+
       group('Effekte',`${row('Ton insgesamt','Hauptschalter für alle Geräusche',tg('sound'))}
         ${row('Jingles und Spiel-Effekte','',tg('uiSound'))}
         ${row('Lautstärke','',rg('uiVolume'))}`),
@@ -5112,8 +5175,9 @@ function viewSettings(){
         <div class="srow"><div><b>Live-Anzeige</b><span>Was du beim Tippen siehst</span></div><div class="pills">${Object.entries(LIVE).map(([k,v])=>`<label class="pill"><input type="checkbox" data-live="${k}" ${S.live[k]?'checked':''}><span>${v}</span></label>`).join('')}</div></div>`),
     display:()=>group('Darstellung',`${row('Farbschema','',seg('theme',[['dark','Dunkel'],['light','Hell'],['auto','System']]))}
         ${row('Akzentfarbe','',`<div class="swatches" data-set="accent">${Object.entries(ACCENTS).filter(([k])=>ownsSet('accent',k)).map(([k,v])=>`<button data-v="${k}" aria-pressed="${S.accent===k}" style="--sw:${v[0]}" aria-label="${v[2]}" title="${v[2]}"></button>`).join('')}<button class="shopdot" data-shop="acc" title="Mehr Farben im Shop">+</button></div>`)}
+        ${row('Himmel nach Tageszeit','Morgens hell, abends Sterne (bei Hintergrund „Keiner“)',tg('sky'))}${row('Jahreszeiten-Deko','Schnee im Dezember, Kürbisse an Halloween, Küken zu Ostern',tg('season'))}
         ${row('Animationen','',tg('anim'))}${row('Konfetti','',tg('confetti'))}${row('Benachrichtigungen','Erfolge und Level-Ups',tg('toasts'))}`),
-    style:()=>group('Stil',`${ownedRow('Hintergrund','bg')}${ownedRow('Tipp-Effekt','trail')}${ownedRow('Konfetti','conf')}${ownedRow('Titel','title')}${ownedRow('Fahrzeug','car')}${ownedRow('Avatar','ava')}${ownedRow('Rahmen','frame')}${ownedRow('Siegesklang','fan')}`)+
+    style:()=>group('Stil',`${ownedRow('Haustier','pet')}${ownedRow('Hintergrund','bg')}${ownedRow('Tipp-Effekt','trail')}${ownedRow('Konfetti','conf')}${ownedRow('Titel','title')}${ownedRow('Fahrzeug','car')}${ownedRow('Avatar','ava')}${ownedRow('Rahmen','frame')}${ownedRow('Siegesklang','fan')}`)+
       group('Spiele und Ziele',`${row('Spieltempo','Wortregen, Blaster, Zombies',seg('gameSpeed',[[0.75,'Ruhig'],[1,'Normal'],[1.3,'Schnell'],[1.6,'Extrem']]))}
         ${row('Sprache der Spieltexte','',seg('gameLang',[['de','Deutsch'],['en','English']]))}
         ${row('Großschreibung in Spielen','',tg('caps'))}
@@ -5238,6 +5302,7 @@ function applyBgFx(){
 /* ---------- Shop & Economy ---------- */
 const RARITY={c:['Gewöhnlich','#9aa3b2'],r:['Selten','#6fb6ff'],e:['Episch','#b98cff'],l:['Legendär','#ffc857']};
 const SHOP_CATS=[
+ {id:'pet',i:'🐾',n:'Haustiere',set:'pet',items:[['none','c',0,1],['🐶','c',200,2],['🐱','c',200,2],['🐰','c',300,3],['🐹','c',300,4],['🐤','c',350,5],['🦊','r',700,6],['🐧','r',700,7],['🐢','r',800,8],['🦜','r',900,9],['🐙','e',1500,11],['🐉','e',1600,12],['🦄','e',1800,14],['🦖','l',3000,16],['🐲','l',3200,18]]},
  {id:'kb',i:'⌨️',n:'Tastaturen',set:'kbTheme',items:[['finger','c',0,1],['mono','c',300,3],['outline','r',600,5],['pastel','r',800,7],['retro','r',1000,9],['gameboy','e',1600,12],['wood','e',1800,14],['mech','e',2200,16],['neon','l',3500,20],['rgb','l',3800,17],['vintage','e',2400,1,'crate'],['crystal','l',4200,1,'crate'],['steampunk','l',4500,1,'crate']]},
  {id:'errorSound',i:'🔔',n:'Fehler-Sounds',set:'errSound',items:[['buzz','c',0,1],['knock','c',0,1],['beep','c',0,1],['none','c',0,1],['showbuzz','r',500,3],['airhorn','r',700,4],['wupwup','r',750,6],['glass','e',1100,8],['meow','e',1200,9],['trombone','e',1300,11],['yeet','l',2200,14]]},
  {id:'wordSkin',i:'🌈',n:'Wort-Effekte',set:'wordSkin',items:[['classic','c',0,1],['candy','r',600,3],['glow','r',650,4],['neon','r',700,5],['fire','e',1100,8],['rainbow','e',1200,9],['glitch','l',2400,14]]},
@@ -5258,6 +5323,7 @@ const SHOP_CATS=[
  {id:'fan',i:'🎺',n:'Siegesklänge',set:'fanfare',items:[['classic','c',0,1],['chime','c',250,3],['arcade','r',600,6],['bells','r',700,8],['orchestra','e',1500,12],['synth','l',2600,18]]},
  {id:'title',i:'🏷️',n:'Titel',set:'title',items:[['auto','c',0,1],['Tastenflüsterer','c',300,3],['Frühaufsteher','r',600,1,'early'],['Nachteule','r',600,1,'night'],['Blitzfinger','r',800,8],['Wortakrobat','r',900,10],['Code-Magier','e',1500,1,'polyglot'],['Bossjäger','e',1600,1,'boss5'],['Unaufhaltsam','e',1800,1,'s14'],['Wortschmied','r',900,12],['Tippmaschine','e',1800,15],['Rhythmusgott','e',1600,1,'rhythm'],['Geisterjäger','e',1500,1,'ghost'],['Legende der Tasten','l',4000,1,13]]},
 ];
+const PET_NAMES={none:'Kein Haustier','🐶':'Hund','🐱':'Katze','🐰':'Hase','🐹':'Hamster','🐤':'Küken','🦊':'Fuchs','🐧':'Pinguin','🐢':'Schildkröte','🦜':'Papagei','🐙':'Oktopus','🐉':'Drache','🦄':'Einhorn','🦖':'T-Rex','🐲':'Drachenbaby'};
 const CAR_NAMES={'🏍️':'Motorrad','⛵':'Segelboot','🚂':'Dampflok','🚗':'Kompaktwagen','🛵':'Roller','🚲':'Fahrrad','🚜':'Traktor','🏎️':'Rennwagen','🛹':'Skateboard','🚁':'Helikopter','🚀':'Rakete','🛸':'Ufo','🐉':'Drache','🦄':'Einhorn'};
 const AVA_NAMES={'🐱':'Katze','🦉':'Eule','🐙':'Krake','🦖':'Dino','🙂':'Standard','🧑‍💻':'Coder','🦊':'Fuchs','🐼':'Panda','🐸':'Frosch','🤖':'Roboter','🧙':'Magier','🥷':'Ninja','🦸':'Held','🐲':'Drachling','👽':'Alien','👑':'Krone'};
 const BG_NAMES={snowfall:'Schneefall',bubbles2:'Aufsteigende Blasen',nebula:'Nebula',rgbwave:'Farbrausch',polar:'Nordlicht',lava:'Lavalampe',fireflies:'Glühwürmchen',synth:'Synthwave',keyrain:'Tastenregen',warp:'Warp-Speed',matrix:'Code-Regen',waves:'Wellen',hex:'Waben',none:'Schlicht',dots:'Punkte',grid:'Raster',lines:'Streifen',stars:'Sternenhimmel',aurora:'Polarlicht',keys:'Tastenmuster'};
@@ -5272,7 +5338,7 @@ const CURSOR_NAMES={std:'Standard',laser:'Laserpunkt',star:'Funkelstern',heart:'
 const FAN_NAMES={classic:'Klassisch',chime:'Glockenspiel',arcade:'Arcade',bells:'Kirchenglocken',orchestra:'Orchester',synth:'Synthwave'};
 const avaHTML=(size='')=>`<span class="ava fr-${Store.data.settings.frame||'none'} ${size}">${esc(Store.data.settings.avatar)}</span>`;
 const myTitle=()=>{const t=Store.data.settings.title;return !t||t==='auto'?levelTitle(levelInfo(Store.data.xp).level):t};
-const itemName=(cat,id)=>({kb:()=>KB_THEMES[id][0],hand:()=>HAND_STYLES[id][0],snd:()=>PROFILES[id][0],acc:()=>ACCENTS[id][2],font:()=>FONTS[id][1],car:()=>CAR_NAMES[id],ava:()=>AVA_NAMES[id],bg:()=>BG_NAMES[id],trail:()=>TRAIL_NAMES[id],conf:()=>CONF_NAMES[id],frame:()=>FRAME_NAMES[id],fan:()=>FAN_NAMES[id],errorSound:()=>ERRSOUNDS[id],wordSkin:()=>WSKIN_NAMES[id],wordFx:()=>WFX_NAMES[id],cursor:()=>CURSOR_NAMES[id],unbox:()=>UNBOX_NAMES[id],nfx:()=>NFX_NAMES[id],title:()=>id==='auto'?'Level-Titel':id})[cat]();
+const itemName=(cat,id)=>({pet:()=>PET_NAMES[id],kb:()=>KB_THEMES[id][0],hand:()=>HAND_STYLES[id][0],snd:()=>PROFILES[id][0],acc:()=>ACCENTS[id][2],font:()=>FONTS[id][1],car:()=>CAR_NAMES[id],ava:()=>AVA_NAMES[id],bg:()=>BG_NAMES[id],trail:()=>TRAIL_NAMES[id],conf:()=>CONF_NAMES[id],frame:()=>FRAME_NAMES[id],fan:()=>FAN_NAMES[id],errorSound:()=>ERRSOUNDS[id],wordSkin:()=>WSKIN_NAMES[id],wordFx:()=>WFX_NAMES[id],cursor:()=>CURSOR_NAMES[id],unbox:()=>UNBOX_NAMES[id],nfx:()=>NFX_NAMES[id],title:()=>id==='auto'?'Level-Titel':id})[cat]();
 const owns=(cat,id)=>(Store.data.owned[cat]||[]).includes(id);
 const catOfSet=set=>SHOP_CATS.find(c=>c.set===set);
 /* ---------- Geheimniskisten (CS:GO-Style) ----------
@@ -5441,6 +5507,7 @@ let shopCat='kb',confirmId=null;
 function coinsFor(xp){return Math.max(1,Math.round(xp/6))}
 function addCoins(n){const d=Store.data;d.coins=(d.coins||0)+n;refreshMe();const c=$('#hc');if(c){c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump')}}
 function itemPreview(cat,id){
+  if(cat==='pet')return id==='none'?'<div class="epv muted small">Kein Haustier</div>':`<div class="epv petpv"><span>${id}</span><i>❤️</i></div>`;
   if(cat==='kb')return kbMini(id);
   if(cat==='hand')return `<div class="hpv hpv-${id}">${[5,4,3,2].map((f,i)=>`<i style="--fc:var(--f${f});height:${[34,46,52,44][i]}px"${i===2?' class="on"':''}></i>`).join('')}</div>`;
   if(cat==='snd')return `<div class="spv"><span class="wave">${Array.from({length:9},(_,i)=>`<i style="--h:${[30,55,80,45,95,60,35,70,40][i]}%"></i>`).join('')}</span><span class="play" data-play="${id}" role="button" aria-label="Probe anhören">▶</span></div>`;
@@ -5473,7 +5540,7 @@ function nextUnlock(){
   const lv=levelInfo(Store.data.xp).level;let best=null;
   SHOP_CATS.forEach(c=>c.items.forEach(([id,r,p,l,req])=>{if(req==null&&l>lv&&(!best||l<best.l))best={l,c,id}}));
   return best?`<p class="next-unlock">Nächste Freischaltung bei <b>Level ${best.l}</b>: ${esc(itemName(best.c.id,best.id))} (${best.c.n}). Noch ${levelInfo(Store.data.xp).need-levelInfo(Store.data.xp).into} XP bis Level ${lv+1}.</p>`:''}
-const SHOP_GROUPS=[['Tastaturen','⌨️',['kb']],['Kisten','📦',['crates','unbox']],['Tippen','✍️',['wordSkin','wordFx','trail','errorSound','hand','font']],['Look','🎨',['acc','bg','cursor','conf']],['Profil','🙂',['ava','frame','nfx','car','title','fan']]];
+const SHOP_GROUPS=[['Tastaturen','⌨️',['kb']],['Kisten','📦',['crates','unbox']],['Tippen','✍️',['wordSkin','wordFx','trail','errorSound','hand','font']],['Look','🎨',['acc','bg','cursor','conf']],['Profil','🙂',['ava','frame','nfx','car','title','fan']],['Haustiere','🐾',['pet']]];
 let shopFilter='all';
 function itemState(C,it){
   const d=Store.data,lv=levelInfo(d.xp).level,[id,r,price,reqLv,req]=it,reqLg=typeof req==='number'?req:null,reqAch=typeof req==='string'&&req!=='crate'?req:null,crateOnly=req==='crate';
@@ -5776,6 +5843,13 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-23.8',d:'23.09.2026',items:[
+    '🐉 Wochen-Boss: alle Spieler kämpfen gemeinsam – jedes getippte Zeichen macht Schaden',
+    '👑 Spieler der Woche auf der Startseite · 🎡 Glücksrad einmal am Tag (mit Streak-Schutz!)',
+    '🐾 Haustiere im Shop: dein Tier sitzt beim Üben dabei und freut sich über Serien',
+    '🎵 Hintergrundmusik (Lo-Fi, Ambient, Klavier) in den Einstellungen unter „Sound“',
+    '🌅 Himmel passend zur Tageszeit und automatische Jahreszeiten-Deko',
+    '👤 In der Weltrangliste auf Spieler klicken: Profil ansehen und als Freund hinzufügen']},
   {v:'2026-09-23.7',d:'23.09.2026',items:[
     '🌍 Die Weltrangliste zeigt jetzt alle Spieler: schnellste WPM, höchstes Level und längste Streak',
     '🏆 In jedem Minispiel steht oben, wer der Weltbeste ist – und ob du es selbst bist']},
@@ -6034,6 +6108,164 @@ async function viewAdmin(){
         <div class="panel"><h3>Neueste Spieler</h3>${newest.map(p=>`<div class="adm-row">${who(p)}<span class="muted small">Lv ${p.level||1}</span><span class="muted small">${dtText(p.createdAt)}</span></div>`).join('')||'<p class="muted small">Keine Daten.</p>'}</div>
       </div></div>`}
 
+/* ---------- Getippte Zeichen dieser Woche (für den Wochen-Boss) ---------- */
+function wkcNow(){const w=Store.data.wkc;return w&&w.k===weekId()?{k:w.k,c:w.c||0}:{k:weekId(),c:0}}
+function wkcAdd(c){const d=Store.data,k=weekId();if(!d.wkc||d.wkc.k!==k){if(d.wkc&&d.wkc.c)d.wkcPrev={k:d.wkc.k,c:d.wkc.c};d.wkc={k,c:0}}d.wkc.c+=c}
+
+/* ---------- Hintergrundmusik: selbst erzeugt im Browser (keine Dateien, keine Rechte Dritter) ---------- */
+const MUSIC_STYLES=[['off','Aus'],['lofi','Lo-Fi'],['ambient','Ambient'],['piano','Klavier']];
+const Music={style:'off',ctx:null,out:null,timer:0,next:0,step:0,noise:null,
+  // Akkorde (Frequenzen) für eine ruhige Folge: Cmaj7 – Am7 – Fmaj7 – G6
+  chords:[[130.8,164.8,196,246.9],[110,130.8,164.8,196],[87.3,110,130.8,164.8],[98,123.5,146.8,164.8]],
+  apply(){const S=Store.data.settings,want=S.sound&&S.music&&S.music!=='off'?S.music:'off';if(want===this.style&&(want==='off'||this.timer))return;this.stop();this.style=want;if(want!=='off')this.start()},
+  start(){try{Sound.init()}catch(e){}const c=Sound.ctx;if(!c)return;this.ctx=c;
+    this.out=c.createGain();this.out.gain.value=0;this.out.connect(c.destination);
+    const len=c.sampleRate,b=c.createBuffer(1,len,c.sampleRate),a=b.getChannelData(0);for(let i=0;i<len;i++)a[i]=Math.random()*2-1;this.noise=b;
+    this.next=c.currentTime+.1;this.step=0;this.timer=setInterval(()=>this.tick(),60)},
+  stop(){clearInterval(this.timer);this.timer=0;if(this.out){try{this.out.gain.setTargetAtTime(0,this.ctx.currentTime,.3);const o=this.out;setTimeout(()=>o.disconnect(),1500)}catch(e){}}this.out=null},
+  vol(){const S=Store.data.settings;return .16*(S.musicVol??.5)},
+  tone(f,t,dur,type,g,att=.02){const c=this.ctx,o=c.createOscillator(),v=c.createGain(),lp=c.createBiquadFilter();o.type=type;o.frequency.value=f;lp.type='lowpass';lp.frequency.value=1400;
+    v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(g,t+att);v.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(lp).connect(v).connect(this.out);o.start(t);o.stop(t+dur+.05)},
+  hit(t,f,dur,g,hp){const c=this.ctx,s=c.createBufferSource(),v=c.createGain(),fl=c.createBiquadFilter();s.buffer=this.noise;fl.type=hp?'highpass':'lowpass';fl.frequency.value=f;
+    v.gain.setValueAtTime(g,t);v.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(fl).connect(v).connect(this.out);s.start(t,Math.random()*.5);s.stop(t+dur)},
+  tick(){const c=this.ctx;if(!c||!this.out)return;if(document.visibilityState!=='visible'){this.out.gain.setTargetAtTime(0,c.currentTime,.2);return}
+    this.out.gain.setTargetAtTime(this.vol(),c.currentTime,.4);
+    const beat=this.style==='ambient'?1.2:60/72/2;   // Lo-Fi und Klavier: Achtel bei 72 BPM
+    while(this.next<c.currentTime+.25){const t=this.next,s=this.step,bar=Math.floor(s/8)%4,ch=this.chords[bar],pos=s%8;
+      if(this.style==='lofi'){
+        if(pos===0)ch.forEach(f=>this.tone(f,t,beat*7.5,'triangle',.05,.08));
+        if(pos===0||pos===5)this.tone(ch[0]/2,t,beat*1.5,'sine',.22,.005);          // Bass
+        if(pos===0||pos===4)this.hit(t,180,.18,.35,false);                          // Kick
+        if(pos===2||pos===6)this.hit(t,1800,.12,.12,true);                          // Snare
+        this.hit(t+(pos%2?beat*.08:0),7000,.04,.04,true);                           // Hi-Hat, leicht verschleppt
+        if(Math.random()<.35)this.hit(t+Math.random()*beat,3000,.01,.03,true);      // Knistern wie eine Schallplatte
+      }else if(this.style==='ambient'){
+        if(s%8===0)ch.forEach((f,i)=>this.tone(f*(i===3?2:1),t,beat*9,'sine',.045,1.6));
+        if(s%2===1)this.tone(ch[(s>>1)%4]*4,t,beat*2,'sine',.012,.3);
+      }else{
+        const arp=[0,1,2,3,2,1,2,3];this.tone(ch[arp[pos]]*2,t,beat*3,'triangle',.07,.005);
+        if(pos===0)this.tone(ch[0]/2,t,beat*8,'sine',.1,.02);
+      }
+      this.next+=beat;this.step++}}};
+['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{if(Store.data&&Store.data.settings)Music.apply()},{once:false,passive:true}));
+
+/* ---------- Himmel nach Tageszeit und Jahreszeiten-Deko ---------- */
+function skyPhase(h=new Date().getHours()){return h>=5&&h<9?'morning':h>=9&&h<17?'day':h>=17&&h<21?'evening':'night'}
+function easterDate(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da)}
+function seasonNow(t=new Date()){const m=t.getMonth()+1,d=t.getDate();
+  if((m===12)||(m===1&&d<=6))return{k:'winter',e:['❄️','❅','❆'],n:'Winter'};
+  if((m===10&&d>=20)||(m===11&&d<=2))return{k:'halloween',e:['🎃','🦇','🍂','👻'],n:'Halloween'};
+  const es=easterDate(t.getFullYear()),diff=(t-es)/864e5;if(diff>-8&&diff<3)return{k:'easter',e:['🐣','🌷','🥚','🐰'],n:'Ostern'};
+  return null}
+function applyAmbience(){
+  const S=Store.data.settings,b=document.body;let sky=$('#sky'),sea=$('#season');
+  if(!sky){b.insertAdjacentHTML('afterbegin','<div id="sky" aria-hidden="true"></div><div id="season" aria-hidden="true"></div>');sky=$('#sky');sea=$('#season')}
+  const on=S.sky!==false&&(!S.bg||S.bg==='none');sky.className=on?'sky-'+skyPhase():'';
+  const s=S.season!==false&&!reduced()?seasonNow():null;
+  if(!s){sea.innerHTML='';sea.dataset.k='';return}
+  if(sea.dataset.k===s.k)return;sea.dataset.k=s.k;
+  sea.innerHTML=Array.from({length:16},(_,i)=>`<i class="sp sp-${s.k}" style="left:${Math.round(Math.random()*100)}%;animation-delay:-${(Math.random()*18).toFixed(1)}s;animation-duration:${(14+Math.random()*10).toFixed(1)}s;font-size:${(12+Math.random()*14).toFixed(0)}px">${s.e[i%s.e.length]}</i>`).join('')}
+setInterval(()=>{if(Store.data&&Store.data.settings)applyAmbience()},6e5);
+
+/* ---------- Haustier beim Üben ---------- */
+function petReact(kind){const p=$('#pet');if(!p||reduced())return;p.classList.remove('happy','oops');void p.offsetWidth;p.classList.add(kind);
+  if(kind==='happy'){const b=document.createElement('i');b.className='petb';b.textContent=pick(['❤️','✨','🎉','⭐']);p.appendChild(b);setTimeout(()=>b.remove(),1000)}}
+
+/* ---------- Glücksrad: einmal am Tag ---------- */
+const WHEEL=[
+  {l:'20',i:'🪙',w:26,t:'coins',v:20,c:'--f3'},{l:'50',i:'🪙',w:22,t:'coins',v:50,c:'--f2'},{l:'Schutz',i:'🧊',w:12,t:'freeze',c:'--f1'},{l:'100',i:'🪙',w:14,t:'coins',v:100,c:'--f4'},
+  {l:'Haustier',i:'🐾',w:6,t:'item',cat:'pet',c:'--f5'},{l:'30',i:'🪙',w:24,t:'coins',v:30,c:'--f3'},{l:'Avatar',i:'🎁',w:7,t:'item',cat:'ava',c:'--f2'},{l:'250',i:'💰',w:4,t:'coins',v:250,c:'--caret'}];
+const wheelReady=()=>{const w=Store.data.wheel;return !w||w.k!==dayKey()};
+function wheelModal(){
+  const d=Store.data,n=WHEEL.length,seg=360/n,R=120;
+  const slice=(s,i)=>{const a0=(i*seg-90)*Math.PI/180,a1=((i+1)*seg-90)*Math.PI/180,x0=R+R*Math.cos(a0),y0=R+R*Math.sin(a0),x1=R+R*Math.cos(a1),y1=R+R*Math.sin(a1),am=((i+.5)*seg-90)*Math.PI/180;
+    return `<path d="M${R},${R} L${x0},${y0} A${R},${R} 0 0 1 ${x1},${y1} Z" style="fill:var(${s.c})" opacity=".85"/><text x="${R+R*.66*Math.cos(am)}" y="${R+R*.66*Math.sin(am)}" transform="rotate(${(i+.5)*seg} ${R+R*.66*Math.cos(am)} ${R+R*.66*Math.sin(am)})" text-anchor="middle" dominant-baseline="middle"><tspan x="${R+R*.66*Math.cos(am)}" dy="-.5em" font-size="20">${s.i}</tspan><tspan x="${R+R*.66*Math.cos(am)}" dy="1.3em" font-size="12" font-weight="800">${s.l}</tspan></text>`};
+  const m=modal(`<div class="wq-h"><h3>🎡 Glücksrad</h3><span class="muted small">🧊 ${d.freeze||0} Streak-Schutz</span></div>
+    <p class="muted small" style="margin:0 0 6px">Einmal am Tag drehen. Ein Streak-Schutz rettet automatisch deine Serie, wenn du einen Tag verpasst.</p>
+    <div class="wheel-wrap"><div class="wheel-ptr">▼</div><svg class="wheel" id="whl" viewBox="0 0 ${R*2} ${R*2}">${WHEEL.map(slice).join('')}<circle cx="${R}" cy="${R}" r="18" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/></svg></div>
+    <p class="wheel-res" id="whr">${wheelReady()?'':'Heute schon gedreht. Morgen wieder!'}</p>
+    <div class="acts"><button class="btn primary" id="whs"${wheelReady()?'':' disabled'}>Drehen!</button><button class="btn ghost" id="whx">Schließen</button></div>`);
+  const close=()=>{m.remove();if(!activity)setHandler(null);if(currentTab==='lessons'&&!activity)viewLessons()};$('#whx',m).onclick=close;setHandler({char(){},esc:close});
+  $('#whs',m).onclick=()=>{if(!wheelReady())return;$('#whs',m).disabled=true;
+    let r=Math.random()*WHEEL.reduce((a,s)=>a+s.w,0),idx=0;for(;idx<n;idx++){r-=WHEEL[idx].w;if(r<=0)break}idx=Math.min(idx,n-1);
+    d.wheel={k:dayKey()};const s=WHEEL[idx];let text='';
+    if(s.t==='coins'){d.coins+=s.v;text=`+${s.v} 🪙`}
+    else if(s.t==='freeze'){d.freeze=Math.min(3,(d.freeze||0)+1);text=`🧊 Streak-Schutz! Du hast jetzt ${d.freeze}.`}
+    else{const C=SHOP_CATS.find(c=>c.id===s.cat),free=C.items.filter(([id,r,p,l,req])=>!owns(C.id,id)&&req==null&&(r==='c'||r==='r'));
+      if(free.length){const [id]=pick(free);d.owned[C.id].push(id);text=`🎁 Neu: ${id} ${itemName(C.id,id)} – im Shop ausrüsten!`}else{d.coins+=150;text='+150 🪙 (du hast schon alles aus dieser Kategorie)'}}
+    Store.save();
+    const turns=5*360+(360-(idx+.5)*seg);const w=$('#whl',m);w.style.transform=`rotate(${turns}deg)`;
+    setTimeout(()=>{$('#whr',m).textContent=text;refreshMe(true);Sound.win();confetti(90)},reduced()?50:4200)}}
+
+/* Streak-Schutz automatisch einsetzen, wenn gestern verpasst wurde */
+function useFreeze(){
+  const d=Store.data,g=d.settings.goal*60,y=new Date();y.setDate(y.getDate()-1);const yk=dayKey(y),b=new Date(y);b.setDate(b.getDate()-1);
+  if(!(d.freeze>0)||(d.days[yk]||0)>=g||(d.frozen&&d.frozen[yk]))return;
+  if(!((d.days[dayKey(b)]||0)>=g||(d.frozen&&d.frozen[dayKey(b)])))return;   // nur eine laufende Serie retten
+  d.frozen=d.frozen||{};d.frozen[yk]=1;d.freeze--;Store.save();
+  setTimeout(()=>toast('🧊','Streak gerettet!',`Ein Streak-Schutz hat gestern abgedeckt. Noch ${d.freeze} übrig.`),1500)}
+
+/* ---------- Wochen-Boss und Spieler der Woche (aus allen Spielerprofilen) ---------- */
+const WBOSS=[['🐉','Tastenfresser'],['👾','Buchstabenbiest'],['🦑','Tintenkrake'],['🤖','Autokorrektor'],['👹','Fehlerteufel'],['🦖','Tippo-Saurus']];
+const WBOSS_COINS=300,WBOSS_PER=8000;
+const wbossOf=k=>WBOSS[Math.abs([...k].reduce((a,c)=>a*31+c.charCodeAt(0),7))%WBOSS.length];
+let commCache={t:0,rows:null};
+async function commRows(){if(commCache.rows&&Date.now()-commCache.t<6e4)return commCache.rows;const rows=await window.fbWorld.all();commCache={t:Date.now(),rows};worldCache={t:Date.now(),rows};return rows}
+/* Schaden einer Woche: Zeichen aller Spieler; Lebenspunkte wachsen mit der Zahl der Mitspieler */
+function bossState(rows,k,prev){
+  const me=myUid(),d=Store.data;
+  const val=p=>{const s=p.stats||{},w=s.wkc||{},wp=s.wkcPrev||{};return w.k===k?(w.c||0):wp.k===k?(wp.c||0):0};
+  const list=rows.filter(p=>p.uid!==me).map(p=>({p,c:val(p)}));
+  const mine=prev?(d.wkcPrev&&d.wkcPrev.k===k?d.wkcPrev.c:(d.wkc&&d.wkc.k===k?d.wkc.c:0)):wkcNow().c;
+  list.push({p:{uid:me,me:true,name:userName()},c:mine});
+  const active=list.filter(x=>x.c>0),dmg=active.reduce((a,x)=>a+x.c,0),hp=Math.max(40000,active.length*WBOSS_PER);
+  return{dmg,hp,mine,active:active.sort((a,b)=>b.c-a.c),dead:dmg>=hp}}
+function playerOfWeek(rows){const me=myUid(),k=weekId(),pk=prevWeekId();
+  const cur=rows.filter(p=>p.uid!==me).map(p=>({p,xp:((p.stats||{}).wk||{}).k===k?(p.stats.wk.xp||0):0}));cur.push({p:{uid:me,me:true,name:userName(),avatar:Store.data.settings.avatar,frame:Store.data.settings.frame},xp:wkXp().xp});
+  const last=rows.map(p=>{const s=p.stats||{},w=s.wk||{},wp=s.wkPrev||{};return{p,xp:w.k===pk?(w.xp||0):wp.k===pk?(wp.xp||0):0}});
+  const top=a=>a.filter(x=>x.xp>0).sort((a,b)=>b.xp-a.xp)[0]||null;return{now:top(cur),last:top(last)}}
+async function renderCommunity(){
+  const el=$('#comm');if(!el||!window.fbWorld)return;
+  let rows;try{rows=await commRows()}catch(e){el.remove();return}
+  if(!$('#comm'))return;
+  const k=weekId(),B=wbossOf(k),s=bossState(rows,k,false),pw=playerOfWeek(rows),pct=Math.min(100,s.dmg/s.hp*100);
+  const who=x=>x.p.me?`${avaHTML()} <b>Du</b>`:`${fAva(x.p)} <b class="pu" data-pu="${esc(x.p.uid)}">${nameHTML(x.p.name,x.p.nameFx)}</b>`;
+  el.innerHTML=`<button class="comm-card boss" id="cboss"><span class="cb-e">${s.dead?'💀':B[0]}</span><div class="cb-t"><b>Wochen-Boss: ${B[1]}</b>
+      <span class="hpbar big"><i style="width:${100-pct}%"></i></span><span class="muted small">${s.dead?'Besiegt! Belohnung gibt es am Montag.':`${Math.round(pct)} % Schaden · ${weekLeftText()}`} · Dein Schaden: ${fmtN(s.mine)}</span></div></button>
+    <div class="comm-card pow"><span class="cb-e">👑</span><div class="cb-t"><b>Spieler der Woche</b><span class="small">${pw.now?`${who(pw.now)} · ${fmtN(pw.now.xp)} XP`:'Noch offen – sammle XP!'}</span>
+      ${pw.last?`<span class="muted small">Letzte Woche: ${pw.last.p.uid===myUid()?'Du':esc(pw.last.p.name)} (${fmtN(pw.last.xp)} XP)</span>`:''}</div></div>`;
+  $('#cboss').onclick=()=>bossModal(rows);
+  bossClaim(rows)}
+function bossModal(rows){
+  const k=weekId(),B=wbossOf(k),s=bossState(rows,k,false),pct=Math.min(100,s.dmg/s.hp*100);
+  const m=modal(`<div class="lg-result"><div class="boss-big">${s.dead?'💀':B[0]}</div><h3>${B[1]}</h3>
+    <p class="muted small">Jedes richtig getippte Zeichen aller Spieler trifft den Boss. Schafft ihr ihn bis Sonntag, bekommt jeder, der mitgemacht hat, ${WBOSS_COINS} 🪙.</p>
+    <span class="hpbar big"><i style="width:${100-pct}%"></i></span><p><b>${fmtN(s.dmg)}</b> von ${fmtN(s.hp)} Lebenspunkten · ${s.active.length} Kämpfer</p></div>
+    <h3 style="margin:10px 0 4px">Meister-Schaden</h3>${s.active.slice(0,8).map((x,i)=>`<div class="lg-row${x.p.me?' me':''}"><span class="pos">${i+1}</span><span class="nm">${x.p.me?'Du':`${fAva(x.p)} ${nameHTML(x.p.name,x.p.nameFx)}`}</span><span class="lp">${fmtN(x.c)}</span></div>`).join('')||'<p class="muted small">Noch niemand. Tipp los!</p>'}
+    <div class="acts"><button class="btn primary" id="bmok">Los, kämpfen!</button></div>`);
+  const close=()=>{m.remove();if(!activity)setHandler(null)};$('#bmok',m).onclick=close;setHandler({char(){},enter:close,esc:close})}
+function bossClaim(rows){
+  const d=Store.data,pk=prevWeekId();if(d.bossClaim===pk)return;const s=bossState(rows,pk,true);d.bossClaim=pk;
+  if(s.dead&&s.mine>0){d.coins+=WBOSS_COINS;toast('💀',`${wbossOf(pk)[1]} wurde besiegt!`,`Danke fürs Mitkämpfen: +${WBOSS_COINS} 🪙`);Sound.level();refreshMe(true)}
+  Store.save()}
+
+/* ---------- Spielerprofil ansehen (aus Weltrangliste und Startseite) ---------- */
+function playerModal(p){
+  const me=myUid();if(!p)return;if(p.uid===me){go('ach');return}
+  const st=p.stats||{},fd=friendData(st),medals=GAMES.map(g=>[g,masteryTier(g,fd)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const L=leagueIdxOf(st),rel=relState(p.uid);
+  const act=rel==='friend'?'<span class="tag">✓ Ihr seid befreundet</span>':rel==='out'?'<span class="tag">Anfrage gesendet</span>':rel==='in'?`<button class="btn primary" data-fa="${esc(p.uid)}">Anfrage annehmen</button>`:`<button class="btn primary" data-fa="${esc(p.uid)}" id="pmadd">➕ Als Freund hinzufügen</button>`;
+  const m=modal(`<div class="pm-top">${fAva(p)}<div><h3>${nameHTML(p.name,p.nameFx)}</h3><p class="muted small">${p.title?`„${esc(p.title)}“ · `:''}${esc(agoText(p))}</p></div></div>
+    <div class="cards compact pm-cards"><div class="card"><b>${p.prestige?`★${p.prestige} `:''}${p.level||1}</b><span>Level</span></div><div class="card"><b>${st.bestWpm||0}</b><span>Beste WPM</span></div>
+      <div class="card"><b>🔥 ${st.bestStreak||0}</b><span>Längste Streak</span></div><div class="card"><b>${LEAGUES[L][1]}</b><span>${LEAGUES[L][0]}-Liga</span></div>
+      <div class="card"><b>${st.ach||0}</b><span>Erfolge</span></div><div class="card"><b>🏅 ${medals.reduce((a,x)=>a+x[1],0)}</b><span>Medaillen</span></div></div>
+    ${medals.length?`<h3 style="margin:12px 0 6px">Beste Medaillen</h3><div class="pm-med">${medals.slice(0,6).map(([g,t])=>`<span title="${esc(g.n)}: ${MASTERY[t-1][0]}">${MASTERY[t-1][1]} ${g.i} ${esc(g.n)}</span>`).join('')}</div>`:''}
+    ${p.teamName?`<p class="muted small" style="margin:10px 0 0">🛡️ Team: ${esc(p.teamName)}</p>`:''}
+    <div class="acts">${act}<button class="btn ghost" id="pmx">Schließen</button></div>`);
+  const close=()=>{m.remove();if(!activity)setHandler(null)};$('#pmx',m).onclick=close;setHandler({char(){},esc:close});
+  const add=$('#pmadd',m);if(add)add.addEventListener('click',()=>{setTimeout(()=>{add.outerHTML='<span class="tag">Anfrage gesendet ✓</span>'},300)})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pu]');if(!b)return;const rows=(worldCache.rows||[]).concat(commCache.rows||[]);playerModal(rows.find(r=>r.uid===b.dataset.pu))});
+
 /* ---------- Leagues ---------- */
 const LEAGUES=[['Bronze','🥉','#C98B5A',60],['Silber','🥈','#B8C2CC',90],['Gold','🥇','#FFC857',120],['Platin','💠','#7FE0D4',155],['Jade','🍀','#5FD38D',190],['Smaragd','💚','#2ECC71',230],['Saphir','🔷','#4F8BFF',270],
   ['Rubin','♦️','#FF5A6E',315],['Amethyst','🔮','#B36BFF',360],['Diamant','💎','#7CC8FF',410],['Meister','🏆','#B79CFF',470],['Großmeister','🎖️','#FF9F43',540],['Champion','⚔️','#FF6B6B',620],['Legende','👑','#FF8FB8',720]];
@@ -6153,7 +6385,7 @@ async function viewWorld(){
   const rows=all.filter(p=>p.uid!==me).map(p=>({...p,val:C.v(p)}));rows.push({uid:me,me:true,val:mine});
   rows.sort((a,b)=>b.val-a.val||(a.me?-1:b.me?1:0));
   const mi=rows.findIndex(r=>r.me);
-  $('#wrl').innerHTML=`<div class="wq-h"><h3>${C.i} ${C.n}</h3><span class="muted small">${fmtN(rows.length)} Spieler</span></div><div class="wr-list" id="wrlist">`+rows.map((r,i)=>`<div class="lg-row${r.me?' me':''}${r.val?'':' zero'}"><span class="pos">${i<3&&r.val?['🥇','🥈','🥉'][i]:i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()} <small class="ttl">Du</small>`:`${fAva(r)} ${nameHTML(r.name,r.nameFx)}`}</span><span class="lp">${esc(C.fmt(r.val))}</span></div>`).join('')+'</div>';
+  $('#wrl').innerHTML=`<div class="wq-h"><h3>${C.i} ${C.n}</h3><span class="muted small">${fmtN(rows.length)} Spieler</span></div><div class="wr-list" id="wrlist">`+rows.map((r,i)=>`<div class="lg-row${r.me?' me':' click'}${r.val?'':' zero'}"${r.me?'':` data-pu="${esc(r.uid)}"`}><span class="pos">${i<3&&r.val?['🥇','🥈','🥉'][i]:i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()} <small class="ttl">Du</small>`:`${fAva(r)} ${nameHTML(r.name,r.nameFx)}`}</span><span class="lp">${esc(C.fmt(r.val))}</span></div>`).join('')+'</div>';
   // Zur eigenen Zeile scrollen, damit man sich sofort findet
   const list=$('#wrlist'),myRow=list&&list.children[mi];if(myRow&&mi>6)list.scrollTop=myRow.offsetTop-list.offsetTop-list.clientHeight/2;
   const rank=mi+1,total=rows.length,pct=Math.max(1,Math.round(rank/total*100));
@@ -6205,7 +6437,7 @@ function publicSummary(){
       count:d.count||d.history.length,totalSecs:Math.round(d.totalSecs||0),strokes:d.strokes||0,ach:Object.keys(d.ach).length,
       lessons:d.lessons||{},high:d.high||{},ghosts:flag(d.ghosts),story:flag(d.story),daily,
       league:{week:String(L.week),lp:L.lp||0,idx:L.idx||0,prevWeek:h0?String(h0.week):'',prevLp:h0?(h0.lp||0):0},
-      wk:wkXp(),wkPrev:Store.data.wkPrev||null,plays:d.plays||{}},
+      wk:wkXp(),wkPrev:Store.data.wkPrev||null,plays:d.plays||{},wkc:wkcNow(),wkcPrev:d.wkcPrev||null},
     prestige:d.prestige||0,rankLv:(d.prestige||0)*100+li.level,xpAll:(d.xp||0)+(d.prestigeXp||0),
     team:(d.team&&d.team.id)||'',teamName:(d.team&&d.team.name)||'',
     tourKey:(d.tour&&d.tour.k)||'',tour:d.tour?{wpm:d.tour.wpm,acc:d.tour.acc}:{},
@@ -6639,7 +6871,7 @@ window.startApp=async function(user,regName){
   leagueRollover();
   applySettings();applyDonate();
   checkAch(null);
-  wqEnsure();
+  wqEnsure();useFreeze();
   adminInit();setTimeout(teamLeagueClaim,4000);
   // Über einen Einladungslink registriert: Startbonus
   if(window.zfRefUsed&&!Store.data.refBonus){Store.data.refBonus=1;Store.data.coins+=INV_NEW;Store.data.notice={i:'🎉',t:'Willkommensbonus',s:`Du wurdest eingeladen: +${INV_NEW} 🪙`}}
