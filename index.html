@@ -109,11 +109,14 @@
       }
     };
 
-    window.fbPing = () => setDoc(meRef(), { lastActive: serverTimestamp() }, { merge: true });
-    // Wie viele Spieler waren in den letzten 5 Minuten aktiv? (Zählabfrage, lädt keine Spielerdaten)
+    // "seen" ist der Anwesenheits-Stempel für den Online-Zähler. lastActive bleibt für "zuletzt aktiv" bei Freunden.
+    window.fbPing = () => setDoc(meRef(), { lastActive: serverTimestamp(), seen: serverTimestamp() }, { merge: true });
+    // Beim Schließen oder Wegwechseln sofort aus dem Zähler austragen
+    window.fbAway = () => setDoc(meRef(), { seen: Timestamp.fromMillis(0) }, { merge: true });
+    // Wie viele Spieler sind gerade da? (Zählabfrage, lädt keine Spielerdaten)
     window.fbOnlineCount = async () => {
       const since = Timestamp.fromMillis(Date.now() - 5 * 6e4);
-      const snap = await getCountFromServer(query(collection(db, 'players'), where('lastActive', '>=', since)));
+      const snap = await getCountFromServer(query(collection(db, 'players'), where('seen', '>=', since)));
       return snap.data().count;
     };
 
@@ -5309,7 +5312,12 @@ window.startApp=async function(user,regName){
   Store.save();   // öffentliche Zusammenfassung sofort aktualisieren
   // Online-Status für Freunde: alle 2 Minuten ein kurzes Lebenszeichen, solange die Seite sichtbar ist
   if(window.fbPing){window.fbPing().catch(()=>{}).then(updOnline);setInterval(()=>{if(document.visibilityState==='visible')window.fbPing().catch(()=>{})},12e4)}
-  setInterval(()=>{if(document.visibilityState==='visible')updOnline()},6e4);
+  setInterval(()=>{if(document.visibilityState==='visible')updOnline()},2e4);
+  // Tab weg: sofort als abwesend melden. Tab wieder da: sofort anmelden und Zahl neu holen.
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden'){if(window.fbAway)window.fbAway().catch(()=>{})}
+    else if(window.fbPing)window.fbPing().catch(()=>{}).then(updOnline)});
+  window.addEventListener('pagehide',()=>{if(window.fbAway)window.fbAway().catch(()=>{})});
 };
 // Beim Verlassen/Wechseln des Tabs ausstehende Änderungen sofort hochladen
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')Store.push()});
@@ -5320,7 +5328,7 @@ function logout(){
     <p class="muted">Dein Fortschritt bleibt gespeichert. Du kannst dich jederzeit wieder anmelden.</p>
     <div class="acts"><button class="btn primary" id="lyes">Abmelden</button><button class="btn ghost" id="lno">Abbrechen</button></div></div>`);
   $('#lno',m).onclick=()=>m.remove();
-  $('#lyes',m).onclick=async()=>{try{await window.fbSignOut()}catch(e){}location.reload()};
+  $('#lyes',m).onclick=async()=>{try{if(window.fbAway)await window.fbAway()}catch(e){}try{await window.fbSignOut()}catch(e){}location.reload()};
 }
 
 
