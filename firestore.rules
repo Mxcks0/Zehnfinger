@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// Sicherheitsregeln für Zehnfinger.
+// Einfügen in der Firebase-Konsole: Firestore Database → Regeln → alles ersetzen → Veröffentlichen.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isMe(uid)  { return signedIn() && request.auth.uid == uid; }
+
+    // Öffentliches Profil: Name, Level, Statistiken, Freundesliste, Liga, Team, Turnier, Herausforderungen.
+    // Lesen dürfen alle angemeldeten Spieler (Freundessuche, Liga, Rangliste, Online-Zähler),
+    // schreiben und löschen nur der Spieler selbst.
+    match /players/{uid} {
+      allow read: if signedIn();
+      allow create, update, delete: if isMe(uid);
+    }
+
+    // Kompletter Spielstand: nur der Spieler selbst.
+    match /progress/{uid} {
+      allow read, write: if isMe(uid);
+    }
+
+    // Live-Duelle: nur die beiden Beteiligten. Gastgeber und Gast lassen sich nachträglich nicht ändern.
+    match /matches/{id} {
+      function inMatch() {
+        return signedIn() && (resource.data.host == request.auth.uid || resource.data.guest == request.auth.uid);
+      }
+      allow read: if inMatch();
+      allow create: if signedIn()
+        && request.resource.data.host == request.auth.uid
+        && request.resource.data.guest is string
+        && request.resource.data.guest != request.auth.uid;
+      allow update: if inMatch()
+        && request.resource.data.host == resource.data.host
+        && request.resource.data.guest == resource.data.guest;
+    }
+
+    // Feedback: angemeldete Spieler dürfen senden, lesen kann es nur der Entwickler in der Konsole.
+    match /feedback/{id} {
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 1000;
+    }
+
+    // Alles andere ist gesperrt.
+  }
+}
