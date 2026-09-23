@@ -676,6 +676,12 @@ nav.tabs{margin-left:24px}
 .home-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end}
 .home h1{font-size:clamp(32px,5.2vw,56px);line-height:1.02;font-weight:800;letter-spacing:-.04em;margin:0 0 10px;max-width:15ch}
 .home h1 span{color:var(--fc)}
+/* Überschrift: Buchstaben hüpfen nacheinander kurz hoch und leuchten auf, dann Pause */
+.home h1 .wd span{display:inline-block;animation:zfhop 5.5s ease-in-out infinite;animation-delay:calc(var(--i) * 110ms + .8s)}
+.home.intro h1 .wd span{animation:rise .6s cubic-bezier(.2,.8,.2,1) both,zfhop 5.5s ease-in-out infinite;animation-delay:calc(var(--i) * 20ms),calc(var(--i) * 110ms + 1.4s)}
+@keyframes zfhop{0%,7%,100%{transform:none;filter:none}3%{transform:translateY(-.2em);filter:brightness(1.6) drop-shadow(0 0 .18em var(--fc))}}
+body.opt-noanim .home h1 .wd span{animation:none}
+@media (prefers-reduced-motion:reduce){.home h1 .wd span,.home.intro h1 .wd span{animation:none}}
 .home .lead{font-size:16px;color:var(--muted);margin:0}
 .next-card{font:inherit;color:var(--text);text-align:left;background:var(--surface);border:1px solid var(--caret);border-radius:16px;padding:14px 18px;min-width:260px;cursor:pointer;display:grid;gap:2px;transition:transform .12s}
 .next-card:hover{transform:translateY(-2px)}
