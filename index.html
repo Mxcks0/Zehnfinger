@@ -167,15 +167,12 @@
        f = Feldpfad im Spielerprofil (z. B. 'stats.bestWpm'), asc = kleiner ist besser (Zeiten) */
     const getPath = (o, f) => f.split('.').reduce((x, k) => x == null ? x : x[k], o);
     window.fbWorld = {
-      async top(f, asc){
-        const q = asc ? [where(f, '>', 0), orderBy(f), limit(20)] : [where(f, '>', 0), orderBy(f, 'desc'), limit(20)];
+      // Alle registrierten Spieler (auch ohne Werte), sortiert wird im Spiel
+      all: async () => (await pl([limit(1000)])).docs.map(plain),
+      // Der Beste eines Minispiels: die obersten Einträge eines Rekordfelds
+      async best(f, asc, n = 5){
+        const q = asc ? [where(f, '>', 0), orderBy(f), limit(n)] : [where(f, '>', 0), orderBy(f, 'desc'), limit(n)];
         return (await pl(q)).docs.map(s => ({ ...plain(s), val: getPath(s.data(), f) }));
-      },
-      // Eigener Platz: wie viele sind besser? (Zählabfrage, lädt keine Profile)
-      async rank(f, asc, v){
-        const c = q => getCountFromServer(query(collection(db, 'players'), ...q)).then(s => s.data().count);
-        const [better, total] = await Promise.all([c(asc ? [where(f, '>', 0), where(f, '<', v)] : [where(f, '>', v)]), c([where(f, '>', 0)])]);
-        return { rank: better + 1, total };
       }
     };
 
@@ -2270,6 +2267,11 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .wr-rank{font-size:52px;font-weight:800;line-height:1;color:var(--caret);font-variant-numeric:tabular-nums;margin:6px 0 4px}
 .wr-pct{font-weight:700;margin:10px 0 0}
 @media (max-width:760px){.wr-grid{grid-template-columns:1fr}.wr-me{order:-1}}
+.wr-list{max-height:min(62vh,640px);overflow:auto;margin:0 -4px;padding:0 4px}
+.lg-row.zero{opacity:.55}
+.gbest{margin:4px 0 0;font-size:13px;color:var(--muted)}
+.gbest b{color:var(--text)}
+.gbest .ava{font-size:14px;margin:0 2px}
 </style>
 </head>
 <body class="locked">
@@ -3271,6 +3273,7 @@ function practice(cfg){
         <label><input type="checkbox" id="tks" ${S.keySound?'checked':''}> Tippgeräusche</label><span>${['race','ghost','timed','daily','ladder','duel','online','tour'].includes(cfg.mode)?'Fehler musst du korrigieren, bevor es weitergeht. ':S.errMode==='backspace'&&cfg.mode!=='sudden'?'⌫ korrigiert, ':''}Esc bricht ab</span><button class="btn ghost small" id="pset" style="margin-left:auto">Einstellungen</button></div>
       <div id="kbwrap"></div><div id="handswrap"></div></section>`;
     const kb=new Keyboard($('#kbwrap'));$('#handswrap').innerHTML=handsSVG();const hands=$('#handswrap svg');
+    if(cfg.tab==='games')setTimeout(()=>showBest(cfg.mode==='code'?'code:'+cfg.lang:MODE2GAME[cfg.mode]),0);
     const vis=()=>{$('#kbwrap').classList.toggle('hide',cfg.hideHelp||!S.kb);$('#handswrap').classList.toggle('hide',cfg.hideHelp||!S.hands)};vis();
     if(!cfg.hideHelp){$('#tkb').onchange=e=>{S.kb=e.target.checked;vis();Store.save();focusCap()};$('#thd').onchange=e=>{S.hands=e.target.checked;vis();Store.save();focusCap()}}
     $('#tks').onchange=e=>{S.keySound=e.target.checked;Store.save();focusCap()};
@@ -3808,7 +3811,7 @@ function dailyText(){const en=isEN(),r=seededRandom('zf-'+(en?'en-':'')+dayKey()
 function canvasGame(kind){
   show(()=>{
     activity=true;setTab('games');
-    const isRain=kind==='rain',isZ=kind==='zombie',isR=kind==='runner',isTw=kind==='tower',isB=kind==='balloon';const d=Store.data;const name=isRain?'Wortregen':isZ?'Zombie-Angriff':isR?'Endlos-Läufer':isTw?'Burgverteidigung':isB?'Ballon-Platzen':'Wort-Blaster';curGameName=name;
+    const isRain=kind==='rain',isZ=kind==='zombie',isR=kind==='runner',isTw=kind==='tower',isB=kind==='balloon';const d=Store.data;const name=isRain?'Wortregen':isZ?'Zombie-Angriff':isR?'Endlos-Läufer':isTw?'Burgverteidigung':isB?'Ballon-Platzen':'Wort-Blaster';curGameName=name;setTimeout(()=>showBest(kind),0);
     main.innerHTML=`<section>
       <div class="prac-head"><button class="btn ghost small" id="back">Zurück</button><div><h2>${name}</h2>
       <p class="muted">${isTw?'Gegner marschieren auf deine Burg zu. Tippe ihre Wörter, um sie aufzuhalten. Mit 👹 markierte Bosse haben lange Wörter und zählen doppelt. Fünf Leben.':isB?'Ballons mit Buchstaben steigen auf. Tipp den Buchstaben, um den Ballon zu platzen, bevor er oben wegfliegt. Fünf Leben.':isR?'Hindernisse rollen auf dich zu. Tippe das Wort darauf, bevor es dich erreicht. Drei Zusammenstöße, dann ist Schluss.':isRain?'Wörter fallen und stapeln sich. Tippe sie weg, bevor der Stapel oben ankommt – auch gestapelte Wörter kannst du noch abtippen.':isZ?'Wörter kriechen von allen Seiten auf dich zu. Tippe sie weg, bevor sie dich erreichen. Drei Treffer, dann ist Schluss.':'Wörter fliegen auf dein Schiff zu. Tippe sie, um sie abzuschießen. Drei Treffer, dann ist Schluss.'}</p></div></div>
@@ -3972,7 +3975,7 @@ function canvasGame(kind){
 
 /* ---------- Game helpers ---------- */
 function gameShell(title,desc,hud){
-  curGameName=title;
+  curGameName=title;{const gm=GAMES.find(x=>x.n===title);if(gm)setTimeout(()=>showBest(gm.id),0)}
   main.innerHTML=`<section class="gshell"><div class="prac-head"><button class="btn ghost small" id="back">Zurück</button><div><h2>${title}${langBadge()}</h2><p class="muted">${desc}</p></div></div>
     <div class="hud">${hud}</div><div id="gbody"></div></section>`;
   $('#back').onclick=()=>go('games');return $('#gbody');
@@ -4761,6 +4764,7 @@ function detectiveGame(){
 function detCase(C){
   show(()=>{
     activity=true;setTab('games');const d=Store.data;
+    setTimeout(()=>showBest('detective'),0);
     const body=gameShell(`${C.i} ${C.t}`,esc(C.intro),`<span>Hinweis <b id="dcn">1</b>/${C.clues.length}</span>`);
     body.innerHTML=`<div class="det"><div class="det-notes" id="dn"></div><div class="typebox det-type" id="dtb"><div id="dtv"></div><div class="focus-hint">Klicke hier und tippe los</div></div><div id="dsus"></div></div>`;
     $('#back').onclick=detectiveGame;
@@ -4807,6 +4811,7 @@ function pianoSetup(){
 function pianoGame(si){
   show(()=>{
     activity=true;setTab('games');const d=Store.data,[title,notes]=PIANO_SONGS[si];
+    setTimeout(()=>showBest('piano'),0);
     const body=gameShell(`🎹 ${title}`,'Tippe die markierten Buchstaben. Fehlerfreie Serien bringen Bonuspunkte.',
       `<span>Ton <b id="pn">0</b>/${notes.length}</span><span>Punkte <b id="pp">0</b></span><span>Fehler <b id="pe">0</b></span><span class="rec">Rekord <b>${d.high.piano||0}</b></span>`);
     body.innerHTML=`<div class="bigstage piano-stage"><div class="p-notes" id="pnt"></div><div class="piano" id="pk">${PIANO_KEYS.map(([k,n])=>`<div class="pkey" data-k="${k}"><b>${n}</b><span>${k.toUpperCase()}</span></div>`).join('')}</div><div class="focus-hint">Klicke hier und tippe los</div></div>`;
@@ -5771,6 +5776,9 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-23.7',d:'23.09.2026',items:[
+    '🌍 Die Weltrangliste zeigt jetzt alle Spieler: schnellste WPM, höchstes Level und längste Streak',
+    '🏆 In jedem Minispiel steht oben, wer der Weltbeste ist – und ob du es selbst bist']},
   {v:'2026-09-23.6',d:'23.09.2026',items:[
     '🌍 Weltrangliste unter „Liga“: schnellste WPM, höchstes Level, meiste XP, längste Streak, Alphabet-Sprint, Tipp-Dungeon und Tippdle – mit deinem eigenen Platz']},
   {v:'2026-09-23.5',d:'23.09.2026',items:[
@@ -6123,36 +6131,53 @@ let lgTab='league',worldCat='wpm';
 function lgHead(title,sub){return `<div class="page-head fr-head"><div><h1 class="ph">${title}</h1><p class="muted">${sub}</p></div>
   <div class="seg" id="lgtab">${[['league','🥇 Liga'],['world','🌍 Weltrangliste']].map(([k,v])=>`<button data-lgt="${k}" aria-pressed="${k===lgTab}">${v}</button>`).join('')}</div></div>`}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-lgt]');if(!b)return;lgTab=b.dataset.lgt;go('league')});
+/* Drei Bestenlisten über ALLE registrierten Spieler (auch wer noch keinen Wert hat, steht mit 0 in der Liste) */
 const WORLD_CATS=[
-  {k:'wpm',i:'⚡',n:'Schnellste WPM',f:'stats.bestWpm',fmt:v=>`${v} WPM`,mine:()=>bestWpm(),ok:v=>v<=250},
-  {k:'lv',i:'⭐',n:'Höchstes Level',f:'rankLv',fmt:v=>{const p=Math.floor(v/100),l=v%100;return `${p?`★${p} `:''}Lv ${l}`},mine:()=>(Store.data.prestige||0)*100+levelInfo(Store.data.xp).level},
-  {k:'xp',i:'✨',n:'Meiste XP',f:'xpAll',fmt:v=>`${fmtN(v)} XP`,mine:()=>(Store.data.xp||0)+(Store.data.prestigeXp||0)},
-  {k:'streak',i:'🔥',n:'Längste Streak',f:'stats.bestStreak',fmt:v=>`${v} ${v===1?'Tag':'Tage'}`,mine:()=>Math.max(Store.data.bestStreak||0,streak(Store.data))},
-  {k:'abc',i:'🔤',n:'Alphabet-Sprint',f:'abc',asc:true,fmt:v=>`${(v/1000).toFixed(2).replace('.',',')} s`,mine:()=>{const v=Store.data.high.abc||0;return v>=1500?v:0}},
-  {k:'dungeon',i:'🗡️',n:'Tipp-Dungeon',f:'stats.high.dungeon',fmt:v=>`${v} ${v===1?'Raum':'Räume'}`,mine:()=>Store.data.high.dungeon||0},
-  {k:'tippdle',i:'🟩',n:'Tippdle gelöst',f:'stats.high.tippdle',fmt:v=>`${v}×`,mine:()=>Store.data.high.tippdle||0}];
+  {k:'wpm',i:'⚡',n:'Schnellste WPM',v:p=>{const x=+((p.stats||{}).bestWpm)||0;return x<=250?x:0},fmt:v=>`${v} WPM`,mine:()=>{const x=bestWpm();return x<=250?x:0}},
+  {k:'lv',i:'⭐',n:'Höchstes Level',v:p=>(p.prestige||0)*100+(p.level||1),fmt:v=>{const pr=Math.floor(v/100),l=v%100;return `${pr?`★${pr} `:''}Lv ${l}`},mine:()=>(Store.data.prestige||0)*100+levelInfo(Store.data.xp).level},
+  {k:'streak',i:'🔥',n:'Längste Streak',v:p=>+((p.stats||{}).bestStreak)||0,fmt:v=>`${v} ${v===1?'Tag':'Tage'}`,mine:()=>Math.max(Store.data.bestStreak||0,streak(Store.data))}];
+let worldCache={t:0,rows:null};
 async function viewWorld(){
   const C=WORLD_CATS.find(c=>c.k===worldCat)||WORLD_CATS[0];
-  main.innerHTML=`${lgHead('🌍 Weltrangliste','Die Besten aller Spieler. Deine Werte werden nach jeder Runde automatisch eingetragen.')}
+  main.innerHTML=`${lgHead('🌍 Weltrangliste','Alle registrierten Spieler im Vergleich. Deine Werte werden nach jeder Runde automatisch eingetragen.')}
     <div class="gfilter wr-cats">${WORLD_CATS.map(c=>`<button data-wc="${c.k}" aria-pressed="${c.k===C.k}">${c.i} ${c.n}</button>`).join('')}</div>
     <div class="wr-grid"><div class="panel lg-table" id="wrl"><p class="muted small">Wird geladen…</p></div>
       <div class="panel wr-me" id="wrme"><p class="muted small">Dein Platz wird berechnet…</p></div></div>`;
   $$('[data-wc]').forEach(b=>b.onclick=()=>{worldCat=b.dataset.wc;viewWorld()});
   if(!window.fbWorld){$('#wrl').innerHTML='<p class="muted small">Nur mit Anmeldung verfügbar.</p>';return}
-  const me=myUid(),m0=C.mine(),mine=C.ok&&!C.ok(m0)?0:m0;
-  let rows;try{rows=await window.fbWorld.top(C.f,C.asc)}catch(e){console.warn('Weltrangliste:',e);if($('#wrl'))$('#wrl').innerHTML='<p class="muted small">Die Rangliste konnte nicht geladen werden.</p>';return}
+  let all;
+  try{if(!worldCache.rows||Date.now()-worldCache.t>6e4)worldCache={t:Date.now(),rows:await window.fbWorld.all()};all=worldCache.rows}
+  catch(e){console.warn('Weltrangliste:',e);if($('#wrl'))$('#wrl').innerHTML='<p class="muted small">Die Rangliste konnte nicht geladen werden.</p>';return}
   if(!$('#wrl')||worldCat!==C.k)return;
-  rows=rows.filter(r=>r.uid!==me&&(+r.val||0)>0&&(!C.ok||C.ok(r.val)));if(mine>0)rows.push({uid:me,me:true,val:mine});
-  rows.sort((a,b)=>C.asc?a.val-b.val:b.val-a.val);rows=rows.slice(0,20);
-  $('#wrl').innerHTML=`<h3>${C.i} ${C.n} <span class="muted small">Top ${rows.length}</span></h3>`+(rows.length?rows.map((r,i)=>`<div class="lg-row${r.me?' me':''}"><span class="pos">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()} <small class="ttl">Du</small>`:`${fAva(r)} ${nameHTML(r.name,r.nameFx)}${r.prestige?` <small class="ttl">★${r.prestige}</small>`:''}`}</span><span class="lp">${esc(C.fmt(r.val))}</span></div>`).join('')
-    :'<p class="muted small">Noch keine Einträge. Spiel eine Runde, dann stehst du hier!</p>');
-  const el=$('#wrme');
-  if(!mine){el.innerHTML=`<h3>Dein Platz</h3><p class="muted small">Du hast hier noch keinen Wert. ${C.k==='abc'?'Spiel den Alphabet-Sprint':C.k==='dungeon'?'Wag dich in den Tipp-Dungeon':C.k==='tippdle'?'Löse ein Tippdle':'Spiel eine Runde'}, um in die Liste zu kommen.</p>`;return}
-  try{const {rank,total}=await window.fbWorld.rank(C.f,C.asc,mine);if(!$('#wrme'))return;
-    const pct=total?Math.max(1,Math.round(rank/total*100)):100;
-    el.innerHTML=`<h3>Dein Platz</h3><div class="wr-rank">#${fmtN(rank)}</div><p class="muted small">von ${fmtN(Math.max(total,rank))} Spielern · ${esc(C.fmt(mine))}</p>
-      <p class="wr-pct">${rank===1?'👑 Du bist die Nummer 1!':pct<=10?`🔥 Du gehörst zu den besten ${pct} %!`:`Besser als ${Math.max(0,100-pct)} % aller Spieler`}</p>`}
-  catch(e){console.warn('Weltrangliste Platz:',e);if($('#wrme'))$('#wrme').innerHTML=`<h3>Dein Platz</h3><p class="muted small">${esc(C.fmt(mine))} – Platz konnte nicht berechnet werden.</p>`}}
+  const me=myUid(),mine=C.mine();
+  const rows=all.filter(p=>p.uid!==me).map(p=>({...p,val:C.v(p)}));rows.push({uid:me,me:true,val:mine});
+  rows.sort((a,b)=>b.val-a.val||(a.me?-1:b.me?1:0));
+  const mi=rows.findIndex(r=>r.me);
+  $('#wrl').innerHTML=`<div class="wq-h"><h3>${C.i} ${C.n}</h3><span class="muted small">${fmtN(rows.length)} Spieler</span></div><div class="wr-list" id="wrlist">`+rows.map((r,i)=>`<div class="lg-row${r.me?' me':''}${r.val?'':' zero'}"><span class="pos">${i<3&&r.val?['🥇','🥈','🥉'][i]:i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()} <small class="ttl">Du</small>`:`${fAva(r)} ${nameHTML(r.name,r.nameFx)}`}</span><span class="lp">${esc(C.fmt(r.val))}</span></div>`).join('')+'</div>';
+  // Zur eigenen Zeile scrollen, damit man sich sofort findet
+  const list=$('#wrlist'),myRow=list&&list.children[mi];if(myRow&&mi>6)list.scrollTop=myRow.offsetTop-list.offsetTop-list.clientHeight/2;
+  const rank=mi+1,total=rows.length,pct=Math.max(1,Math.round(rank/total*100));
+  $('#wrme').innerHTML=`<h3>Dein Platz</h3><div class="wr-rank">#${fmtN(rank)}</div><p class="muted small">von ${fmtN(total)} Spielern · ${esc(C.fmt(mine))}</p>
+    <p class="wr-pct">${!mine?'Spiel eine Runde, um nach oben zu klettern!':rank===1?'👑 Du bist die Nummer 1!':pct<=10?`🔥 Du gehörst zu den besten ${pct} %!`:`Besser als ${Math.max(0,100-pct)} % aller Spieler`}</p>`}
+
+/* ---------- Weltbester im Minispiel: wird oben im jeweiligen Spiel angezeigt ---------- */
+const BEST_SKIP=new Set(['daily','ghost','story','abc']);   // Alphabet-Sprint hat eine eigene Rangliste im Spiel
+const bestField=g=>g.id==='timed'?'stats.high.sixty':g.id.startsWith('code:')?'stats.high.code_'+g.id.slice(5):'stats.high.'+g.id;
+const WPM_GAMES=new Set(['timed','race','duel','ladder','blind']);
+let bestCache={};
+async function showBest(gid){
+  const g=gid&&GAMES.find(x=>x.id===gid);if(!g||BEST_SKIP.has(g.id)||!window.fbWorld)return;
+  const host=$('.prac-head > div');if(!host||$('.gbest',host))return;
+  host.insertAdjacentHTML('beforeend','<p class="gbest" id="gbest">🏆 Weltbester wird geladen…</p>');
+  const f=bestField(g),low=LOWER_BETTER.has(g.id),wpmish=WPM_GAMES.has(g.id)||g.id.startsWith('code:');
+  let top;
+  try{const c=bestCache[f];if(c&&Date.now()-c.t<12e4)top=c.v;else{const rows=(await window.fbWorld.best(f,low)).filter(r=>!wpmish||r.val<=250);top=rows[0]||null;bestCache[f]={t:Date.now(),v:top}}}
+  catch(e){console.warn('Weltbester:',e);const el=$('#gbest');if(el)el.remove();return}
+  const el=$('#gbest');if(!el)return;
+  const mine=gameScore(g,Store.data),meBest=mine>0&&(!top||(low?mine<=top.val:mine>=top.val));
+  el.innerHTML=meBest?`👑 <b>Du bist der Weltbeste</b> in diesem Spiel: ${esc(scoreText(g,mine))}`
+    :top?`🏆 Weltbester: ${fAva(top)} <b>${nameHTML(top.name,top.nameFx)}</b> mit ${esc(scoreText(g,top.val))}`
+    :'🏆 Noch kein Weltrekord – hol ihn dir!'}
 
 function histLabel(k){const t=+k;if(!isNaN(t)&&t>1e11){const a=new Date(t),b=new Date(t+PERIOD_MS);return `${a.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})}, ${a.getHours()}–${b.getHours()||24} Uhr`}return 'Woche ab '+new Date(k+'T00:00:00').toLocaleDateString('de-DE')}
 
