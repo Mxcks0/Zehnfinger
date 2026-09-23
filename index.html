@@ -80,7 +80,7 @@
                title: d.title || '', level: d.level || 1, stats: d.stats || {}, lastActive: la,
                nameFx: d.nameFx || 'none', car: d.car || '🚗', prestige: d.prestige || 0,
                team: d.team || '', teamName: d.teamName || '', ch: Array.isArray(d.ch) ? d.ch : [], chr: d.chr || {},
-               rx: Array.isArray(d.rx) ? d.rx : [] };
+               rx: Array.isArray(d.rx) ? d.rx : [], news: Array.isArray(d.news) ? d.news : [] };
     };
     const ms = v => v && typeof v.toMillis === 'function' ? v.toMillis() : 0;
     const meRef = () => doc(db, 'players', auth.currentUser.uid);
@@ -157,6 +157,11 @@
     };
     /* ---------- Feedback: landet in der Sammlung "feedback" (nur lesbar in der Firebase-Konsole) ---------- */
     window.fbFeedback = data => addDoc(collection(db, 'feedback'), { ...data, uid: auth.currentUser ? auth.currentUser.uid : '', createdAt: serverTimestamp() });
+
+    /* ---------- Alphabet-Sprint: Weltrangliste (Bestzeit in ms, kleiner ist besser) ---------- */
+    window.fbAbc = {
+      board: async () => (await pl([where('abc', '>', 0), orderBy('abc'), limit(30)])).docs.map(s => ({ ...plain(s), ms: s.data().abc }))
+    };
 
     /* ---------- Team-Liga: alle Spieler, die in einem Team sind ---------- */
     window.fbTeamLeague = async () => (await pl([where('team', '!=', ''), limit(1000)])).docs.map(plain);
@@ -2166,6 +2171,82 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .fbk-t{white-space:pre-wrap;margin:10px 0 6px;line-height:1.5}
 .fbk-m{margin:0}
 @media (max-width:860px){.adm-grid{grid-template-columns:1fr}}
+/* Neuigkeiten, Goldene Taste und die sechs neuen Spiele */
+.fr-main{display:grid;gap:14px;min-width:0}
+#frnews:empty{display:none}
+.news-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.news-row .nm{font-size:14px;line-height:1.35;min-width:0}
+.news-row .nm small{display:block;font-size:12px}
+.news-row .rxb{width:30px;height:28px;font-size:15px}
+.rxb.on{border-color:var(--caret);background:color-mix(in srgb,var(--caret) 18%,var(--surface2))}
+.tview .c.gold{color:#FFC857!important;text-shadow:0 0 10px #FFC857,0 0 2px #FFC857;animation:goldpulse 1s ease-in-out infinite}
+@keyframes goldpulse{50%{transform:scale(1.18)}}
+.floaty.gold{color:#FFC857;font-weight:800}
+/* Tippdle */
+.td-stage{gap:14px}
+.td-grid{display:grid;gap:6px}
+.td-row{display:grid;grid-template-columns:repeat(5,clamp(40px,7vh,56px));gap:6px}
+.td-c{height:clamp(40px,7vh,56px);display:grid;place-items:center;border:2px solid var(--line);border-radius:10px;font-family:var(--mono);font-size:clamp(20px,3.4vh,28px);font-weight:700;text-transform:uppercase}
+.td-c.f{border-color:var(--muted)}
+.td-c.g{background:#3FA66B;border-color:#3FA66B;color:#fff}
+.td-c.y{background:#C9A227;border-color:#C9A227;color:#fff}
+.td-c.b{background:var(--surface2);border-color:var(--surface2);color:var(--muted)}
+.td-keys{max-width:420px;justify-content:center}
+.hused span.td-y{background:color-mix(in srgb,#C9A227 30%,var(--surface2));color:#E3C45A}
+/* Alphabet-Sprint */
+.abc-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:14px;align-items:start}
+.abc-row{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:520px;font-family:var(--mono)}
+.abc-row span{width:26px;height:28px;display:grid;place-items:center;border-radius:6px;background:var(--surface2);color:var(--muted);font-size:14px}
+.abc-row span.ok{background:color-mix(in srgb,var(--good) 25%,var(--surface2));color:var(--good)}
+.abc-board h3{margin:0 0 6px}
+/* Emoji-Rätsel */
+.emo{font-size:clamp(48px,9vh,80px);line-height:1.1;letter-spacing:.1em}
+/* Tipp-Dungeon */
+.dg{gap:12px}
+.dg-mons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;width:100%}
+.dg-mon{display:grid;justify-items:center;gap:5px;min-width:130px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)}
+.dg-mon.tgt{border-color:var(--caret)}
+.dg-mon.boss{border-color:var(--bad);min-width:170px}
+.dg-mon.dead{opacity:.35}
+.dg-e{font-size:clamp(34px,6vh,52px);line-height:1}
+.dg-mon.boss .dg-e{font-size:clamp(46px,8vh,70px)}
+.dg-w{font-family:var(--mono);font-size:17px;font-weight:600}
+.dg-w i{font-style:normal;color:var(--caret)}
+.dg-mon .hpbar,.dg-mon .charge{max-width:120px}
+.dg-mon .charge i{background:var(--bad)}
+.dg-me{display:flex;align-items:center;gap:10px;width:min(420px,100%)}
+.dg-me .hpbar{flex:1;max-width:none}
+.dg-av{font-size:30px}
+.dg-picks{display:grid;gap:8px}
+.dg-pick{font:inherit;color:var(--text);display:grid;grid-template-columns:auto auto 1fr;gap:12px;align-items:center;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);cursor:pointer}
+.dg-pick:hover{border-color:var(--caret)}
+.dg-pick>b{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:var(--caret);color:#241a02}
+.dg-pick div{display:grid}
+/* Tipp-Detektiv */
+.det-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.det-case{font:inherit;color:var(--text);text-align:left;display:grid;gap:4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer}
+.det-case:hover{border-color:var(--caret)}
+.det-case.done{border-color:color-mix(in srgb,var(--good) 55%,var(--line))}
+.det{display:grid;gap:12px}
+.det-notes p{margin:4px 0;padding:8px 12px;border-radius:10px;background:var(--surface2);font-size:15px}
+.det-type[hidden]{display:none}
+.det-sus{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:8px 0 12px}
+.det-s{display:grid;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+#dsus h3{margin:4px 0}
+/* Tastatur-Klavier */
+.piano-stage{gap:20px}
+.p-notes{display:flex;gap:6px;font-family:var(--mono);font-size:22px;min-height:1.6em;flex-wrap:wrap;justify-content:center}
+.p-notes span{color:var(--muted)}
+.p-notes span.ok{color:var(--good)}
+.p-notes span.cur{color:var(--caret);transform:scale(1.35);font-weight:800}
+.piano{display:flex;gap:4px}
+.pkey{width:clamp(34px,6vw,58px);height:clamp(110px,20vh,170px);border-radius:0 0 10px 10px;background:#F4F1EA;color:#2a2733;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:8px;box-shadow:inset 0 -6px 0 #d8d3c7;transition:transform .08s}
+.pkey b{font-size:13px}
+.pkey span{font-family:var(--mono);font-size:12px;opacity:.6}
+.pkey.next{background:#FFE7A8;box-shadow:inset 0 -6px 0 #E8C35E}
+.pkey.hit{animation:pkhit .25s}
+@keyframes pkhit{40%{transform:translateY(4px);background:#B9F2D2}}
+@media (max-width:760px){.abc-wrap{grid-template-columns:1fr}}
 </style>
 </head>
 <body class="locked">
@@ -2794,6 +2875,7 @@ function recordSession(mode,label,st,extra={}){
   newAch.forEach(a=>q.push(()=>{toast(a.i,'Erfolg freigeschaltet',`${a.n} (+20 XP, +15 🪙)`);Sound.ach()}));
   if(!rankBefore&&rankAfter)q.push(()=>{toast(LEAGUES[d.league.idx][1],`Liga beigetreten: Platz ${rankAfter}`,`Du kämpfst jetzt in der ${LEAGUES[d.league.idx][0]}-Liga mit`)});
   else if(rankAfter<rankBefore)q.push(()=>{toast(LEAGUES[d.league.idx][1],`Platz ${rankAfter} in der Liga`,`Du hast ${rankBefore-rankAfter} ${rankBefore-rankAfter===1?'Rivalen':'Rivalen'} überholt`)});
+  mast.forEach(([gm,t])=>{if(t>=2)newsAdd('m',{g:gm.id,v:t})});if(levelUp)newsAdd('lv',{v:levelInfo(d.xp).level});newAch.forEach(a=>newsAdd('a',{a:a.id}));if(wq.includes(null))newsAdd('wq',{});
   mast.forEach(([gm,t])=>q.push(()=>{toast(MASTERY[t-1][1],`${MASTERY[t-1][0]} in ${gm.n}`,`Neue Meisterschafts-Stufe (+${MASTERY[t-1][2]} 🪙)`);Sound.ach()}));
   wq.forEach(n=>q.push(()=>{if(n===null)toast('🎁','Alle Wochenaufgaben geschafft',`Bonus: +${WQ_BONUS} 🪙`);else toast('🎯','Wochenaufgabe erledigt',`${n} (+${WQ_COINS} 🪙)`);Sound.ok()}));
   chWon.forEach(([c,gm])=>q.push(()=>{toast('⚔️','Herausforderung geschafft!',`Du hast ${c.from.name} in ${gm.n} geschlagen (+${CH_COINS} 🪙)`);Sound.win()}));
@@ -3173,7 +3255,18 @@ function practice(cfg){
     const text=cfg.code?sanitizeCode(cfg.text()):sanitize(cfg.text());const tb=$('#tb'),lcb=$('#lcb');
     const upd=st=>{$('#lw').textContent=Math.round(st.wpm);$('#lc').textContent=Math.round(st.cpm);$('#la').textContent=st.acc.toFixed(0);
       if(!cfg.timeLimit)$('#lp').style.width=(st.progress*100)+'%'};
+    /* Goldene Taste: ab und zu leuchtet ein kommender Buchstabe golden. Beim ersten Versuch richtig getroffen = Bonus-Münzen */
+    const goldOn=(cfg.mode==='lesson'||cfg.mode==='free')&&!cfg.blind;let goldIdx=-1,goldNext=rnd(18,45);
+    const goldPlace=()=>{const c=[];for(let j=typer.i+6;j<Math.min(text.length,typer.i+26);j++)if(/\p{L}/u.test(text[j]))c.push(j);if(!c.length)return;goldIdx=pick(c);typer.spans[goldIdx].classList.add('gold')};
+    const goldCheck=(good)=>{
+      if(!goldOn)return;const idx=good||typer.mode()!=='stop'?typer.i-1:typer.i;
+      if(goldIdx>=0&&idx===goldIdx&&(good||typer.mode()!=='stop')){const s=typer.spans[goldIdx];s.classList.remove('gold');
+        if(good&&!typer.had[goldIdx]){const d=Store.data,k=dayKey();if(!d.gold||d.gold.k!==k)d.gold={k,c:0};
+          if(d.gold.c<80){const c=Math.min(80-d.gold.c,rnd(3,8));d.gold.c+=c;d.coins+=c;refreshMe(true);floatText(tb,`+${c} 🪙`,'gold');Sound.combo()}}
+        goldIdx=-1;goldNext=typer.i+rnd(35,80)}
+      else if(goldIdx<0&&typer.i>=goldNext)goldPlace()};
     const onKey=(ch,good,combo)=>{
+      goldCheck(good);
       if(cfg.mode==='ghost'&&typer.i>0)myTimes[typer.i-1]=Math.round(performance.now()-typer.start);
       kb.flash(ch,good);lcb.textContent=combo;if(good&&typer.i>0)trailFx(tb,typer.spans[typer.i-1],ch);
       if(good){ch===' '?Sound.space():Sound.key();
@@ -3541,6 +3634,7 @@ const GAMES=[
  {id:'sudden',cat:'tempo',i:'💥',n:'Sudden Death',s:'Ein Fehler, Runde vorbei',rec:d=>`${d.high.sudden||0} Zeichen`},
  {id:'bomb',cat:'tempo',i:'💣',n:'Bombe entschärfen',s:'Tippe den Code, bevor der Zünder abläuft',rec:d=>`${d.high.bomb||0} entschärft`},
  {id:'blind',cat:'tempo',i:'🙈',n:'Blindflug',s:'Tippen, ohne zu sehen, was du tippst',rec:d=>`${d.high.blind||0} WPM`},
+ {id:'abc',cat:'tempo',i:'🔤',n:'Alphabet-Sprint',s:'A bis Z so schnell wie möglich – mit Weltrangliste',rec:d=>d.high.abc?`${(d.high.abc/1000).toFixed(2)} s`:'–'},
  {id:'rain',cat:'arcade',i:'🌧️',n:'Wortregen',s:'Wörter stapeln sich',rec:d=>`${d.high.rain||0} Punkte`},
  {id:'blaster',cat:'arcade',i:'🚀',n:'Wort-Blaster',s:'Schieß Wörter ab',rec:d=>`${d.high.blaster||0} Punkte`},
  {id:'zombie',cat:'arcade',i:'🧟',n:'Zombie-Angriff',s:'Angriff von allen Seiten',rec:d=>`${d.high.zombie||0} Punkte`},
@@ -3550,6 +3644,8 @@ const GAMES=[
  {id:'runner',cat:'arcade',i:'🏃',n:'Endlos-Läufer',s:'Spring über Hindernisse',rec:d=>`${d.high.runner||0} Punkte`},
  {id:'rhythm',cat:'arcade',i:'🥁',n:'Rhythmus',s:'Tasten im Takt',rec:d=>`${d.high.rhythm||0} Punkte`},
  {id:'mole',cat:'arcade',i:'🔨',n:'Maulwurf-Jagd',s:'Tippe die Wörter, bevor die Maulwürfe abtauchen',rec:d=>`${d.high.mole||0} Punkte`},
+ {id:'dungeon',cat:'arcade',i:'🗡️',n:'Tipp-Dungeon',s:'Kämpf dich durch Räume voller Monster, jede Runde anders',rec:d=>`${d.high.dungeon||0} Räume`},
+ {id:'piano',cat:'arcade',i:'🎹',n:'Tastatur-Klavier',s:'Spiel bekannte Melodien mit den Buchstaben-Tasten',rec:d=>`${d.high.piano||0} Punkte`},
  {id:'blitz',cat:'brain',i:'⚡',n:'Blitztasten',s:'Reaktionstest',rec:d=>d.high.blitz?`${d.high.blitz} ms`:'–'},
  {id:'memory',cat:'brain',i:'🧠',n:'Gedächtnis',s:'Aus dem Kopf tippen',rec:d=>`${d.high.memory||0} Zeichen`},
  {id:'anagram',cat:'brain',i:'🔀',n:'Buchstabensalat',s:'Ordne die Buchstaben',rec:d=>`${d.high.anagram||0} Punkte`},
@@ -3560,11 +3656,14 @@ const GAMES=[
  {id:'hangman',cat:'brain',i:'❓',n:'Galgenraten',s:'Errate das Wort Buchstabe für Buchstabe',rec:d=>`${d.high.hangman||0} Wörter`},
  {id:'chain',cat:'brain',i:'🔗',n:'Wortkette',s:'Jedes Wort beginnt mit dem letzten Buchstaben des vorigen',rec:d=>`${d.high.chain||0} Punkte`},
  {id:'typo',cat:'brain',i:'🔍',n:'Fehlerjagd',s:'Finde den Tippfehler im Satz',rec:d=>`${d.high.typo||0} Punkte`},
+ {id:'tippdle',cat:'brain',i:'🟩',n:'Tippdle',s:'Das tägliche Worträtsel: 5 Buchstaben, 6 Versuche',rec:d=>`${d.high.tippdle||0} gelöst`},
+ {id:'emoji',cat:'brain',i:'😀',n:'Emoji-Rätsel',s:'Errate das Wort hinter den Emojis',rec:d=>`${d.high.emoji||0} Punkte`},
+ {id:'detective',cat:'brain',i:'🕵️',n:'Tipp-Detektiv',s:'Tippe die Hinweise ab und überführe den Täter',rec:d=>`${d.high.detective||0}/${DET_CASES.length} Fälle`},
  {id:'story',cat:'brain',i:'📖',n:'Story-Modus',s:'Geschichte mit Entscheidungen',rec:d=>`${Object.keys(d.story).length}/3 Enden`},
  ...Object.entries(CODE_LANGS).map(([k,L])=>({id:'code:'+k,cat:'code',i:L.i,n:L.n,s:L.d,rec:d=>`${d.high['code_'+k]||0} WPM`}))
 ];
-const NEW_GAMES=new Set(['blind','chain','typo']);
-const MODE2GAME={blind:'blind',chain:'chain',typo:'typo',bomb:'bomb',mole:'mole',hangman:'hangman',online:'online',sixty:'timed',timed:'timed',race:'race',ghost:'ghost',sudden:'sudden',ladder:'ladder',duel:'duel',rain:'rain',blaster:'blaster',zombie:'zombie',runner:'runner',tower:'tower',balloon:'balloon',boss:'boss',rhythm:'rhythm',blitz:'blitz',memory:'memory',story:'story',anagram:'anagram',gaps:'gaps',kitchen:'kitchen',puzzle:'puzzle',math:'math'};
+const NEW_GAMES=new Set(['tippdle','dungeon','abc','emoji','detective','piano']);
+const MODE2GAME={tippdle:'tippdle',dungeon:'dungeon',abc:'abc',emoji:'emoji',detective:'detective',piano:'piano',blind:'blind',chain:'chain',typo:'typo',bomb:'bomb',mole:'mole',hangman:'hangman',online:'online',sixty:'timed',timed:'timed',race:'race',ghost:'ghost',sudden:'sudden',ladder:'ladder',duel:'duel',rain:'rain',blaster:'blaster',zombie:'zombie',runner:'runner',tower:'tower',balloon:'balloon',boss:'boss',rhythm:'rhythm',blitz:'blitz',memory:'memory',story:'story',anagram:'anagram',gaps:'gaps',kitchen:'kitchen',puzzle:'puzzle',math:'math'};
 let gameFilter='all',gameQuery='';
 /* Spiele-Übersicht: alle Spiele auf einer Seite, nach Kategorie gruppiert. Online-Duell und
    Tägliche Challenge stehen oben als große Karten und nicht noch einmal im Raster. */
@@ -3607,6 +3706,12 @@ function startGame(k){
   if(k==='bomb')return bombGame();
   if(k==='mole')return moleGame();
   if(k==='hangman')return hangmanGame();
+  if(k==='tippdle')return tippdleGame();
+  if(k==='dungeon')return dungeonGame();
+  if(k==='abc')return abcGame();
+  if(k==='emoji')return emojiGame();
+  if(k==='detective')return detectiveGame();
+  if(k==='piano')return pianoSetup();
   if(k==='chain')return chainGame();
   if(k==='typo')return typoGame();
   if(k==='blind')return practice({tab:'games',mode:'blind',blind:true,hideHelp:true,label:'Blindflug',title:'Blindflug',sub:'Du siehst nicht, ob du richtig tippst. Vertrau deinen Fingern! Erst am Ende zeigen wir, wo die Fehler waren.',text:()=>gSent(3),back:()=>go('games')});
@@ -4414,6 +4519,289 @@ function typoGame(){
   });
 }
 
+/* ---------- Tippdle: tägliches Worträtsel ---------- */
+const TD_WORDS={
+  de:'apfel birne blume brief decke eimer engel ernte fabel farbe feder fisch frage geist glanz hafen honig hotel insel jacke kabel kamel karte katze kerze kette kiste kleid knopf kraft krone kugel lampe laune leder licht liebe linie liste mauer maske milch monat motor musik nacht nadel nebel onkel opfer paket party pferd pilot platz preis puppe radio regal regen reise rolle sache salat sonne spiel stadt stein stern stuhl sturm suppe tante tasse teich thema tiger torte traum truhe vogel waage wagen wange welle wolke wurst zange zebra zweig frost gabel gurke juwel kakao koala krimi nudel palme perle pizza pflug quark rinde sahne schaf seife socke sport stamm stift tulpe vater wiese wolle zunge zwerg biber dachs mixer bluse boden fluss klang sirup'.split(' '),
+  en:'apple bread chair cloud dream earth field flame fruit ghost grape heart horse house juice knife lemon light money mouse music night ocean paint party piano pizza plant queen river robot sheep smile snake space spoon storm sugar table tiger toast tower train water whale world zebra beach candy dance eagle frost glass honey jelly kite laser magic noble olive pearl quiet radio salad shark smoke'.split(' ')};
+const tdWord=k=>{const L=(isEN()?TD_WORDS.en:TD_WORDS.de).filter(w=>/^[a-z]{5}$/.test(w)),r=seededRandom('td-'+(isEN()?'en-':'')+k);return L[Math.floor(r()*L.length)]};
+/* Wertung wie beim Original: grün = richtige Stelle, gelb = kommt vor, grau = nicht drin (doppelte Buchstaben korrekt gezählt) */
+function tdScore(guess,word){const res=Array(5).fill('b'),left={};
+  [...word].forEach((c,i)=>{if(guess[i]===c)res[i]='g';else left[c]=(left[c]||0)+1});
+  [...guess].forEach((c,i)=>{if(res[i]!=='g'&&left[c]){res[i]='y';left[c]--}});return res}
+function tippdleGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data,k=(isEN()?'en-':'')+dayKey(),word=tdWord(dayKey());
+    const body=gameShell('Tippdle','Errate das Wort des Tages in sechs Versuchen. 🟩 richtiger Buchstabe an der richtigen Stelle, 🟨 Buchstabe kommt vor, ⬜ kommt nicht vor. Jeden Tag ein neues Wort – für alle dasselbe.',
+      `<span>Versuch <b id="tdn">1</b>/6</span><span>Serie <b id="tds">${d.tdStreak||0}</b></span><span class="rec">Gelöst <b>${d.high.tippdle||0}</b></span>`);
+    const T=d.td&&d.td.k===k?d.td:(d.td={k,g:[],done:false,won:false,t0:0});
+    body.innerHTML=`<div class="bigstage td-stage" id="tdst"><div class="td-grid" id="tdg"></div><div class="hused td-keys" id="tdk"></div><p class="muted small" id="tdm"></p><div class="acts" id="tda"></div><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    const ABC=[...'qwertzuiopasdfghjklyxcvbnm'];let cur='';
+    const msg=t=>{$('#tdm').textContent=t};
+    function render(){
+      const rows=T.g.map(gs=>{const sc=tdScore(gs,word);return [...gs].map((c,i)=>`<span class="td-c ${sc[i]}">${esc(c.toUpperCase())}</span>`).join('')});
+      if(!T.done&&T.g.length<6)rows.push([...cur.padEnd(5)].map(c=>`<span class="td-c${c.trim()?' f':''}">${esc(c.toUpperCase())}</span>`).join(''));
+      while(rows.length<6)rows.push('<span class="td-c"></span>'.repeat(5));
+      $('#tdg').innerHTML=rows.map(r=>`<div class="td-row">${r}</div>`).join('');
+      const st={};T.g.forEach(gs=>tdScore(gs,word).forEach((s,i)=>{const c=gs[i];if(s==='g'||st[c]==='g')st[c]='g';else if(s==='y'||st[c]==='y')st[c]='y';else st[c]=st[c]||'b'}));
+      $('#tdk').innerHTML=ABC.map(c=>`<span class="${st[c]==='g'?'hit':st[c]==='y'?'td-y':st[c]==='b'?'bad':''}">${c.toUpperCase()}</span>`).join('');
+      $('#tdn').textContent=Math.min(6,T.g.length+(T.done?0:1))}
+    function shareText(){const rows=T.g.map(gs=>tdScore(gs,word).map(s=>s==='g'?'🟩':s==='y'?'🟨':'⬜').join(''));
+      return `Tippdle ${new Date().toLocaleDateString('de-DE')} ${T.won?T.g.length:'X'}/6\n${rows.join('\n')}\n${myUid()?inviteLink():'https://www.zehnfingernulllangeweile.de'}`}
+    function finished(){
+      msg(T.won?`Geschafft in ${T.g.length} ${T.g.length===1?'Versuch':'Versuchen'}! Morgen gibt es ein neues Wort.`:`Das Wort war „${word.toUpperCase()}“. Morgen gibt es ein neues.`);
+      $('#tda').innerHTML='<button class="btn primary" id="tdsh">📋 Ergebnis kopieren</button><button class="btn" id="tdb">Zu den Spielen</button>';
+      $('#tdsh').onclick=async()=>{const t=shareText();try{if(navigator.share&&/Mobi|Android/i.test(navigator.userAgent)){await navigator.share({text:t});return}await navigator.clipboard.writeText(t);toast('🟩','Ergebnis kopiert','Jetzt in WhatsApp & Co. einfügen')}catch(e){}};
+      $('#tdb').onclick=()=>go('games')}
+    function submit(){
+      if(cur.length<5)return msg('Das Wort braucht 5 Buchstaben.');
+      if(!/[aeiouy]/.test(cur)){bump($('#tdg'),'shake');Sound.err();return msg('Das sieht nicht nach einem Wort aus.')}
+      if(T.g.includes(cur))return msg('Das hast du schon versucht.');
+      if(!T.t0)T.t0=Date.now();T.g.push(cur);[...cur].forEach(c=>recKey(c,true));cur='';
+      if(T.g[T.g.length-1]===word){T.done=true;T.won=true}else if(T.g.length>=6)T.done=true;
+      render();
+      if(T.done){
+        const y=dayKey(new Date(Date.now()-864e5));d.tdStreak=T.won?(d.tdLast===y?(d.tdStreak||0)+1:1):0;if(T.won)d.tdLast=dayKey();
+        if(T.won){d.high.tippdle=(d.high.tippdle||0)+1;newsAdd('td',{v:T.g.length});Sound.win();confetti(120)}else Sound.hurt();
+        const secs=Math.max(5,(Date.now()-T.t0)/1000),n=T.g.length*5;
+        recordSession('tippdle','Tippdle',{wpm:n/5/(secs/60),acc:T.won?100:70,secs,ok:n,err:0,typed:n},{chars:n*3,bonus:T.won?(7-T.g.length)*8:5});
+        $('#tds').textContent=d.tdStreak;const hr=$('.hud .rec b');if(hr)hr.textContent=d.high.tippdle||0;finished()}
+      else msg(`Noch ${6-T.g.length} ${6-T.g.length===1?'Versuch':'Versuche'}.`);
+      Store.save()}
+    render();if(T.done)finished();else msg('Tipp ein Wort mit 5 Buchstaben und drück Enter.');
+    setHandler({char:ch=>{if(T.done)return;const c=ch.toLowerCase();if(!/^[a-z]$/.test(c))return;if(cur.length<5){cur+=c;Sound.key();render()}},
+      back:()=>{if(!T.done){cur=cur.slice(0,-1);render()}},enter:()=>{if(!T.done)submit()},esc:()=>go('games')});
+  });
+}
+
+/* ---------- Alphabet-Sprint mit Weltrangliste ---------- */
+const ABC_ALL='abcdefghijklmnopqrstuvwxyz';
+function abcGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data;
+    const body=gameShell('Alphabet-Sprint','Tippe das Alphabet von A bis Z so schnell du kannst. Die Zeit startet mit dem A. Jeder falsche Buchstabe kostet eine halbe Sekunde.',
+      `<span>Zeit <b id="at">0,00</b></span><span>Fehler <b id="ae">0</b></span><span class="rec">Bestzeit <b>${d.high.abc?(d.high.abc/1000).toFixed(2)+' s':'–'}</b></span>`);
+    body.innerHTML=`<div class="abc-wrap"><div class="bigstage" id="ast"><div class="bigkey" id="ak">A</div><div class="abc-row" id="ar">${[...ABC_ALL].map(c=>`<span>${c.toUpperCase()}</span>`).join('')}</div>
+      <p class="muted small" id="am">Tipp A, um zu starten.</p><div class="focus-hint">Klicke hier und tippe los</div></div>
+      <div class="panel abc-board"><h3>🌍 Weltrangliste</h3><div id="ab"><p class="muted small">Wird geladen…</p></div></div></div>`;
+    let i=0,t0=0,pen=0,err=0,raf=0,state='ready';
+    const spans=$$('#ar span'),fmt=ms=>(ms/1000).toFixed(2).replace('.',',');
+    const tick=()=>{if(state!=='play')return;$('#at').textContent=fmt(performance.now()-t0+pen);raf=requestAnimationFrame(tick)};
+    function onChar(ch){
+      const c=ch.toLowerCase();if(state==='done')return;
+      if(c!==ABC_ALL[i]){if(state==='play'){err++;pen+=500;$('#ae').textContent=err;recKey(ABC_ALL[i],false);Sound.err();bump($('#ak'),'shake')}return}
+      if(state==='ready'){state='play';t0=performance.now();tick()}
+      spans[i].classList.add('ok');recKey(c,true);Sound.key();i++;
+      if(i<26){$('#ak').textContent=ABC_ALL[i].toUpperCase();return}
+      state='done';cancelAnimationFrame(raf);const ms=Math.round(performance.now()-t0+pen);$('#at').textContent=fmt(ms);$('#ak').textContent='✓';
+      const valid=ms>=1500,prev=d.high.abc||0,rec=valid&&(!prev||ms<prev);if(rec){d.high.abc=ms;newsAdd('abc',{v:ms})}
+      const secs=ms/1000,info=recordSession('abc','Alphabet-Sprint',{wpm:26/5/(secs/60),acc:26/(26+err)*100,secs,ok:26,err,typed:26+err},{chars:52,bonus:rec&&prev?30:8});
+      if(rec&&prev){Sound.win();confetti(110)}
+      setTimeout(()=>gameOverModal(!valid?'Zu schnell, um wahr zu sein':rec&&prev?'Neue Bestzeit!':'Geschafft',[`${fmt(ms)} Sekunden, ${err} ${err===1?'Fehler':'Fehler'}.`,valid?`Deine Bestzeit: ${fmt(d.high.abc)} s`:'Zeiten unter 1,5 Sekunden werden nicht gewertet.'],info.xp,()=>abcGame()),400);
+      loadBoard()}
+    async function loadBoard(){const el=$('#ab');if(!el||!window.fbAbc)return;let rows;try{rows=await window.fbAbc.board()}catch(e){el.innerHTML='<p class="muted small">Konnte nicht geladen werden.</p>';return}
+      const me=myUid(),mine=d.high.abc||0;rows=rows.filter(r=>r.uid!==me);if(mine)rows.push({uid:me,me:true,ms:mine});rows.sort((a,b)=>a.ms-b.ms);
+      if(!$('#ab'))return;const mi=rows.findIndex(r=>r.me);
+      const row=(r,j)=>`<div class="lg-row${r.me?' me':''}"><span class="pos">${j<3?['🥇','🥈','🥉'][j]:j+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()}`:`${fAva(r)} ${nameHTML(r.name,r.nameFx)}`}</span><span class="lp">${fmt(r.ms)} s</span></div>`;
+      el.innerHTML=rows.length?rows.slice(0,10).map(row).join('')+(mi>=10?`<div class="lg-cut">···</div>${row(rows[mi],mi)}`:''):'<p class="muted small">Noch keine Zeiten. Sei die erste Person!</p>'}
+    loadBoard();cleanup=()=>cancelAnimationFrame(raf);
+    setHandler({guard:true,char:onChar,enter:()=>{if(state==='done')abcGame()},esc:()=>go('games')});
+  });
+}
+
+/* ---------- Emoji-Rätsel ---------- */
+const EMOJI_DE=[['☀️🌸','Sonnenblume'],['🔥🚒','Feuerwehr'],['❄️⛄','Schneemann'],['🎂🎉','Geburtstag'],['🐝🍯','Honig'],['🍎🌳','Apfelbaum'],['⭐🐟','Seestern'],['🏠🔑','Hausschlüssel|Schlüssel'],
+  ['📖🐛','Bücherwurm'],['🦷🪥','Zahnbürste'],['🎄🎁','Weihnachten'],['🐰🥚','Ostern|Osterei'],['🌈🦄','Einhorn'],['☕🥐','Frühstück'],['🚀🌕','Mondlandung|Mond'],['⏰😴','Wecker'],
+  ['🎸🎤','Konzert'],['🌋🔥','Vulkan'],['🍿🎬','Kino'],['🚲🔔','Fahrrad'],['🐸👑','Froschkönig'],['🌧️🌈','Regenbogen'],['🏔️⛷️','Skifahren|Ski'],['🐄🥛','Milch|Kuhmilch'],
+  ['🌞🕶️','Sonnenbrille'],['⚡🌩️','Gewitter|Blitz'],['🦋🐛','Schmetterling|Raupe'],['🏰👸','Prinzessin|Schloss'],['⛵🌊','Segeln|Segelboot'],['🎃👻','Halloween'],['🥕🐇','Hase|Kaninchen'],
+  ['🕷️🕸️','Spinnennetz'],['🍋🥤','Limonade'],['✈️🏝️','Urlaub|Reise'],['🌡️🤒','Fieber'],['🦉🌙','Eule'],['🧀🐭','Maus'],['🍌🐒','Affe'],['💡🧠','Idee'],['🌲🌲🌲','Wald'],
+  ['🎹🎵','Klavier'],['⚽🥅','Tor|Fußball'],['🐟🎣','Angeln|Angel'],['🧊🍦','Eis|Eiscreme'],['🎓📜','Abschluss|Diplom'],['🔑🔒','Schloss'],['🌙⭐','Nacht|Sternenhimmel'],['🍝🇮🇹','Nudeln|Spaghetti'],
+  ['📮✉️','Brief|Post'],['👓📖','Lesen|Brille'],['🌊🏄','Surfen'],['🐻🍯','Bär|Honig'],['🧲⚡','Magnet'],['🌽🍿','Popcorn'],['🥚🐣','Küken'],['🏃🏅','Marathon|Sieger|Medaille']];
+const EMOJI_EN=[['☀️🌸','sunflower'],['❄️⛄','snowman'],['🎂🎉','birthday'],['🌧️🌈','rainbow'],['⭐🐟','starfish'],['🦷🪥','toothbrush'],['🐝🍯','honey'],['🎄🎁','christmas'],['🌈🦄','unicorn'],
+  ['🍿🎬','movie|cinema'],['🚲🔔','bicycle|bike'],['🎃👻','halloween'],['🌋🔥','volcano'],['⏰😴','alarm'],['🔥🚒','firetruck|fire truck'],['🕷️🕸️','spiderweb|web'],['🍋🥤','lemonade'],['🐸👑','frog prince|prince'],
+  ['🌞🕶️','sunglasses'],['🦋🐛','butterfly'],['🧀🐭','mouse'],['🍌🐒','monkey'],['💡🧠','idea'],['🎹🎵','piano'],['🌊🏄','surfing'],['✈️🏝️','vacation|holiday'],['🦉🌙','owl']];
+const normA=s=>s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z]/g,'');
+function emojiGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data,TIME=90;
+    const body=gameShell('Emoji-Rätsel','Welches Wort steckt hinter den Emojis? Tipp es ein und drück Enter. Tab überspringt (kostet 5 Sekunden). Umlaute darfst du auch als ae, oe, ue schreiben.',
+      `<span>Zeit <b id="et">${TIME}</b></span><span>Gelöst <b id="en">0</b></span><span>Punkte <b id="es">0</b></span><span class="rec">Rekord <b>${d.high.emoji||0}</b></span>`);
+    body.innerHTML=`<div class="bigstage idle" id="est"><div class="emo" id="eq">🤔</div><p class="muted" id="eh"></p><div class="membuf" id="eb"><span>…</span></div><p class="muted small" id="em"></p>
+      <button class="btn primary" id="ego">Spiel starten</button><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    let state='ready',left=TIME,pool=[],cur=null,buf='',n=0,score=0,ok=0,err=0,t0=0,shown=0,iv=0;
+    const msg=t=>{$('#em').textContent=t};
+    function next(){if(!pool.length)pool=shuffle([...(isEN()?EMOJI_EN:EMOJI_DE)]);cur=pool.pop();const ans=cur[1].split('|');buf='';shown=performance.now();
+      $('#eq').textContent=cur[0];$('#eh').textContent=`${ans[0][0].toUpperCase()} … · ${ans[0].replace(/\s/g,'').length} Buchstaben`;render()}
+    function render(){$('#eb').innerHTML=buf?esc(buf):'<span>…</span>';$('#en').textContent=n;$('#es').textContent=score}
+    function start(){state='play';left=TIME;n=0;score=0;ok=0;err=0;t0=performance.now();pool=[];$('#est').classList.remove('idle');$('#ego').hidden=true;focusCap();msg('');next();
+      clearInterval(iv);iv=setInterval(()=>{if(!focused||state!=='play')return;left-=.1;$('#et').textContent=Math.max(0,Math.ceil(left));if(left<=0)end()},100)}
+    function submit(){if(!buf.trim())return;const ans=cur[1].split('|');
+      if(ans.some(a=>normA(a)===normA(buf))){n++;const s=(performance.now()-shown)/1000,pts=30+Math.max(0,Math.round(20-s))*2;score+=pts;ok+=buf.length+1;[...buf].forEach(c=>recKey(c,true));
+        Sound.ok();floatText($('#est'),'+'+pts);msg(`Richtig: ${ans[0]}!`);next()}
+      else{err++;Sound.err();Mash.err();bump($('#eb'),'shake');buf='';msg('Nicht ganz. Versuch es nochmal!');render()}}
+    function end(){if(state!=='play')return;state='done';clearInterval(iv);const prev=d.high.emoji||0,rec=score>prev;if(rec)d.high.emoji=score;const secs=(performance.now()-t0)/1000;
+      const info=recordSession('emoji','Emoji-Rätsel',{wpm:ok/5/(Math.max(secs,1)/60),acc:ok+err?ok/(ok+err*5)*100:100,secs,ok,err,typed:ok+err},{chars:ok*2,bonus:n*3});
+      if(rec&&prev){Sound.win();confetti(110)}
+      gameOverModal(rec&&prev?'Neuer Rekord!':'Zeit ist um',[`${n} Rätsel gelöst, ${fmtN(score)} Punkte.`,cur?`Das letzte war: ${cur[0]} = ${cur[1].split('|')[0]}`:''].filter(Boolean),info.xp,()=>emojiGame())}
+    $('#ego').onclick=start;cleanup=()=>clearInterval(iv);
+    setHandler({guard:true,char:ch=>{if(state==='ready'){if(ch===' ')start();return}if(state!=='play')return;if(buf.length<30){buf+=ch;Sound.key();render()}},
+      back:()=>{buf=buf.slice(0,-1);render()},enter:()=>{if(state==='ready')start();else submit()},
+      tab:()=>{if(state!=='play')return;left-=5;msg(`Übersprungen: ${cur[0]} = ${cur[1].split('|')[0]}`);Sound.err();next()},esc:()=>go('games')});
+  });
+}
+
+/* ---------- Tipp-Dungeon (Roguelike) ---------- */
+const DG_MON=[['🐀','Ratte',6],['🦇','Fledermaus',7],['🕷️','Spinne',8],['🐍','Schlange',9],['👺','Goblin',11],['💀','Skelett',12],['🧟','Zombie',13],['👻','Geist',12],['🐺','Wolf',14],['🧌','Troll',18]];
+const DG_BOSS=[['🐉','Drache',40],['👹','Oger',34],['🦂','Riesenskorpion',30],['🧙','Hexenmeister',36]];
+const DG_UP=[
+  {i:'❤️',n:'Robust',d:'+20 maximale Leben, voll geheilt',f:P=>{P.max+=20;P.hp=P.max}},
+  {i:'⚔️',n:'Scharfe Klinge',d:'+30 % Schaden',f:P=>{P.dmg*=1.3}},
+  {i:'🧊',n:'Frostaura',d:'Monster greifen 15 % langsamer an',f:P=>{P.slow*=1.15}},
+  {i:'🧪',n:'Heiltrank',d:'Sofort 40 Leben zurück',f:P=>{P.hp=Math.min(P.max,P.hp+40)}},
+  {i:'🩸',n:'Lebensraub',d:'Jedes besiegte Monster heilt 4 Leben',f:P=>{P.leech+=4}},
+  {i:'🎯',n:'Kritische Treffer',d:'+15 % Chance auf doppelten Schaden',f:P=>{P.crit+=.15}},
+  {i:'🛡️',n:'Schild',d:'Monster machen 20 % weniger Schaden',f:P=>{P.armor*=.8}},
+  {i:'🔥',n:'Kampfrausch',d:'Ab 5 fehlerfreien Wörtern in Folge +50 % Schaden',f:P=>{P.rage=true}}];
+function dungeonGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data,W=plainWords(3,9);
+    const body=gameShell('Tipp-Dungeon','Tippe das Wort über einem Monster, um es anzugreifen. Monster laden ihren Angriff auf – sei schneller! Nach jedem Raum wählst du eine Verbesserung (Taste 1, 2 oder 3). Jeder fünfte Raum hat einen Boss.',
+      `<span>Raum <b id="dr">1</b></span><span>Leben <b id="dh">100</b></span><span>Serie <b id="dc">0</b></span><span class="rec">Rekord <b>${d.high.dungeon||0} Räume</b></span>`);
+    body.innerHTML=`<div class="bigstage idle dg" id="dgs"><div class="dg-mons" id="dgm"></div><div class="dg-me"><span class="dg-av">${esc(d.settings.avatar||'🙂')}</span><span class="hpbar"><i id="dgh" style="width:100%"></i></span><span class="muted small" id="dgi"></span></div>
+      <div class="membuf" id="dgb"><span>…</span></div><p class="muted small" id="dgmsg">Tipp das Wort über einem Monster.</p><button class="btn primary" id="dggo">Abenteuer starten</button><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    let state='ready',P,room=0,mons=[],buf='',ok=0,err=0,kills=0,t0=0,iv=0,picks=[];
+    const msg=t=>{$('#dgmsg').textContent=t};
+    const newWord=()=>{const used=new Set(mons.filter(m=>m.hp>0).map(m=>m.w[0])),maxL=Math.min(9,4+Math.floor(room/2));const c=W.filter(w=>w.length<=maxL&&!used.has(w[0]));return pick(c.length?c:W)};
+    function spawnRoom(){room++;mons=[];const boss=room%5===0,n=boss?1:Math.min(3,1+Math.floor((room-1)/3));
+      for(let i=0;i<n;i++){const [e,nm,hp]=boss?pick(DG_BOSS):pick(DG_MON),mx=Math.round(hp*(1+room*.12)),m={e,nm,boss,hp:mx,max:mx,ch:Math.random()*.4,every:Math.max(2.6,(boss?5:6.5)-room*.15)*P.slow,dmg:(boss?9:4)+room*.8,w:''};mons.push(m);m.w=newWord()}
+      msg(boss?`⚠️ Boss-Raum! Ein ${mons[0].nm} erscheint.`:`Raum ${room}: ${mons.length} ${mons.length===1?'Monster':'Monster'}.`);buf='';render()}
+    const target=()=>buf?mons.findIndex(m=>m.hp>0&&m.w.startsWith(buf)):-1;
+    function render(){const t=target();
+      $('#dgm').innerHTML=mons.map((m,i)=>`<div class="dg-mon${m.hp<=0?' dead':''}${m.boss?' boss':''}${i===t?' tgt':''}"><div class="dg-w">${m.hp>0?(i===t?`<i>${esc(buf)}</i>${esc(m.w.slice(buf.length))}`:esc(m.w)):'✓'}</div>
+        <div class="dg-e">${m.e}</div><span class="hpbar"><i style="width:${Math.max(0,m.hp/m.max*100)}%"></i></span><span class="charge"><i style="width:${m.hp>0?Math.min(100,m.ch*100):0}%"></i></span></div>`).join('');
+      $('#dgb').innerHTML=buf?esc(buf):'<span>…</span>';$('#dh').textContent=Math.max(0,Math.ceil(P.hp));$('#dgh').style.width=Math.max(0,P.hp/P.max*100)+'%';
+      $('#dr').textContent=room;$('#dc').textContent=P.streak;$('#dgi').textContent=`${Math.ceil(P.hp)}/${P.max} Leben · Schaden ×${P.dmg.toFixed(1)}${P.rage?' · 🔥':''}${P.crit?` · 🎯${Math.round(P.crit*100)} %`:''}`}
+    function start(){P={hp:100,max:100,dmg:1,slow:1,leech:0,crit:0,armor:1,rage:false,streak:0};room=0;ok=0;err=0;kills=0;t0=performance.now();state='play';
+      $('#dgs').classList.remove('idle');$('#dggo').hidden=true;focusCap();spawnRoom();
+      clearInterval(iv);iv=setInterval(()=>{if(!focused||state!=='play')return;
+        mons.forEach(m=>{if(m.hp<=0)return;m.ch+=.1/m.every;if(m.ch>=1){m.ch=0;P.hp-=m.dmg*P.armor;P.streak=0;Sound.hurt();bump($('#dgs'),'shake');floatText($('#dgs'),'-'+Math.round(m.dmg*P.armor),'bad')}});
+        if(P.hp<=0)return end();render()},100)}
+    function hit(i){const m=mons[i],crit=Math.random()<P.crit,dmg=m.w.length*1.5*P.dmg*(crit?2:1)*(P.rage&&P.streak>=5?1.5:1);
+      m.hp-=dmg;m.ch=Math.max(0,m.ch-.15);floatText($('#dgs'),(crit?'💥 ':'')+'-'+Math.round(dmg));Sound.ok();
+      if(m.hp<=0){kills++;P.hp=Math.min(P.max,P.hp+P.leech)}else m.w=newWord();
+      buf='';if(mons.every(x=>x.hp<=0))roomDone();render()}
+    function roomDone(){state='pick';picks=shuffle([...DG_UP]).slice(0,3);Sound.win();
+      const m=modal(`<h3>🚪 Raum ${room} geschafft!</h3><p class="muted small">Wähle eine Verbesserung (Taste 1, 2 oder 3):</p><div class="dg-picks">${picks.map((u,i)=>`<button class="dg-pick" data-u="${i}"><b>${i+1}</b><span class="gi">${u.i}</span><div><b>${u.n}</b><span class="muted small">${u.d}</span></div></button>`).join('')}</div>`);
+      const choose=i=>{if(state!=='pick')return;picks[i].f(P);m.remove();state='play';setHandler(H);spawnRoom();focusCap()};
+      $$('[data-u]',m).forEach(b=>b.onclick=()=>choose(+b.dataset.u));
+      setHandler({char:ch=>{if('123'.includes(ch))choose(+ch-1)},esc:()=>go('games')})}
+    function end(){if(state==='done')return;state='done';clearInterval(iv);$$('.modal').forEach(x=>x.remove());const cleared=room-1,prev=d.high.dungeon||0,rec=cleared>prev;if(rec){d.high.dungeon=cleared;if(cleared>=3)newsAdd('dg',{v:cleared})}
+      const secs=(performance.now()-t0)/1000,info=recordSession('dungeon','Tipp-Dungeon',{wpm:ok/5/(Math.max(secs,1)/60),acc:ok+err?ok/(ok+err)*100:100,secs,ok,err,typed:ok+err},{chars:ok,bonus:cleared*6});
+      if(rec&&prev){Sound.win();confetti(110)}
+      gameOverModal(rec&&prev?'Neuer Rekord!':'Im Dungeon gefallen',[`${cleared} ${cleared===1?'Raum':'Räume'} geschafft, ${kills} Monster besiegt.`],info.xp,()=>dungeonGame())}
+    const H={guard:true,char:ch=>{if(state==='ready'){if(ch===' ')start();return}if(state!=='play'||ch===' ')return;
+        const c=ch.toLowerCase(),t0i=target(),nb=buf+c,t=mons.findIndex(m=>m.hp>0&&m.w.startsWith(nb));
+        if(t<0){err++;P.streak=0;if(t0i>=0)recKey(mons[t0i].w[buf.length],false);Sound.err();Mash.err();bump($('#dgb'),'shake');render();return}
+        buf=nb;ok++;recKey(c,true);Sound.key();if(mons[t].w===buf){P.streak++;hit(t)}else render()},
+      back:()=>{if(state==='play'){buf=buf.slice(0,-1);render()}},enter:()=>{if(state==='ready')start()},esc:()=>go('games')};
+    $('#dggo').onclick=start;cleanup=()=>clearInterval(iv);setHandler(H);
+  });
+}
+
+/* ---------- Tipp-Detektiv ---------- */
+const DET_CASES=[
+  {id:'kuchen',t:'Der verschwundene Kuchen',i:'🎂',intro:'In der Bäckerei Krume ist über Nacht der Geburtstagskuchen für Bürgermeisterin Wolf verschwunden. Bäcker Otto ist verzweifelt.',
+   clues:['Auf dem Boden der Backstube sind kleine weiße Pfotenabdrücke aus Mehl.','Die Tür zur Backstube war die ganze Nacht fest abgeschlossen.','Neben dem Hundekorb liegen Kuchenkrümel und ein Klecks Sahne.'],
+   sus:[['Otto','Bäcker Otto','hat den Kuchen gebacken und den Schlüssel'],['Lena','Lehrling Lena','ging abends als Letzte nach Hause'],['Kraus','Herr Kraus','Stammkunde, liebt Sahnetorte'],['Bello','Hund Bello','schläft nachts in der Backstube']],
+   who:'Bello',why:'Die Tür war zu, also war der Täter schon drin. Die Pfotenabdrücke und die Krümel am Hundekorb verraten Bello!'},
+  {id:'museum',t:'Das Rätsel im Museum',i:'🖼️',intro:'Aus dem Stadtmuseum ist das Gemälde „Blaue Stunde“ verschwunden. Es gibt keine Einbruchsspuren.',
+   clues:['Der Dieb kam ohne Gewalt durch die Hintertür, also hatte er einen Schlüssel.','An der Leiter unter dem leeren Rahmen klebt frische blaue Farbe.','Nur im Keller wird gerade gestrichen, und zwar blau.'],
+   sus:[['Weiss','Direktorin Frau Weiß','war an diesem Abend auf einer Gala'],['Karl','Hausmeister Karl','hat alle Schlüssel und streicht den Keller'],['Tom','Besucher Tom','hat das Bild lange angestarrt'],['Jens','Wachmann Jens','hatte in der Nacht Dienst am Haupteingang']],
+   who:'Karl',why:'Er hatte einen Schlüssel für die Hintertür, und die blaue Farbe an der Leiter stammt aus dem Keller, den nur er streicht.'},
+  {id:'minka',t:'Wo ist Katze Minka?',i:'🐈',intro:'Katze Minka ist seit dem Morgen verschwunden. Ihre Besitzerin Mia hat schon überall gesucht.',
+   clues:['Seit heute Morgen steht ein Umzugswagen vor dem Nachbarhaus.','Die Umzugshelfer haben die Kartons offen im Hausflur stehen lassen.','Aus einem Karton im Wagen kommt ein leises Miauen.'],
+   sus:[['Moeller','Umzugsfirma Möller','packt nebenan Kartons ein'],['Paul','Postbote Paul','war um zehn Uhr da'],['Berg','Nachbarin Frau Berg','füttert Minka manchmal'],['Finn','Mias Bruder Finn','ärgert Minka gern']],
+   who:'Moeller',why:'Minka ist in einen offenen Karton geklettert und wurde aus Versehen mit eingeladen. Die Umzugsfirma war es, aber ganz ohne Absicht!'},
+  {id:'tafel',t:'Die Nachricht an der Tafel',i:'🏫',intro:'Am Morgen steht an der Tafel: „Heute keine Hausaufgaben!“ Frau Stein möchte wissen, wer das war.',
+   clues:['Die Schrift ist stark nach links geneigt, wie bei Linkshändern.','Jonas ist der einzige Linkshänder in der Klasse.','An Jonas’ Ärmel klebt noch weißer Kreidestaub.'],
+   sus:[['Mia','Mia','hat Tafeldienst diese Woche'],['Jonas','Jonas','kam heute als Erster in die Klasse'],['Stein','Frau Stein','die Lehrerin selbst'],['Ali','Ali','sitzt direkt neben der Tafel']],
+   who:'Jonas',why:'Nur ein Linkshänder schreibt so schräg, und der Kreidestaub am Ärmel ist der Beweis.'}];
+function detectiveGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data;d.det=d.det||{};
+    const body=gameShell('Tipp-Detektiv','Wähle einen Fall. Tippe jeden Hinweis ab, um den nächsten aufzudecken. Am Ende tippst du den Namen der verdächtigen Person, die es war.',
+      `<span>Gelöst <b>${Object.keys(d.det).length}/${DET_CASES.length}</b></span>`);
+    body.innerHTML=`<div class="det-list">${DET_CASES.map(c=>`<button class="det-case${d.det[c.id]?' done':''}" data-dc="${c.id}"><span class="gi">${c.i}</span><b>${esc(c.t)}</b><span class="muted small">${d.det[c.id]?'✓ gelöst':'ungelöst'}</span></button>`).join('')}</div>`;
+    $$('[data-dc]',body).forEach(b=>b.onclick=()=>detCase(DET_CASES.find(c=>c.id===b.dataset.dc)));
+    setHandler({char(){},esc:()=>go('games')});
+  });
+}
+function detCase(C){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data;
+    const body=gameShell(`${C.i} ${C.t}`,esc(C.intro),`<span>Hinweis <b id="dcn">1</b>/${C.clues.length}</span>`);
+    body.innerHTML=`<div class="det"><div class="det-notes" id="dn"></div><div class="typebox det-type" id="dtb"><div id="dtv"></div><div class="focus-hint">Klicke hier und tippe los</div></div><div id="dsus"></div></div>`;
+    $('#back').onclick=detectiveGame;
+    let ci=0,ok=0,err=0,t0=performance.now(),typer=null,buf='',tries=0;
+    function clue(){$('#dcn').textContent=ci+1;
+      typer=new Typer($('#dtv'),{errMode:()=>'stop',onKey:(ch,good)=>{good?Sound.key():(Sound.err(),bump($('#dtb'),'shake'))},onDone:st=>{ok+=st.ok||0;err+=st.err||0;
+        $('#dn').insertAdjacentHTML('beforeend',`<p>🔎 ${esc(C.clues[ci])}</p>`);Sound.ok();ci++;if(ci<C.clues.length)clue();else accuse()}});
+      typer.load(C.clues[ci]);setHandler({char:ch=>typer.input(ch),esc:detectiveGame})}
+    function accuse(){$('#dtb').hidden=true;
+      $('#dsus').innerHTML=`<h3>Wer war es? Tippe den Namen und drück Enter.</h3><div class="det-sus">${C.sus.map(([k,n,x])=>`<div class="det-s"><b>${esc(n)}</b><span class="muted small">${esc(x)}</span></div>`).join('')}</div><div class="membuf" id="dbf"><span>…</span></div><p class="muted small" id="dm"></p>`;
+      const r=()=>{$('#dbf').innerHTML=buf?esc(buf):'<span>…</span>'};
+      setHandler({char:ch=>{if(buf.length<30){buf+=ch;Sound.key();r()}},back:()=>{buf=buf.slice(0,-1);r()},esc:detectiveGame,enter:()=>{
+        const g=normA(buf);if(!g)return;const hit=C.sus.find(([k,n])=>normA(k)===g||normA(n).includes(g)&&g.length>=3);
+        if(!hit){$('#dm').textContent='Diese Person gibt es in dem Fall nicht.';Sound.err();return}
+        tries++;
+        if(hit[0]!==C.who){$('#dm').textContent=`${hit[1]} war es nicht. ${tries<2?'Lies die Hinweise noch einmal!':''}`;Sound.err();buf='';r();if(tries<2)return;return solve(false)}
+        solve(true)}});}
+    function solve(won){const first=!d.det[C.id];if(won)d.det[C.id]=Date.now();d.high.detective=Object.keys(d.det).length;
+      const secs=(performance.now()-t0)/1000,info=recordSession('detective','Tipp-Detektiv',{wpm:ok/5/(Math.max(secs,1)/60),acc:ok+err?ok/(ok+err)*100:100,secs,ok,err,typed:ok+err},{chars:ok,bonus:won?(first?40:10):0});
+      if(won&&first){Sound.win();confetti(120)}
+      const m=modal(`<h3>${won?'🕵️ Fall gelöst!':'Leider daneben'}</h3><p class="muted">${won?'':`Es war ${esc(C.sus.find(s=>s[0]===C.who)[1])}. `}${esc(C.why)}</p>${info.xp?`<p style="color:var(--caret);font-weight:700">+${info.xp} XP, +${coinsFor(info.xp)} 🪙</p>`:''}
+        <div class="acts"><button class="btn primary" id="dok">Weitere Fälle</button><button class="btn" id="dgb2">Zu den Spielen</button></div>`);
+      $('#dok',m).onclick=detectiveGame;$('#dgb2',m).onclick=()=>go('games');setHandler({char(){},enter:detectiveGame,esc:()=>go('games')})}
+    clue();
+  });
+}
+
+/* ---------- Tastatur-Klavier ---------- */
+const PIANO_KEYS=[['a','C',261.63],['s','D',293.66],['d','E',329.63],['f','F',349.23],['g','G',392],['h','A',440],['j','H',493.88],['k','C',523.25],['l','D',587.33]];
+const PIANO_SONGS=[
+  ['Alle meine Entchen','asdfgghhhhghhhhgffffddssssa'],
+  ['Hänschen klein','gddfssasdfggggddfssadgga'],
+  ['Bruder Jakob','asdaasdadfgdfgghgfdaghgfdaagaaga'],
+  ['Ode an die Freude','ddfggfdsaasddssddfggfdsaasdsaa'],
+  ['Morgen kommt der Weihnachtsmann','aagghhgffddssaggffddsggffddsaagghhgffddssa'],
+  ['Kuckuck, Kuckuck','gdgdfdsasdfsdfgdgdfdsasdfsa']];
+function pianoSetup(){
+  const d=Store.data;
+  const m=modal(`<h3>🎹 Tastatur-Klavier</h3><p class="muted small">Die Grundreihe A S D F G H J K L ist deine Klaviatur. Tippe die angezeigten Buchstaben, und die Melodie erklingt. Ton an!</p>
+    <div class="track-list">${PIANO_SONGS.map((s,i)=>`<button class="btn" data-ps="${i}"><b>${esc(s[0])}</b><span class="muted small">${s[1].length} Töne${(d.pianoBest||{})[i]?` · Bestwert ${d.pianoBest[i]} Punkte`:''}</span></button>`).join('')}</div>
+    <div class="acts"><button class="btn ghost" id="pc">Abbrechen</button></div>`);
+  $$('[data-ps]',m).forEach(b=>b.onclick=()=>{m.remove();pianoGame(+b.dataset.ps)});$('#pc',m).onclick=()=>m.remove();
+}
+function pianoGame(si){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data,[title,notes]=PIANO_SONGS[si];
+    const body=gameShell(`🎹 ${title}`,'Tippe die markierten Buchstaben. Fehlerfreie Serien bringen Bonuspunkte.',
+      `<span>Ton <b id="pn">0</b>/${notes.length}</span><span>Punkte <b id="pp">0</b></span><span>Fehler <b id="pe">0</b></span><span class="rec">Rekord <b>${d.high.piano||0}</b></span>`);
+    body.innerHTML=`<div class="bigstage piano-stage"><div class="p-notes" id="pnt"></div><div class="piano" id="pk">${PIANO_KEYS.map(([k,n])=>`<div class="pkey" data-k="${k}"><b>${n}</b><span>${k.toUpperCase()}</span></div>`).join('')}</div><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    let i=0,pts=0,err=0,streak=0,t0=0;
+    function render(){$('#pnt').innerHTML=[...notes].map((c,j)=>`<span class="${j<i?'ok':j===i?'cur':''}">${c.toUpperCase()}</span>`).slice(Math.max(0,i-6),i+14).join('');
+      $$('.pkey',body).forEach(k=>k.classList.toggle('next',k.dataset.k===notes[i]));$('#pn').textContent=i;$('#pp').textContent=pts;$('#pe').textContent=err}
+    function play(k){const p=PIANO_KEYS.find(x=>x[0]===k);if(!p)return;Sound.init&&Sound.init();Sound.tone(p[2],.45,'triangle',.14);const el=$(`.pkey[data-k="${k}"]`,body);if(el){el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit')}}
+    function onChar(ch){const c=ch.toLowerCase();if(i>=notes.length)return;if(!t0)t0=performance.now();
+      if(c===notes[i]){play(c);streak++;pts+=10+Math.min(10,Math.floor(streak/5))*2;recKey(c,true);i++;render();if(i>=notes.length)done()}
+      else{err++;streak=0;pts=Math.max(0,pts-5);recKey(notes[i],false);Sound.err();bump($('#pnt'),'shake');render()}}
+    function done(){const prev=d.high.piano||0,rec=pts>prev;if(rec)d.high.piano=pts;d.pianoBest=d.pianoBest||{};d.pianoBest[si]=Math.max(d.pianoBest[si]||0,pts);
+      const secs=(performance.now()-t0)/1000,info=recordSession('piano','Tastatur-Klavier',{wpm:notes.length/5/(Math.max(secs,1)/60),acc:notes.length/(notes.length+err)*100,secs,ok:notes.length,err,typed:notes.length+err},{chars:notes.length*2,bonus:err?5:20});
+      if(!err){Sound.win();confetti(100)}
+      setTimeout(()=>gameOverModal(err?'Melodie gespielt':'Fehlerfrei gespielt! 🎶',[`${fmtN(pts)} Punkte, ${err} ${err===1?'Fehler':'Fehler'}.`],info.xp,()=>pianoGame(si)),500)}
+    render();setHandler({guard:true,char:onChar,esc:()=>go('games')});
+  });
+}
+
 /* ---------- Galgenraten ---------- */
 const HANG_PARTS=['<line x1="115" y1="15" x2="115" y2="40"/>','<circle cx="115" cy="58" r="18"/>','<line x1="115" y1="76" x2="115" y2="130"/>',
   '<line x1="115" y1="92" x2="92" y2="114"/>','<line x1="115" y1="92" x2="138" y2="114"/>','<line x1="115" y1="130" x2="95" y2="166"/>','<line x1="115" y1="130" x2="135" y2="166"/>'];
@@ -4456,7 +4844,7 @@ function hangmanGame(){
 
 /* ---------- Views: Achievements & Level ---------- */
 /* ---------- Views: Stats ---------- */
-const MODE_LABEL={blind:'Blindflug',chain:'Wortkette',typo:'Fehlerjagd',tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
+const MODE_LABEL={tippdle:'Tippdle',dungeon:'Tipp-Dungeon',abc:'Alphabet-Sprint',emoji:'Emoji-Rätsel',detective:'Tipp-Detektiv',piano:'Tastatur-Klavier',blind:'Blindflug',chain:'Wortkette',typo:'Fehlerjagd',tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
 function chartSVG(h){
   const pts=h.slice(-40);if(pts.length<2)return '<p class="muted">Nach zwei Übungen erscheint hier dein Verlauf.</p>';
   const W=680,H=220,PL=34,PR=10,PT=12,PB=26;const max=Math.ceil(Math.max(20,...pts.map(p=>p.wpm))*1.15/10)*10;
@@ -5164,15 +5552,17 @@ function wqModal(){
   const close=()=>{m.remove();if(!activity)setHandler(null)};$('#wqok',m).onclick=close;setHandler({char(){},enter:close,esc:close})}
 
 /* ---------- Meisterschaft pro Spiel ---------- */
+/* Spiele, bei denen ein kleinerer Wert besser ist (Zeit in ms) */
+const LOWER_BETTER=new Set(['blitz','abc']);
 const MASTERY=[['Bronze','🥉',25],['Silber','🥈',50],['Gold','🥇',100],['Diamant','💎',200]];
 const mBase=x=>[.2,.5,1,2].map(f=>Math.round(x*f/10)*10);
 const MASTERY_T={timed:[25,40,60,80],race:[25,40,60,80],ghost:[1,2,4,5],duel:[25,40,55,70],ladder:[25,40,55,70],sudden:[100,250,500,900],bomb:[3,8,14,20],online:[1,5,15,30],
   rain:mBase(1000),blaster:mBase(1000),zombie:mBase(1000),boss:[1,2,4,5],tower:mBase(1000),balloon:mBase(1000),runner:mBase(1000),rhythm:mBase(1000),mole:mBase(1500),
-  blitz:[900,750,600,480],memory:[5,7,10,13],anagram:mBase(500),gaps:mBase(500),kitchen:mBase(800),puzzle:mBase(500),math:mBase(300),hangman:[2,5,10,16],story:[1,2,3],code:[20,30,45,60],blind:[20,35,50,65],chain:mBase(600),typo:mBase(400)};
+  blitz:[900,750,600,480],memory:[5,7,10,13],anagram:mBase(500),gaps:mBase(500),kitchen:mBase(800),puzzle:mBase(500),math:mBase(300),hangman:[2,5,10,16],story:[1,2,3],code:[20,30,45,60],blind:[20,35,50,65],chain:mBase(600),typo:mBase(400),tippdle:[1,5,15,40],dungeon:[3,6,10,15],abc:[6000,4500,3500,2800],emoji:mBase(500),detective:[1,2,3,4],piano:mBase(600)};
 const mtOf=g=>MASTERY_T[g.id.startsWith('code:')?'code':g.id];
 /* Blitztasten: weniger ms ist besser */
-function masteryTier(g,d){const t=mtOf(g);if(!t)return 0;const v=gameScore(g,d),low=g.id==='blitz';return t.filter(x=>low?v>0&&v<=x:v>=x).length}
-function masteryNext(g,d){const t=mtOf(g),i=masteryTier(g,d);if(!t||i>=t.length)return '';return `${MASTERY[i][0]} ab ${g.id==='blitz'?`unter ${t[i]} ms`:scoreText(g,t[i])}`}
+function masteryTier(g,d){const t=mtOf(g);if(!t)return 0;const v=gameScore(g,d),low=LOWER_BETTER.has(g.id);return t.filter(x=>low?v>0&&v<=x:v>=x).length}
+function masteryNext(g,d){const t=mtOf(g),i=masteryTier(g,d);if(!t||i>=t.length)return '';return `${MASTERY[i][0]} ab ${g.id==='blitz'?`unter ${t[i]} ms`:g.id==='abc'?`unter ${(t[i]/1000).toFixed(1)} s`:scoreText(g,t[i])}`}
 function checkMastery(){
   const d=Store.data,got=[];d.mastery=d.mastery||{};
   GAMES.forEach(g=>{const t=masteryTier(g,d),p=d.mastery[g.id]||0;if(t>p){for(let i=p;i<t;i++)d.coins+=MASTERY[i][2];d.mastery[g.id]=t;got.push([g,t])}});
@@ -5180,7 +5570,7 @@ function checkMastery(){
 const medalCount=()=>Object.values(Store.data.mastery||{}).reduce((a,b)=>a+b,0);
 /* Einen Rekordwert eines Spiels lesbar machen, z. B. „1.200 Punkte“ oder „45 WPM“ */
 function scoreText(g,s){
-  if(g.id==='ghost')return `${s}/5 Strecken`;if(g.id==='story')return `${s}/3 Enden`;if(g.id==='blitz')return `${s} ms`;
+  if(g.id==='ghost')return `${s}/5 Strecken`;if(g.id==='story')return `${s}/3 Enden`;if(g.id==='blitz')return `${s} ms`;if(g.id==='abc')return `${(s/1000).toFixed(2)} s`;
   try{return g.rec({high:new Proxy({},{get:()=>s}),ghosts:{},story:{},daily:{}})}catch(e){return fmtN(s)}}
 
 /* ---------- Prestige ---------- */
@@ -5190,7 +5580,7 @@ function doPrestige(){
   const m=modal(`<h3>⭐ Prestige ${n} starten?</h3><p class="muted">Dein Level beginnt wieder bei 1. Münzen, Shop-Gegenstände, Erfolge, Rekorde und deine Liga bleiben erhalten. Dafür bekommst du einen Prestige-Stern neben deinem Level und ${fmtN(PRESTIGE_COINS)} 🪙.</p>
     <div class="acts"><button class="btn primary" id="pyes">Prestige starten</button><button class="btn ghost" id="pno">Abbrechen</button></div>`);
   const close=()=>{m.remove();setHandler(null)};$('#pno',m).onclick=close;
-  $('#pyes',m).onclick=()=>{d.prestige=n;d.prestigeXp=(d.prestigeXp||0)+d.xp;d.xp=0;d.coins+=PRESTIGE_COINS;Store.save();refreshMe(true);close();
+  $('#pyes',m).onclick=()=>{d.prestige=n;newsAdd('p',{v:n});d.prestigeXp=(d.prestigeXp||0)+d.xp;d.xp=0;d.coins+=PRESTIGE_COINS;Store.save();refreshMe(true);close();
     Sound.level();confetti(200);toast('⭐',`Prestige ${n}`,`Auf ein Neues ab Level 1 (+${fmtN(PRESTIGE_COINS)} 🪙)`);go('ach')};
   setHandler({char(){},enter:()=>$('#pyes',m).click(),esc:close})}
 
@@ -5203,7 +5593,7 @@ function tourResult(st,cfg){
   const d=Store.data,k=cfg.tourK,valid=st.progress>=1&&st.acc>=90&&st.wpm<=250;   // über 250 WPM ist kein Mensch schnell
   if(d.tour&&d.tour.k!==k){d.tourPrev={...d.tour};d.tour=null}
   const prev=d.tour,better=valid&&(!prev||st.wpm>prev.wpm);
-  if(better)d.tour={k,wpm:Math.round(st.wpm),acc:Math.round(st.acc*10)/10};
+  if(better){d.tour={k,wpm:Math.round(st.wpm),acc:Math.round(st.acc*10)/10};newsAdd('tour',{v:d.tour.wpm})}
   return{valid,better,first:better&&!prev}}
 const tourMine=()=>{const t=Store.data.tour;return t&&t.k===weekId()?t:null};
 async function tourRows(k,mine){
@@ -5319,7 +5709,7 @@ function chAnswers(){const now=Date.now(),o={};Object.entries(Store.data.chAns||
 function chIncoming(){const me=myUid(),now=Date.now(),ans=Store.data.chAns||{};if(!me)return [];
   return Social.friends.flatMap(f=>(f.ch||[]).filter(c=>c&&c.to===me&&now-c.t<CH_DAYS*864e5&&!ans[c.id]&&GAMES.some(g=>g.id===c.g)).map(c=>({...c,from:f})))}
 const chGame=id=>GAMES.find(g=>g.id===id);
-const chBeats=(g,mine,theirs)=>g.id==='blitz'?mine>0&&mine<theirs:mine>theirs;
+const chBeats=(g,mine,theirs)=>LOWER_BETTER.has(g.id)?mine>0&&mine<theirs:mine>theirs;
 const chLeft=c=>{const dd=Math.ceil((c.t+CH_DAYS*864e5-Date.now())/864e5);return dd<=1?'nur noch heute':`noch ${dd} Tage`};
 /* Nach einer Runde: Hat der neue Rekord eine offene Herausforderung in diesem Spiel geschlagen? */
 function chCheck(mode,extra){
@@ -5358,6 +5748,12 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-23.5',d:'23.09.2026',items:[
+    '🟩 Tippdle: das tägliche Worträtsel – teile dein Ergebnis!',
+    '🗡️ Tipp-Dungeon: kämpf dich durch Räume voller Monster und sammle Verbesserungen',
+    '🔤 Alphabet-Sprint mit Weltrangliste · 😀 Emoji-Rätsel · 🕵️ Tipp-Detektiv · 🎹 Tastatur-Klavier',
+    '📰 Neuigkeiten unter „Freunde“: sieh, was deine Freunde geschafft haben, und reagiere darauf',
+    '✨ Goldene Taste: beim Üben leuchtet manchmal ein Buchstabe golden – triff ihn für Bonus-Münzen']},
   {v:'2026-09-23.4',d:'23.09.2026',items:[
     '👏 Reaktionen: schick Freunden 👏 🔥 😂 💪 😮 ❤️ (auf der Seite eines Freundes)',
     '🏆 Team-Liga: alle Teams kämpfen jede Woche um Platz 1 – die Top 3 bekommen Münzen',
@@ -5487,19 +5883,47 @@ const agoShort=t=>{const m=Math.round((Date.now()-t)/6e4);if(m<1)return 'gerade 
 function rxOutgoing(){const now=Date.now();return (Store.data.rxOut||[]).filter(r=>now-r.t<RX_DAYS*864e5).slice(-20)}
 function rxIncoming(){const me=myUid(),now=Date.now();if(!me)return [];
   return Social.friends.flatMap(f=>(f.rx||[]).filter(r=>r&&r.to===me&&now-r.t<RX_DAYS*864e5&&RX.includes(r.e)).map(r=>({...r,from:f}))).sort((a,b)=>b.t-a.t)}
-function rxSend(f,e){
-  const d=Store.data,now=Date.now(),last=(d.rxOut||[]).filter(r=>r.to===f.uid).pop();
+function rxSend(f,e,ref){
+  const d=Store.data,now=Date.now(),last=(d.rxOut||[]).filter(r=>r.to===f.uid&&(r.ref||'')===(ref||'')).pop();
+  if(ref&&(d.rxOut||[]).some(r=>r.ref===ref&&r.e===e))return;   // dieselbe Reaktion nur einmal pro Neuigkeit
   if(last&&now-last.t<8000){toast(e,'Kurz warten','Du hast gerade erst reagiert.');return}
-  d.rxOut=(d.rxOut||[]).concat({id:now.toString(36)+rnd(10,99),to:f.uid,e,t:now}).slice(-20);Store.save();Store.push();
-  toast(e,`An ${f.name} geschickt`,'');Sound.ok()}
+  d.rxOut=(d.rxOut||[]).concat({id:now.toString(36)+rnd(10,99),to:f.uid,e,t:now,...(ref?{ref}:{})}).slice(-20);Store.save();Store.push();
+  toast(e,`An ${f.name} geschickt`,'');Sound.ok();if(ref&&currentTab==='friends')renderFriendsLive()}
 function rxNotify(){
   const d=Store.data;d.rxSeen=d.rxSeen||[];let n=0;
-  rxIncoming().forEach(r=>{if(d.rxSeen.includes(r.id))return;d.rxSeen.push(r.id);n++;if(!activity)toast(r.e,`${r.from.name} hat dir ${r.e} geschickt`,'')});
+  rxIncoming().forEach(r=>{if(d.rxSeen.includes(r.id))return;d.rxSeen.push(r.id);n++;if(activity)return;
+    const it=r.ref&&(d.news||[]).find(x=>x.id===r.ref);toast(r.e,it?`${r.from.name} reagiert mit ${r.e}`:`${r.from.name} hat dir ${r.e} geschickt`,it?`auf: ${newsText(it)}`:'')});
   if(n){d.rxSeen=d.rxSeen.slice(-80);Store.save()}}
-const rxBar=(uid,set=RX)=>`<div class="rxbar">${set.map(e=>`<button class="rxb" data-rx="${e}" data-rxu="${esc(uid)}" title="${e} schicken" aria-label="${e} schicken">${e}</button>`).join('')}</div>`;
+const rxBar=(uid,set=RX,ref)=>`<div class="rxbar">${set.map(e=>`<button class="rxb" data-rx="${e}" data-rxu="${esc(uid)}"${ref?` data-rxr="${esc(ref)}"`:''} title="${e} schicken" aria-label="${e} schicken">${e}</button>`).join('')}</div>`;
+
+/* ---------- Freunde-Neuigkeiten: was deine Freunde erreicht haben ---------- */
+const NEWS_DAYS=7;
+function newsAdd(k,data){const d=Store.data,t=Date.now();d.news=(d.news||[]).concat({id:t.toString(36)+rnd(10,99),k,t,...data}).slice(-15)}
+function newsList(){const now=Date.now();return (Store.data.news||[]).filter(n=>now-n.t<NEWS_DAYS*864e5)}
+function newsText(n){
+  const g=n.g&&GAMES.find(x=>x.id===n.g),a=n.a&&ACH.find(x=>x.id===n.a);
+  switch(n.k){
+    case 'm':return g&&MASTERY[n.v-1]?`${MASTERY[n.v-1][1]} ${MASTERY[n.v-1][0]} in ${g.n}`:'Neue Medaille';
+    case 'lv':return `⬆️ Level ${n.v} erreicht`;
+    case 'a':return a?`${a.i} Erfolg „${a.n}“`:'🏆 Neuer Erfolg';
+    case 'p':return `⭐ Prestige ${n.v} gestartet`;
+    case 'wq':return '🎯 Alle Wochenaufgaben geschafft';
+    case 'tour':return `🏆 ${n.v} WPM im Wochen-Turnier`;
+    case 'td':return `🟩 Tippdle in ${n.v}/6 gelöst`;
+    case 'dg':return `🗡️ ${n.v} Räume im Tipp-Dungeon`;
+    case 'abc':return `🔤 Alphabet in ${(n.v/1000).toFixed(2).replace('.',',')} s`;
+    default:return '✨ Etwas Neues geschafft'}}
+function newsFeed(){const now=Date.now();
+  return Social.friends.flatMap(f=>(f.news||[]).filter(n=>n&&n.id&&now-n.t<NEWS_DAYS*864e5).map(n=>({...n,from:f}))).sort((a,b)=>b.t-a.t).slice(0,15)}
+function newsPanel(){
+  const items=newsFeed(),mine=new Set(rxOutgoing().filter(r=>r.ref).map(r=>r.ref+'|'+r.e));
+  return `<div class="fr-list-head"><h3>Neuigkeiten</h3><span class="muted small">Was deine Freunde erreicht haben</span></div>
+    ${items.length?items.map(n=>`<div class="news-row">${fAva(n.from)}<div class="nm"><b>${esc(n.from.name)}</b> <span>${esc(newsText(n))}</span><small class="muted">${agoShort(n.t)}</small></div>
+      <div class="rxbar">${['👏','🔥','😮'].map(e=>`<button class="rxb${mine.has(n.id+'|'+e)?' on':''}" data-rx="${e}" data-rxu="${esc(n.from.uid)}" data-rxr="${esc(n.id)}" title="${e} schicken">${e}</button>`).join('')}</div></div>`).join('')
+      :'<p class="muted small">Noch nichts Neues. Sobald deine Freunde Medaillen holen, Level aufsteigen oder Rekorde brechen, siehst du es hier.</p>'}`}
 function rxPanel(){const inc=rxIncoming().slice(0,5);if(!inc.length)return '';
   return `<div class="panel rx-panel"><h3>Reaktionen</h3>${inc.map(r=>`<div class="fr-u">${fAva(r.from)}<div class="nm"><b>${esc(r.from.name)} <span class="rxe">${r.e}</span></b><span>${agoShort(r.t)}</span></div>${rxBar(r.from.uid,['👏','🔥','😂'])}</div>`).join('')}</div>`}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-rx]');if(!b)return;const f=Social.friends.find(x=>x.uid===b.dataset.rxu);if(f)rxSend(f,b.dataset.rx)});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-rx]');if(!b)return;const f=Social.friends.find(x=>x.uid===b.dataset.rxu);if(f)rxSend(f,b.dataset.rx,b.dataset.rxr)});
 
 /* ---------- Team-Liga: alle Teams nach XP dieser Woche ---------- */
 const TL_PRIZE=[500,300,200];
@@ -5699,7 +6123,7 @@ function publicSummary(){
     team:(d.team&&d.team.id)||'',teamName:(d.team&&d.team.name)||'',
     tourKey:(d.tour&&d.tour.k)||'',tour:d.tour?{wpm:d.tour.wpm,acc:d.tour.acc}:{},
     tourPrevKey:(d.tourPrev&&d.tourPrev.k)||'',tourPrev:d.tourPrev?{wpm:d.tourPrev.wpm,acc:d.tourPrev.acc}:{},
-    ch:chOutgoing(),chr:chAnswers(),rx:rxOutgoing()
+    ch:chOutgoing(),chr:chAnswers(),rx:rxOutgoing(),news:newsList(),abc:(d.high&&d.high.abc&&d.high.abc>=1500)?d.high.abc:0
   };
 }
 
@@ -5753,7 +6177,7 @@ function viewFriends(){
         </div>
         <div class="fr-side" id="frreq"></div>
       </div>
-      <div class="panel" id="frlist"></div>
+      <div class="fr-main"><div class="panel" id="frlist"></div><div class="panel" id="frnews"></div></div>
     </div>`;
   tabs();
   const q=$('#frq'),run=()=>frSearch(q.value);
@@ -5808,6 +6232,7 @@ function renderFriendsLive(){
         ${cols.map(([k,,f])=>`<span class="num${k===friendSort?' lead':''}">${f(p)}</span>`).join('')}
         <span class="go">${p.me?'':'›'}</span></${tag}>`}).join('')}`;
   $$('#frsort button').forEach(b=>b.onclick=()=>{friendSort=b.dataset.fs;renderFriendsLive()});
+  const nw=$('#frnews');if(nw)nw.innerHTML=newsPanel();
 }
 
 /* Detailansicht: du gegen einen Freund */
@@ -5829,7 +6254,7 @@ function viewFriend(f){
     ['⌨️','Anschläge',mine.strokes,st.strokes,loc],
     [LEAGUES[d.league.idx][1],'Liga-XP diese Runde',mine.league.lp,leagueLpOf(st),loc]
   ].map(([i,n,a,b,fmt])=>({i,n,a:+a||0,b:+b||0,fmt:fmt||(x=>+x||0),w:cmpW(a,b)}));
-  const games=GAMES.map(g=>({i:g.i,n:g.n,a:safeRec(g,d),b:safeRec(g,fd),w:cmpW(gameScore(g,d),gameScore(g,fd),g.id==='blitz')}));
+  const games=GAMES.map(g=>({i:g.i,n:g.n,a:safeRec(g,d),b:safeRec(g,fd),w:cmpW(gameScore(g,d),gameScore(g,fd),LOWER_BETTER.has(g.id))}));
   const lessons=LESSONS.map((l,ix)=>{const a=d.lessons[l.id]||{},b=fd.lessons[l.id]||{};
     return{n:`${ix+1}. ${l.t}`,a,b,w:cmpW((a.stars||0)*1000+(a.wpm||0),(b.stars||0)*1000+(b.wpm||0))}});
   const tally=[...ov,...games,...lessons],W=tally.filter(x=>x.w>0).length,Lz=tally.filter(x=>x.w<0).length;
