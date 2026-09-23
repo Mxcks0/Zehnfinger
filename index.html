@@ -77,7 +77,8 @@
       const la = d.lastActive && typeof d.lastActive.toMillis === 'function' ? d.lastActive.toMillis() : 0;
       return { uid: snap.id, name: d.name || 'Spieler', avatar: d.avatar || '🙂', frame: d.frame || 'none',
                title: d.title || '', level: d.level || 1, stats: d.stats || {}, lastActive: la,
-               nameFx: d.nameFx || 'none', car: d.car || '🚗' };
+               nameFx: d.nameFx || 'none', car: d.car || '🚗', prestige: d.prestige || 0,
+               team: d.team || '', teamName: d.teamName || '', ch: Array.isArray(d.ch) ? d.ch : [], chr: d.chr || {} };
     };
     const meRef = () => doc(db, 'players', auth.currentUser.uid);
 
@@ -119,6 +120,24 @@
       const snap = await getCountFromServer(query(collection(db, 'players'), where('seen', '>=', since)));
       return snap.data().count;
     };
+
+    /* ---------- Teams, Wochen-Turnier, Einladungen ----------
+       Alles steht in den öffentlichen players/<uid>-Dokumenten, abgefragt über einfache Gleichheits-Filter. */
+    const pl = col => getDocs(query(collection(db, 'players'), ...col));
+    window.fbTeam = {
+      members: async id => (await pl([where('team', '==', id), limit(20)])).docs.map(plain)
+    };
+    window.fbTour = {
+      // Alle Ergebnisse einer Turnierwoche: aktuelle Einträge und solche, die schon in die Vorwoche gerutscht sind
+      async board(k){
+        const [a, b] = await Promise.all([pl([where('tourKey', '==', k), limit(300)]), pl([where('tourPrevKey', '==', k), limit(300)])]);
+        const rows = new Map();
+        a.docs.forEach(s => { const d = s.data(), t = d.tour || {}; rows.set(s.id, { ...plain(s), wpm: t.wpm || 0, acc: t.acc || 0 }) });
+        b.docs.forEach(s => { const d = s.data(), t = d.tourPrev || {}; if(!rows.has(s.id)) rows.set(s.id, { ...plain(s), wpm: t.wpm || 0, acc: t.acc || 0 }) });
+        return [...rows.values()].filter(r => r.wpm > 0).sort((x, y) => y.wpm - x.wpm || y.acc - x.acc);
+      }
+    };
+    window.fbInvites = async () => (await pl([where('refBy', '==', auth.currentUser.uid), limit(100)])).docs.map(plain);
 
     window.fbFriends = {
       async search(q){
@@ -250,16 +269,22 @@
           pendingName = name;
           const cred = await createUserWithEmailAndPassword(auth, email, pass);
           await updateProfile(cred.user, { displayName: name });
-          // Spielerprofil in Firestore anlegen
+          // Spielerprofil in Firestore anlegen. Kam der Spieler über einen Einladungslink, wird der
+          // Einladende vermerkt und bekommt direkt eine Freundschaftsanfrage.
+          let ref = '';
+          try{ ref = localStorage.getItem('zf-ref') || '' }catch(e){}
+          if(ref === cred.user.uid) ref = '';
           await setDoc(doc(db, 'players', cred.user.uid), {
             name: name,
             nameLower: name.toLowerCase(),
             level: 1,
-            friends: [],
+            friends: ref ? [ref] : [],
             declined: [],
+            ...(ref ? { refBy: ref } : {}),
             createdAt: serverTimestamp(),
             lastActive: serverTimestamp()
           }, { merge: true });
+          if(ref){ window.zfRefUsed = ref; try{ localStorage.removeItem('zf-ref') }catch(e){} }
           say('Account erstellt – los geht\'s!','ok');
         } else {
           const cred = await signInWithEmailAndPassword(auth, email, pass);
@@ -289,6 +314,12 @@
       s.classList.add('out');
       setTimeout(() => s.remove(), 300);
     }
+
+    // Einladungslink (?ref=<uid>) merken, bis sich jemand registriert
+    try{
+      const r = new URLSearchParams(location.search).get('ref');
+      if(r && /^[A-Za-z0-9]{10,40}$/.test(r)) localStorage.setItem('zf-ref', r);
+    }catch(e){}
 
     document.addEventListener('DOMContentLoaded', () => {
       grab();
@@ -1958,6 +1989,66 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .boss .avatar{font-size:min(72px,9vh)}
 .kitchen{min-height:min(320px,50vh);padding:16px}
 @media (max-height:720px){.tview{height:calc(1.9em * min(var(--lines,3),3))}.hands{max-height:14vh}}
+/* ---- Langzeit: Wochenaufgaben, Turnier, Meisterschaft, Prestige, Teams, Einladen, Herausforderungen ---- */
+.wq-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px}
+.wq-h h3{margin:0}
+.wq-list{display:grid;gap:8px}
+.wq-row{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2)}
+.wq-row.ok{border-color:color-mix(in srgb,var(--good) 55%,var(--line))}
+.wq-row.bonus{border-style:dashed}
+.wq-i{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:var(--surface)}
+.wq-row.ok .wq-i{background:color-mix(in srgb,var(--good) 22%,var(--surface));color:var(--good);font-weight:800}
+.wq-t{display:grid;gap:5px;min-width:0}
+.wq-t b{font-size:14px;line-height:1.3}
+.wq-bar,.tg-bar{display:block;height:6px;border-radius:3px;background:var(--surface);overflow:hidden}
+.wq-bar i,.tg-bar i{display:block;height:100%;border-radius:3px;background:var(--caret);transition:width .5s}
+.wq-row.ok .wq-bar i,.tg-bar.ok i{background:var(--good)}
+.wq-v{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.wq-row.ok .wq-v{color:var(--good)}
+.tg-bar{height:8px;border-radius:4px;background:var(--surface2);margin-top:4px}
+.tb-list{display:grid;gap:2px;max-height:min(52vh,440px);overflow:auto}
+.tb-prize{margin:10px 0 0}
+/* Spiele: drei Karten oben nebeneinander */
+.today-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+.today-row .today{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"i t g" "i e g";gap:2px 12px;align-items:center}
+.today-row .today .gi{grid-area:i}.today-row .today .tt{grid-area:t;min-width:0}.today-row .today em{grid-area:e;font-size:13px}.today-row .today .go{grid-area:g}
+.today-row .today .tt b{font-size:16px}
+.today.tour-hero{border-color:var(--f4);background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--f4) 16%,transparent),transparent 60%),var(--surface)}
+.today.tour-hero em{color:var(--f4)}
+.today.tour-hero .go{background:var(--f4);color:#2a1604}
+@media (max-width:900px){.today-row{grid-template-columns:1fr}}
+.gmed{margin-left:6px;font-size:14px}
+/* Prestige */
+.lvnum{position:relative}
+.pst{position:absolute;right:-8px;bottom:-8px;font-size:13px;font-weight:800;letter-spacing:0;padding:3px 8px;border-radius:999px;background:var(--surface);color:var(--caret);border:1px solid var(--caret)}
+/* Freunde: Reiter */
+.fr-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.fr-head .ph{margin:0}
+.seg button .tbadge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;font-weight:800;font-style:normal;line-height:1;vertical-align:1px}
+/* Teams */
+.team-empty,.inv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.team-empty .fr-note{grid-column:1/-1;margin:0}
+.team{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start}
+.team-top{display:flex;align-items:center;gap:16px}
+.team-top .tt{flex:1;min-width:0}
+.team-top h2{margin:0;font-size:22px}
+.team-top p{margin:2px 0 0}
+.team-goal{grid-column:1}
+.team #tmem{grid-column:2;grid-row:1/span 2}
+.team #tmem h3{margin:0 0 6px}
+.tcode{font-family:var(--mono);letter-spacing:.12em;color:var(--text)}
+.tcode-in{text-transform:uppercase;font-family:var(--mono);letter-spacing:.12em}
+/* Herausforderungen */
+.ch-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;max-height:min(52vh,420px);overflow:auto;margin:6px 0 4px}
+.ch-g{font:inherit;color:var(--text);text-align:left;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;display:grid;gap:2px}
+.ch-g:hover{border-color:var(--caret)}
+.ch-g .gi{width:30px;height:30px;font-size:17px;border-radius:9px;margin-bottom:4px}
+.ch-g b{font-size:14px}
+.ch-g em{font-style:normal;font-size:12px;color:var(--caret)}
+.ch-panel{border-color:color-mix(in srgb,var(--f5) 45%,var(--line))}
+.ch-panel h3{margin-top:0}
+.ch-panel .fr-u .nm b{white-space:normal;overflow:visible}
+@media (max-width:760px){.team-empty,.inv-grid,.team{grid-template-columns:1fr}.team #tmem,.team-goal{grid-column:auto;grid-row:auto}.fr-head .seg{width:100%;flex-wrap:nowrap}.fr-head .seg button{flex:1;padding:8px 4px;font-size:14px;white-space:nowrap}}
 </style>
 </head>
 <body class="locked">
@@ -2485,7 +2576,7 @@ const nextTitle=lv=>TITLES.find(t=>t[0]>lv);
 const countStars=(d,n)=>LESSONS.filter(l=>((d.lessons[l.id]||{}).stars||0)>=n).length;
 const goalDays=d=>Object.values(d.days).filter(v=>v>=d.settings.goal*60).length;
 function streak(d){const g=d.settings.goal*60;let s=0;const dt=new Date();if((d.days[dayKey(dt)]||0)<g)dt.setDate(dt.getDate()-1);while((d.days[dayKey(dt)]||0)>=g){s++;dt.setDate(dt.getDate()-1)}return s}
-const TYPING=['lesson','free','sixty','timed','race','sudden','ghost','daily','code','ladder','duel','online'];
+const TYPING=['lesson','free','sixty','timed','race','sudden','ghost','daily','code','ladder','duel','online','tour'];
 const isTyping=c=>c&&TYPING.includes(c.mode);
 const ACH=[
  {id:'first',i:'⌨️',n:'Erste Schritte',d:'Schließe deine erste Übung ab.',c:d=>d.count>=1},
@@ -2574,6 +2665,8 @@ function recordSession(mode,label,st,extra={}){
   d.xp=(d.xp||0)+xp;const s=streak(d);d.bestStreak=Math.max(d.bestStreak||0,s);
   const newAch=checkAch(Object.assign({mode,label,st},extra));
   if(newAch.length){d.xp+=newAch.length*20;xp+=newAch.length*20}
+  wkAdd(xp);
+  const mast=checkMastery(),wq=wqTrack({mode,st,xp,extra,goalMet:d.days[today]>=g}),chWon=chCheck(mode,extra);
   const levelUp=levelInfo(d.xp).level>beforeLv;
   leagueRollover();const rankBefore=myRank(false);d.league.lp+=xp;const rankAfter=myRank(false);
   const coins=coinsFor(xp)+(levelUp?30:0)+newAch.length*15;d.coins=(d.coins||0)+coins;
@@ -2584,6 +2677,11 @@ function recordSession(mode,label,st,extra={}){
   newAch.forEach(a=>q.push(()=>{toast(a.i,'Erfolg freigeschaltet',`${a.n} (+20 XP, +15 🪙)`);Sound.ach()}));
   if(!rankBefore&&rankAfter)q.push(()=>{toast(LEAGUES[d.league.idx][1],`Liga beigetreten: Platz ${rankAfter}`,`Du kämpfst jetzt in der ${LEAGUES[d.league.idx][0]}-Liga mit`)});
   else if(rankAfter<rankBefore)q.push(()=>{toast(LEAGUES[d.league.idx][1],`Platz ${rankAfter} in der Liga`,`Du hast ${rankBefore-rankAfter} ${rankBefore-rankAfter===1?'Rivalen':'Rivalen'} überholt`)});
+  mast.forEach(([gm,t])=>q.push(()=>{toast(MASTERY[t-1][1],`${MASTERY[t-1][0]} in ${gm.n}`,`Neue Meisterschafts-Stufe (+${MASTERY[t-1][2]} 🪙)`);Sound.ach()}));
+  wq.forEach(n=>q.push(()=>{if(n===null)toast('🎁','Alle Wochenaufgaben geschafft',`Bonus: +${WQ_BONUS} 🪙`);else toast('🎯','Wochenaufgabe erledigt',`${n} (+${WQ_COINS} 🪙)`);Sound.ok()}));
+  chWon.forEach(([c,gm])=>q.push(()=>{toast('⚔️','Herausforderung geschafft!',`Du hast ${c.from.name} in ${gm.n} geschlagen (+${CH_COINS} 🪙)`);Sound.win()}));
+  if(mast.length||wq.length||chWon.length){Store.save();refreshMe();updateFriendBadge()}
+  if(d.team)setTimeout(teamCheck,1500);
   q.forEach((f,i)=>setTimeout(f,700+i*1000));
   return{xp,coins,levelUp,level:levelInfo(d.xp).level,goalNow,newAch,streak:s,beforeInto:levelInfo(d.xp-xp),rank:rankAfter};
 }
@@ -2863,7 +2961,7 @@ $('#donate').addEventListener('click',e=>{if(Store.data.settings.donateMin){e.pr
 function refreshMe(bump){
   const d=Store.data,li=levelInfo(d.xp),s=streak(d);
   $('#hc b').textContent=(d.coins||0).toLocaleString('de-DE');
-  $('#hlv').textContent=LEAGUES[d.league.idx][1]+' Lv '+li.level;$('#hxp').style.setProperty('--p',(li.into/li.need*100)+'%');
+  $('#hlv').textContent=LEAGUES[d.league.idx][1]+(d.prestige?' ★'+d.prestige:'')+' Lv '+li.level;$('#hxp').style.setProperty('--p',(li.into/li.need*100)+'%');
   $('#hl').title=`${li.into} / ${li.need} XP bis Level ${li.level+1}`;
   $('#hs').textContent=s;$('#hsk').classList.toggle('cold',todaySecs()<d.settings.goal*60);
   $('#hsk').title=`Streak: ${s} ${s===1?'Tag':'Tage'} – Tagesziel ${d.settings.goal} Min`;
@@ -2922,14 +3020,14 @@ function viewLessons(){
       <div><b>🔥 ${s}</b><span>${s===1?'Tag':'Tage'} Streak</span></div>
       <div><b>Lv ${li.level}</b><span>${esc(myTitle())}</span></div>
       <button class="strip-lg" id="slg"><b>${LEAGUES[d.league.idx][1]} ${myRank(false)?`Platz ${myRank(false)}`:'Noch nicht dabei'}</b><span>${LEAGUES[d.league.idx][0]}-Liga</span></button>
-      <div><b>${bestWpm()}</b><span>Bestwert WPM</span></div>
+      <button class="strip-lg" id="swq" title="Wochenaufgaben ansehen"><b>🎯 ${wqCount()}/4</b><span>Wochenaufgaben</span></button>
       <div class="legend mini">${[5,4,3,2,1].map(n=>`<span class="chip" style="--fc:var(--f${n})" title="${FINGER_NAMES[n]}"><i></i>${({5:'Klein',4:'Ring',3:'Mittel',2:'Zeige',1:'Daumen'})[n]}</span>`).join('')}</div>
     </div>
     <div class="courses" role="tablist" aria-label="Kurse">${secStats.map(x=>`<button role="tab" data-c="${x.id}" aria-selected="${x.id===courseSel}"><b>${x.t}</b><span class="cbar"><i style="width:${x.done/x.total*100}%"></i></span><span class="muted small">${x.done}/${x.total} · ${x.d}</span></button>`).join('')}</div>
     <div id="lgrid"></div>
   </section>`;
   firstLoad=false;animRings();
-  $('#cont').onclick=()=>practice(lessonCfg(ri));$('#slg').onclick=()=>go('league');
+  $('#cont').onclick=()=>practice(lessonCfg(ri));$('#slg').onclick=()=>go('league');$('#swq').onclick=wqModal;
   $$('.courses button').forEach(b=>b.onclick=()=>{courseSel=b.dataset.c;viewLessons()});
   paged($('#lgrid'),'les-'+courseSel,'lessons',LESSONS.map((l,i)=>[l,i]).filter(([l])=>l.sec===courseSel),card,grid=>$$('.lesson',grid).forEach(b=>b.onclick=()=>practice(lessonCfg(+b.dataset.i))));
 }
@@ -2943,12 +3041,12 @@ function practice(cfg){
     if(cfg.mode==='ghost'){const g=Store.data.ghosts[cfg.track];laneLabel=g?`Geist ${g.wpm} WPM`:'Noch kein Geist';
       ghostAt=g?(el,len)=>{const ms=el*1000;let lo=0,hi=g.times.length;while(lo<hi){const m=(lo+hi)>>1;if(g.times[m]<=ms)lo=m+1;else hi=m}return lo/len}:null}
     main.innerHTML=`<section>
-      <div class="prac-head"><button class="btn ghost small" id="back">Zurück</button><div><h2>${esc(cfg.title)}${cfg.tab==='games'&&cfg.mode!=='code'?langBadge():''}</h2><p class="muted">${esc(cfg.sub||'')}</p></div></div>
+      <div class="prac-head"><button class="btn ghost small" id="back">Zurück</button><div><h2>${esc(cfg.title)}${cfg.tab==='games'&&cfg.mode!=='code'&&cfg.mode!=='tour'?langBadge():''}</h2><p class="muted">${esc(cfg.sub||'')}</p></div></div>
       ${cfg.mode==='race'||cfg.mode==='ghost'||cfg.mode==='duel'||cfg.mode==='online'?`<div class="track${cfg.mode==='online'?' online':''}"><div class="lane"><span class="who">Du</span><div class="road"><i class="car" id="cy">${esc(S.car)}</i></div></div><div class="lane"><span class="who">${esc(laneLabel)}</span><div class="road"><i class="car${cfg.mode==='ghost'?' ghostcar':''}" id="cg">${cfg.mode==='ghost'?'👻':cfg.mode==='duel'?'🤖':cfg.mode==='online'?esc(cfg.oppCar||'🚙'):'🚙'}</i></div></div></div>`:''}
       <div class="live"><div class="st-wpm"><b id="lw">0</b><span>WPM</span></div><div class="st-cpm"><b id="lc">0</b><span>Anschläge/Min</span></div><div class="st-acc"><b id="la">100</b><span>% Genauigkeit</span></div><div class="combo st-combo"><b id="lcb">0</b><span>Serie</span></div><div class="st-time"><b id="lt">${cfg.timeLimit?fmtTime(cfg.timeLimit):'0:00'}</b><span>${cfg.timeLimit?'übrig':'Zeit'}</span></div><div class="bar st-bar"><i id="lp"></i></div></div>
       <div class="typebox${cfg.code?' codebox':''}" id="tb"><div id="tv"></div><div class="focus-hint">Klicke hier und tippe los</div></div>
       <div class="toggles">${cfg.hideHelp?'<span>In dieser Übung ohne Tastatur und Hände</span>':`<label><input type="checkbox" id="tkb" ${S.kb?'checked':''}> Tastatur anzeigen</label><label><input type="checkbox" id="thd" ${S.hands?'checked':''}> Hände anzeigen</label>`}
-        <label><input type="checkbox" id="tks" ${S.keySound?'checked':''}> Tippgeräusche</label><span>${['race','ghost','timed','daily','ladder','duel','online'].includes(cfg.mode)?'Fehler musst du korrigieren, bevor es weitergeht. ':S.errMode==='backspace'&&cfg.mode!=='sudden'?'⌫ korrigiert, ':''}Esc bricht ab</span><button class="btn ghost small" id="pset" style="margin-left:auto">Einstellungen</button></div>
+        <label><input type="checkbox" id="tks" ${S.keySound?'checked':''}> Tippgeräusche</label><span>${['race','ghost','timed','daily','ladder','duel','online','tour'].includes(cfg.mode)?'Fehler musst du korrigieren, bevor es weitergeht. ':S.errMode==='backspace'&&cfg.mode!=='sudden'?'⌫ korrigiert, ':''}Esc bricht ab</span><button class="btn ghost small" id="pset" style="margin-left:auto">Einstellungen</button></div>
       <div id="kbwrap"></div><div id="handswrap"></div></section>`;
     const kb=new Keyboard($('#kbwrap'));$('#handswrap').innerHTML=handsSVG();const hands=$('#handswrap svg');
     const vis=()=>{$('#kbwrap').classList.toggle('hide',cfg.hideHelp||!S.kb);$('#handswrap').classList.toggle('hide',cfg.hideHelp||!S.hands)};vis();
@@ -2966,7 +3064,7 @@ function practice(cfg){
       else{Sound.err();if(cfg.tab==='games'&&cfg.mode!=='sudden')Mash.err();if(!reduced()){tb.classList.remove('shake');void tb.offsetWidth;tb.classList.add('shake')}
         if(cfg.mode==='sudden')typer.finish()}
     };
-    const typer=new Typer($('#tv'),{lang:cfg.code?cfg.lang:null,errMode:()=>cfg.mode==='sudden'?'continue':['race','ghost','timed','daily','ladder','duel','online'].includes(cfg.mode)?'stop':S.errMode,onNext:ch=>lightHands(hands,kb.highlight(ch)),onUpdate:upd,onKey,onDone:st=>{if(st.progress>=1)Sound.finishText();finish(st)}});
+    const typer=new Typer($('#tv'),{lang:cfg.code?cfg.lang:null,errMode:()=>cfg.mode==='sudden'?'continue':['race','ghost','timed','daily','ladder','duel','online','tour'].includes(cfg.mode)?'stop':S.errMode,onNext:ch=>lightHands(hands,kb.highlight(ch)),onUpdate:upd,onKey,onDone:st=>{if(st.progress>=1)Sound.finishText();finish(st)}});
     typer.load(text);
     const iv=setInterval(()=>{
       if(!typer.start||typer.done)return;const st=typer.stats();
@@ -3042,6 +3140,11 @@ function practice(cfg){
         extra.bonus=rec&&!p?40:rec?15:0;celebrate=rec&&!!p;
         title=!d.daily[k]?'Nicht gewertet':!p?'Challenge geschafft':rec?'Neuer Tagesbestwert!':'Geschafft';note=d.daily[k]?`Dein Bestwert heute: ${d.daily[k].wpm} WPM. Morgen gibt es einen neuen Text.`:'Gewertet wird ab 85 % Genauigkeit. Versuch es nochmal.';
         btns=[['Nochmal',()=>practice(cfg)]];
+      }else if(cfg.mode==='tour'){
+        const r=tourResult(st,cfg);extra.bonus=r.first?40:r.better?15:0;celebrate=r.better&&!r.first;
+        title=!r.valid?'Nicht gewertet':r.first?'Du bist im Turnier!':r.better?'Neuer Turnier-Bestwert!':'Geschafft';
+        note=!r.valid?'Gewertet wird ein vollständiger Durchgang mit mindestens 90 % Genauigkeit.':`Dein Turnier-Bestwert: ${d.tour.wpm} WPM. Abgerechnet wird Montag um 0 Uhr.`;
+        btns=[['Nochmal',()=>practice(cfg)],['Rangliste',()=>{$$('.modal').forEach(x=>x.remove());go('games');setTimeout(tourBoard,60)}]];
       }else if(cfg.mode==='race'){
         const ghostSecs=text.length/(cfg.opp*5/60);const valid=st.acc>=85,won=valid&&st.secs<=ghostSecs&&st.progress>=1;
         title=!valid?'Rennen ungültig':won?'Gewonnen!':'Knapp verloren';note=!valid?`Unter 85 % Genauigkeit zählt ein Rennen nicht. Du hattest ${st.acc.toFixed(0)} %.`:won?`Du warst ${(ghostSecs-st.secs).toFixed(1)} Sekunden schneller.`:`Dein Gegner war ${(st.secs-ghostSecs).toFixed(1)} Sekunden vorn.`;
@@ -3343,10 +3446,13 @@ function viewGames(){
   const recent=[...new Set(d.history.slice().reverse().map(h=>h.mode==='code'?codeMap[(h.label||'').replace('Code: ','')]:MODE2GAME[h.mode]).filter(Boolean))].map(id=>pool.find(g=>g.id===id)).filter(Boolean).slice(0,6);
   if(!['all',...GAME_SECS.map(s=>s[0])].includes(gameFilter))gameFilter='all';
   const secOf=k=>GAME_SECS.find(s=>s[0]===k)||[];
-  const tile=g=>`<button class="gtile" data-g="${g.id}">${NEW_GAMES.has(g.id)?'<span class="newb">Neu</span>':''}<span class="gi">${g.i}</span><b>${g.n}</b><span class="gs">${g.s}</span><em>${safeRec(g,d)}</em></button>`;
-  main.innerHTML=`<div class="games-head"><div class="page-head"><h1 class="ph">Spiele</h1><p class="muted">${pool.length+1} Spiele für Tempo, Treffsicherheit und Reaktion.</p></div>
+  const tile=g=>{const t=masteryTier(g,d),nx=masteryNext(g,d),tip=(t?`${MASTERY[t-1][0]}-Medaille`:'Noch keine Medaille')+(nx?` · Nächste Stufe: ${nx}`:' · Höchste Stufe erreicht');
+    return `<button class="gtile" data-g="${g.id}" title="${esc(tip)}">${NEW_GAMES.has(g.id)?'<span class="newb">Neu</span>':''}<span class="gi">${g.i}</span><b>${g.n}</b><span class="gs">${g.s}</span><em>${safeRec(g,d)}${t?`<span class="gmed" aria-label="${MASTERY[t-1][0]}">${MASTERY[t-1][1]}</span>`:''}</em></button>`};
+  const tm=tourMine();
+  main.innerHTML=`<div class="games-head"><div class="page-head"><h1 class="ph">Spiele</h1><p class="muted">${pool.length+1} Spiele für Tempo, Treffsicherheit und Reaktion · <span title="Medaillen aus der Meisterschaft: Bronze, Silber, Gold und Diamant pro Spiel">🏅 ${medalCount()} Medaillen</span></p></div>
     <div class="langsw"><div class="seg" id="glang"><button data-l="de" aria-pressed="${!isEN()}">🇩🇪 Deutsch</button><button data-l="en" aria-pressed="${isEN()}">🇬🇧 English</button></div></div></div>
-    <div class="today-row"><button class="today${done?' done':''}" data-g="daily"><span class="gi">${D.i}</span><span class="tt"><b>${D.n}</b><span class="muted small">${D.s}, ${new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})}</span></span><em>${D.rec(d)}</em><span class="go">${done?'Nochmal':'Spielen'}</span></button>
+    <div class="today-row"><button class="today${done?' done':''}" data-g="daily"><span class="gi">${D.i}</span><span class="tt"><b>${D.n}</b><span class="muted small">${new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})}</span></span><em>${D.rec(d)}</em><span class="go">${done?'Nochmal':'Spielen'}</span></button>
+    <button class="today tour-hero" id="tourhero"><span class="gi">🏆</span><span class="tt"><b>Wochen-Turnier</b><span class="muted small">Ein Text für alle Spieler · ${weekLeftText()}</span></span><em>${tm?`Bestwert ${tm.wpm} WPM`:'Noch nicht dabei'}</em><span class="go">${tm?'Rangliste':'Mitmachen'}</span></button>
     <button class="today online-hero" id="onhero"><span class="gi">🌐</span><span class="tt"><b>Online-Duell</b><span class="muted small">${(()=>{const n=Social.friends.filter(isOnline).length;return n?`${n} ${n===1?'Freund ist':'Freunde sind'} gerade online`:'Fordere deine Freunde live heraus'})()}</span></span><em>${d.high.online||0} ${(d.high.online||0)===1?'Sieg':'Siege'}</em><span class="go">Herausfordern</span></button></div>
     ${recent.length?`<div class="grecent"><span class="grecent-l">Weiterspielen</span>${recent.map(g=>`<button class="gchip" data-g="${g.id}"><span>${g.i}</span>${g.n}</button>`).join('')}</div>`:''}
     <div class="gtools"><div class="gfilter" role="tablist"><button data-gf="all" aria-pressed="${gameFilter==='all'}">Alle <em>${pool.length}</em></button>${GAME_SECS.map(([k,t,,ic])=>`<button data-gf="${k}" aria-pressed="${k===gameFilter}">${ic} ${t} <em>${pool.filter(g=>g.cat===k).length}</em></button>`).join('')}</div>
@@ -3359,7 +3465,8 @@ function viewGames(){
       <div class="gtiles">${l.map(tile).join('')}</div></section>`).join('')||`<p class="muted gnone">Kein Spiel gefunden für „${esc(gameQuery)}“.</p>`;
     $$('#gsecs [data-g]').forEach(b=>b.onclick=()=>startGame(b.dataset.g))};
   draw();
-  $('.today[data-g=daily]').onclick=()=>startGame('daily');$('#onhero').onclick=()=>go('online');
+  $('.today[data-g=daily]').onclick=()=>startGame('daily');$('#onhero').onclick=()=>go('online');$('#tourhero').onclick=()=>tourBoard();
+  setTimeout(tourClaim,400);
   $$('.gchip').forEach(b=>b.onclick=()=>startGame(b.dataset.g));
   $$('[data-gf]').forEach(b=>b.onclick=()=>{gameFilter=b.dataset.gf;$$('[data-gf]').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
   $('#gq').oninput=e=>{gameQuery=e.target.value;draw()};
@@ -4137,7 +4244,7 @@ function hangmanGame(){
 
 /* ---------- Views: Achievements & Level ---------- */
 /* ---------- Views: Stats ---------- */
-const MODE_LABEL={bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
+const MODE_LABEL={tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
 function chartSVG(h){
   const pts=h.slice(-40);if(pts.length<2)return '<p class="muted">Nach zwei Übungen erscheint hier dein Verlauf.</p>';
   const W=680,H=220,PL=34,PR=10,PT=12,PB=26;const max=Math.ceil(Math.max(20,...pts.map(p=>p.wpm))*1.15/10)*10;
@@ -4218,10 +4325,11 @@ function viewAch(){
   const list=ACH.filter(a=>achFilter==='all'||(achFilter==='got'?d.ach[a.id]:!d.ach[a.id]));
   main.innerHTML=`${profileTop('ach')}
     <div class="ach-top">
-      <div class="panel lvcard"><div class="lvnum">${li.level}</div>
+      <div class="panel lvcard"><div class="lvnum">${li.level}${d.prestige?`<span class="pst" title="Prestige ${d.prestige}">★${d.prestige}</span>`:''}</div>
         <div class="lvinfo"><h2>${esc(levelTitle(li.level))}</h2><span class="xpbar"><i id="axp" style="--p:0%"></i></span>
         <p class="muted small" style="margin:0">${li.into} von ${li.need} XP bis Level ${li.level+1}${nt?`. Ab Level ${nt[0]}: „${nt[1]}"`:''}</p>
-        <p class="muted small" style="margin:4px 0 0">Insgesamt ${d.xp.toLocaleString('de-DE')} XP</p></div></div>
+        <p class="muted small" style="margin:4px 0 0">Insgesamt ${fmtN(d.xp+(d.prestigeXp||0))} XP${d.prestige?` · Prestige ${d.prestige}`:''}</p>
+        ${li.level>=PRESTIGE_LV?`<button class="btn primary small" id="prst" style="margin-top:8px">⭐ Prestige ${(d.prestige||0)+1} starten</button>`:`<p class="muted small" style="margin:4px 0 0">Ab Level ${PRESTIGE_LV}: Prestige mit Stern und ${fmtN(PRESTIGE_COINS)} 🪙</p>`}</div></div>
       <div class="panel goalcard">
         <div class="gc-row"><div class="ring">${ringSVG(todaySecs()/(g*60))}<div><b>${Math.floor(todaySecs()/60)}/${g} Min</b><span class="muted small" style="display:block">heute</span></div></div>
           <div><b class="big">🔥 ${s}</b><span class="muted small">Streak</span></div><div><b class="big">${d.bestStreak||0}</b><span class="muted small">längster</span></div>
@@ -4233,6 +4341,7 @@ function viewAch(){
       <div class="seg" id="afil">${[['all','Alle'],['got','Freigeschaltet'],['open','Offen']].map(([k,v])=>`<button data-af="${k}" aria-pressed="${k===achFilter}">${v}</button>`).join('')}</div></div>
     <div id="agrid"></div>`;
   animRings();requestAnimationFrame(()=>requestAnimationFrame(()=>{const e=$('#axp');if(e)e.style.setProperty('--p',(li.into/li.need*100)+'%')}));
+  if($('#prst'))$('#prst').onclick=doPrestige;
   $$('#gsel button').forEach(b=>b.onclick=()=>{d.settings.goal=+b.dataset.m;d.bestStreak=Math.max(d.bestStreak||0,streak(d));checkAch(null);Store.save();refreshMe();go('ach')});
   $$('#afil button').forEach(b=>b.onclick=()=>{achFilter=b.dataset.af;pageState['ach-'+achFilter]={p:0};viewAch()});
   paged($('#agrid'),'ach-'+achFilter,'achs',list,a=>{const t=d.ach[a.id];return `<div class="ach ${t?'got':'locked'}" title="${esc(a.d)}"><span class="ai">${a.i}</span><div><b>${esc(a.n)}</b><span>${esc(a.d)}</span></div></div>`});
@@ -4777,6 +4886,252 @@ function viewShop(){
   }
 }
 
+/* =====================================================================
+   Langzeit-Motivation: Wochenaufgaben, Meisterschaft, Prestige,
+   Wochen-Turnier, Teams, Einladungen und Freundes-Herausforderungen
+   ===================================================================== */
+const fmtN=n=>Math.round(+n||0).toLocaleString('de-DE');
+const myUid=()=>(window.fbOnline&&window.fbOnline.me())||'';
+/* Eine Woche beginnt montags um 0 Uhr */
+function weekId(t=Date.now()){const d=new Date(t);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return dayKey(d)}
+function weekLeftText(){const e=new Date(weekId()+'T00:00:00');e.setDate(e.getDate()+7);const ms=e-Date.now(),dd=Math.floor(ms/864e5);
+  return dd>0?`noch ${dd} ${dd===1?'Tag':'Tage'}`:`noch ${Math.max(1,Math.ceil(ms/36e5))} Std.`}
+/* XP dieser Woche (für Teams) */
+function wkXp(){const w=Store.data.wk;return w&&w.k===weekId()?{k:w.k,xp:w.xp||0}:{k:weekId(),xp:0}}
+function wkAdd(xp){const d=Store.data,k=weekId();if(!d.wk||d.wk.k!==k)d.wk={k,xp:0};d.wk.xp+=xp}
+const gameIdOf=(mode,extra)=>mode==='code'?'code:'+((extra&&extra.lang)||''):MODE2GAME[mode]||null;
+const catOfMode=m=>{if(m==='code')return 'code';const g=GAMES.find(x=>x.id===MODE2GAME[m]);return g?g.cat:null};
+
+/* ---------- Wochenaufgaben ---------- */
+const WQ_COINS=150,WQ_BONUS=400;
+const WQ_POOL=[
+  {id:'xp',i:'✨',v:[800,1200,1800],n:v=>`Sammle ${fmtN(v)} XP`,add:c=>c.xp},
+  {id:'lessons',i:'📚',v:[3,5,8],n:v=>`Schließe ${v} Lektionen ab`,add:c=>c.mode==='lesson'?1:0},
+  {id:'tempo',i:'🏁',v:[3,5],n:v=>`Spiele ${v} Tempo-Runden`,add:c=>catOfMode(c.mode)==='tempo'?1:0},
+  {id:'arcade',i:'🕹️',v:[3,5,8],n:v=>`Spiele ${v} Arcade-Runden`,add:c=>catOfMode(c.mode)==='arcade'?1:0},
+  {id:'brain',i:'🧠',v:[3,5],n:v=>`Spiele ${v} Köpfchen-Runden`,add:c=>catOfMode(c.mode)==='brain'?1:0},
+  {id:'variety',i:'🎲',v:[4,6],n:v=>`Spiele ${v} verschiedene Spiele`,key:c=>gameIdOf(c.mode,c.extra)},
+  {id:'acc',i:'🎯',v:[3,5],n:v=>`${v} Tipp-Runden mit mindestens 97 % Genauigkeit`,add:c=>TYPING.includes(c.mode)&&c.st.acc>=97&&(c.st.ok||0)>=40?1:0},
+  {id:'chars',i:'⌨️',v:[4000,7000,10000],n:v=>`Tippe ${fmtN(v)} richtige Zeichen`,add:c=>c.st.ok||0},
+  {id:'minutes',i:'⏱️',v:[45,90],n:v=>`Übe insgesamt ${v} Minuten`,add:c=>(c.st.secs||0)/60},
+  {id:'daily',i:'📅',v:[3,5],n:v=>`Spiele die Tägliche Challenge an ${v} Tagen`,key:c=>c.mode==='daily'?dayKey():null},
+  {id:'goal',i:'🔥',v:[4,6],n:v=>`Erreiche dein Tagesziel an ${v} Tagen`,key:c=>c.goalMet?dayKey():null},
+  {id:'tour',i:'🏆',v:[1],n:()=>'Nimm am Wochen-Turnier teil',add:c=>c.mode==='tour'&&c.st.progress>=1?1:0}
+];
+/* Alle Spieler bekommen dieselben vier Aufgaben pro Woche */
+function wqEnsure(){
+  const d=Store.data,k=weekId();if(d.wq&&d.wq.k===k)return d.wq;
+  const r=seededRandom('wq-'+k),ids=WQ_POOL.map(q=>q.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}
+  d.wq={k,list:ids.slice(0,4).map(id=>{const q=WQ_POOL.find(x=>x.id===id);return{id,v:q.v[Math.floor(r()*q.v.length)]}}),p:{},u:{},done:{},bonus:0};
+  return d.wq}
+const wqCount=()=>{const W=wqEnsure();return W.list.filter(x=>W.done[x.id]).length};
+function wqTrack(c){
+  const W=wqEnsure(),d=Store.data,got=[];
+  W.list.forEach(({id,v})=>{if(W.done[id])return;const q=WQ_POOL.find(x=>x.id===id);if(!q)return;
+    if(q.key){const k=q.key(c);if(k){const u=W.u[id]=W.u[id]||[];if(!u.includes(k))u.push(k);W.p[id]=u.length}}
+    else W.p[id]=(W.p[id]||0)+(q.add(c)||0);
+    if((W.p[id]||0)>=v){W.done[id]=Date.now();d.coins+=WQ_COINS;got.push(q.n(v))}});
+  if(!W.bonus&&W.list.every(x=>W.done[x.id])){W.bonus=1;d.coins+=WQ_BONUS;got.push(null)}
+  return got}
+function wqModal(){
+  const W=wqEnsure(),n=wqCount();
+  const m=modal(`<div class="wq-h"><h3>🎯 Wochenaufgaben</h3><span class="muted small">${weekLeftText()}</span></div>
+    <p class="muted small" style="margin:0 0 12px">Jeden Montag gibt es vier neue Aufgaben, für alle Spieler dieselben. Jede bringt ${WQ_COINS} 🪙, alle vier zusammen noch ${WQ_BONUS} 🪙 extra.</p>
+    <div class="wq-list">${W.list.map(({id,v})=>{const q=WQ_POOL.find(x=>x.id===id),p=Math.min(v,W.p[id]||0),ok=!!W.done[id];
+      return `<div class="wq-row${ok?' ok':''}"><span class="wq-i">${ok?'✓':q.i}</span><div class="wq-t"><b>${esc(q.n(v))}</b><span class="wq-bar"><i style="width:${p/v*100}%"></i></span></div><span class="wq-v">${ok?'Erledigt':`${fmtN(p)} / ${fmtN(v)}`}</span></div>`}).join('')}
+      <div class="wq-row bonus${W.bonus?' ok':''}"><span class="wq-i">${W.bonus?'✓':'🎁'}</span><div class="wq-t"><b>Alle vier geschafft</b><span class="muted small">${n} von 4 erledigt</span></div><span class="wq-v">+${WQ_BONUS} 🪙</span></div></div>
+    <div class="acts"><button class="btn primary" id="wqok">Schließen</button></div>`);
+  const close=()=>{m.remove();if(!activity)setHandler(null)};$('#wqok',m).onclick=close;setHandler({char(){},enter:close,esc:close})}
+
+/* ---------- Meisterschaft pro Spiel ---------- */
+const MASTERY=[['Bronze','🥉',25],['Silber','🥈',50],['Gold','🥇',100],['Diamant','💎',200]];
+const mBase=x=>[.2,.5,1,2].map(f=>Math.round(x*f/10)*10);
+const MASTERY_T={timed:[25,40,60,80],race:[25,40,60,80],ghost:[1,2,4,5],duel:[25,40,55,70],ladder:[25,40,55,70],sudden:[100,250,500,900],bomb:[3,8,14,20],online:[1,5,15,30],
+  rain:mBase(1000),blaster:mBase(1000),zombie:mBase(1000),boss:[1,2,4,5],tower:mBase(1000),balloon:mBase(1000),runner:mBase(1000),rhythm:mBase(1000),mole:mBase(1500),
+  blitz:[900,750,600,480],memory:[5,7,10,13],anagram:mBase(500),gaps:mBase(500),kitchen:mBase(800),puzzle:mBase(500),math:mBase(300),hangman:[2,5,10,16],story:[1,2,3],code:[20,30,45,60]};
+const mtOf=g=>MASTERY_T[g.id.startsWith('code:')?'code':g.id];
+/* Blitztasten: weniger ms ist besser */
+function masteryTier(g,d){const t=mtOf(g);if(!t)return 0;const v=gameScore(g,d),low=g.id==='blitz';return t.filter(x=>low?v>0&&v<=x:v>=x).length}
+function masteryNext(g,d){const t=mtOf(g),i=masteryTier(g,d);if(!t||i>=t.length)return '';return `${MASTERY[i][0]} ab ${g.id==='blitz'?`unter ${t[i]} ms`:scoreText(g,t[i])}`}
+function checkMastery(){
+  const d=Store.data,got=[];d.mastery=d.mastery||{};
+  GAMES.forEach(g=>{const t=masteryTier(g,d),p=d.mastery[g.id]||0;if(t>p){for(let i=p;i<t;i++)d.coins+=MASTERY[i][2];d.mastery[g.id]=t;got.push([g,t])}});
+  return got}
+const medalCount=()=>Object.values(Store.data.mastery||{}).reduce((a,b)=>a+b,0);
+/* Einen Rekordwert eines Spiels lesbar machen, z. B. „1.200 Punkte“ oder „45 WPM“ */
+function scoreText(g,s){
+  if(g.id==='ghost')return `${s}/5 Strecken`;if(g.id==='story')return `${s}/3 Enden`;if(g.id==='blitz')return `${s} ms`;
+  try{return g.rec({high:new Proxy({},{get:()=>s}),ghosts:{},story:{},daily:{}})}catch(e){return fmtN(s)}}
+
+/* ---------- Prestige ---------- */
+const PRESTIGE_LV=30,PRESTIGE_COINS=1000;
+function doPrestige(){
+  const d=Store.data;if(levelInfo(d.xp).level<PRESTIGE_LV)return;const n=(d.prestige||0)+1;
+  const m=modal(`<h3>⭐ Prestige ${n} starten?</h3><p class="muted">Dein Level beginnt wieder bei 1. Münzen, Shop-Gegenstände, Erfolge, Rekorde und deine Liga bleiben erhalten. Dafür bekommst du einen Prestige-Stern neben deinem Level und ${fmtN(PRESTIGE_COINS)} 🪙.</p>
+    <div class="acts"><button class="btn primary" id="pyes">Prestige starten</button><button class="btn ghost" id="pno">Abbrechen</button></div>`);
+  const close=()=>{m.remove();setHandler(null)};$('#pno',m).onclick=close;
+  $('#pyes',m).onclick=()=>{d.prestige=n;d.prestigeXp=(d.prestigeXp||0)+d.xp;d.xp=0;d.coins+=PRESTIGE_COINS;Store.save();refreshMe(true);close();
+    Sound.level();confetti(200);toast('⭐',`Prestige ${n}`,`Auf ein Neues ab Level 1 (+${fmtN(PRESTIGE_COINS)} 🪙)`);go('ach')};
+  setHandler({char(){},enter:()=>$('#pyes',m).click(),esc:close})}
+
+/* ---------- Wochen-Turnier ---------- */
+const TOUR_PRIZE=r=>r===1?1000:r===2?600:r===3?400:r<=10?200:75;
+/* Fester deutscher Text pro Woche, damit alle unter gleichen Bedingungen tippen */
+function tourText(k){const r=seededRandom('tour-'+k),p=a=>a[Math.floor(r()*a.length)],s=new Set();while(s.size<4)s.add(p(SENT));return [...s,p(QUOTES)].join(' ')}
+function tourCfg(){const k=weekId();return{tab:'games',mode:'tour',tourK:k,label:'Wochen-Turnier',title:'Wochen-Turnier',sub:`Ein Text für alle Spieler, dein bester Versuch zählt. Abrechnung Montag 0 Uhr (${weekLeftText()}).`,text:()=>tourText(k),back:()=>go('games')}}
+function tourResult(st,cfg){
+  const d=Store.data,k=cfg.tourK,valid=st.progress>=1&&st.acc>=90&&st.wpm<=250;   // über 250 WPM ist kein Mensch schnell
+  if(d.tour&&d.tour.k!==k){d.tourPrev={...d.tour};d.tour=null}
+  const prev=d.tour,better=valid&&(!prev||st.wpm>prev.wpm);
+  if(better)d.tour={k,wpm:Math.round(st.wpm),acc:Math.round(st.acc*10)/10};
+  return{valid,better,first:better&&!prev}}
+const tourMine=()=>{const t=Store.data.tour;return t&&t.k===weekId()?t:null};
+async function tourRows(k,mine){
+  const me=myUid();let rows=(await window.fbTour.board(k)).filter(r=>r.uid!==me);
+  if(mine)rows.push({uid:me,me:true,wpm:mine.wpm,acc:mine.acc});
+  return rows.sort((a,b)=>b.wpm-a.wpm||b.acc-a.acc)}
+async function tourBoard(){
+  const k=weekId(),mine=tourMine();
+  const m=modal(`<div class="wq-h"><h3>🏆 Wochen-Turnier</h3><span class="muted small">${weekLeftText()}</span></div>
+    <p class="muted small" style="margin:0 0 10px">Ein fester Text für alle Spieler. Gewertet wird dein schnellster vollständiger Versuch mit mindestens 90 % Genauigkeit.</p>
+    <div id="tbl"><p class="muted">Rangliste wird geladen…</p></div>
+    <p class="muted small tb-prize">Preise am Montag: 🥇 ${fmtN(TOUR_PRIZE(1))} · 🥈 ${TOUR_PRIZE(2)} · 🥉 ${TOUR_PRIZE(3)} · Top 10: ${TOUR_PRIZE(4)} · alle anderen ${TOUR_PRIZE(11)} 🪙</p>
+    <div class="acts"><button class="btn primary" id="tbp">${mine?'Nochmal versuchen':'Jetzt mitmachen'}</button><button class="btn ghost" id="tbc">Schließen</button></div>`);
+  const close=()=>{m.remove();if(!activity)setHandler(null)};$('#tbc',m).onclick=close;$('#tbp',m).onclick=()=>{m.remove();practice(tourCfg())};
+  setHandler({char(){},enter:()=>$('#tbp',m).click(),esc:close});
+  let rows;try{rows=await tourRows(k,mine)}catch(e){console.warn('Turnier:',e);$('#tbl',m).innerHTML='<p class="muted">Die Rangliste konnte nicht geladen werden.</p>';return}
+  const mi=rows.findIndex(r=>r.me);
+  const row=(r,i)=>`<div class="lg-row${r.me?' me':''}"><span class="pos">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()}`:`${fAva(r)} ${nameHTML(r.name,r.nameFx)}`}</span><span class="lp">${r.wpm} WPM</span></div>`;
+  $('#tbl',m).innerHTML=rows.length?`<div class="tb-list">${rows.slice(0,10).map(row).join('')}${mi>=10?`<div class="lg-cut">···</div>${row(rows[mi],mi)}`:''}</div>
+    <p class="muted small" style="margin:6px 0 0">${rows.length} ${rows.length===1?'Teilnehmer':'Teilnehmende'} diese Woche</p>`:'<p class="muted">Noch niemand dabei. Sei die erste Person!</p>'}
+/* Nach Wochenende: Platzierung ermitteln und Preis auszahlen */
+async function tourClaim(){
+  const d=Store.data,k=weekId(),c=[d.tour,d.tourPrev].find(t=>t&&t.k!==k&&!t.claimed);if(!c||!window.fbTour||activity)return;
+  if($('.modal')||$('.welcome')){setTimeout(tourClaim,5000);return}   // nicht über ein anderes Fenster legen
+  let rows;try{rows=await tourRows(c.k,c)}catch(e){return}
+  if(c.claimed||activity||$('.modal'))return;
+  const rank=rows.findIndex(r=>r.me)+1,coins=TOUR_PRIZE(rank);c.claimed=1;c.rank=rank;d.coins+=coins;Store.save();refreshMe(true);
+  const m=modal(`<div class="lg-result"><div class="lg-badge big">🏆</div><h3>Turnier-Ergebnis: Platz ${rank} von ${rows.length}</h3>
+    <p class="muted">Letzte Woche hast du ${c.wpm} WPM geschafft. Belohnung: ${fmtN(coins)} 🪙</p><div class="acts"><button class="btn primary" id="tcok">Weiter</button></div></div>`);
+  if(rank<=3){Sound.level();confetti(160)}
+  const close=()=>{m.remove();if(!activity)setHandler(null)};$('#tcok',m).onclick=close;setHandler({char(){},enter:close,esc:close})}
+
+/* ---------- Teams ---------- */
+const TEAM_GOAL=2000,TEAM_MAX=10,TEAM_COINS=250;
+let teamCache={id:null,t:0,members:[]};
+async function teamLoad(force){
+  const d=Store.data;if(!d.team||!window.fbTeam)return [];
+  if(!force&&teamCache.id===d.team.id&&Date.now()-teamCache.t<6e4)return teamCache.members;
+  const ms=await window.fbTeam.members(d.team.id);teamCache={id:d.team.id,t:Date.now(),members:ms};return ms}
+/* Mitglieder mit ihren XP dieser Woche; der eigene Eintrag kommt immer frisch aus dem lokalen Stand */
+function teamRows(ms){
+  const k=weekId(),me=myUid();
+  const rows=ms.filter(m=>m.uid!==me).map(m=>{const w=(m.stats||{}).wk||{};return{...m,xp:w.k===k?(w.xp||0):0}});
+  rows.push({uid:me,me:true,xp:wkXp().xp});return rows.sort((a,b)=>b.xp-a.xp)}
+const teamGoal=n=>TEAM_GOAL*Math.max(1,n);
+async function teamCheck(){
+  const d=Store.data;if(!d.team)return;let ms;try{ms=await teamLoad()}catch(e){return}
+  const rows=teamRows(ms),sum=rows.reduce((a,r)=>a+r.xp,0),k=weekId();
+  if(sum>=teamGoal(rows.length)&&d.teamClaim!==k){d.teamClaim=k;d.coins+=TEAM_COINS;Store.save();refreshMe(true);toast('🛡️','Team-Ziel erreicht!',`${d.team.name} hat das Wochenziel geschafft (+${TEAM_COINS} 🪙)`);Sound.ach()}}
+const teamCode=()=>Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[rnd(0,31)]).join('');
+async function viewTeam(){
+  const box=$('#teambox'),d=Store.data;if(!box)return;
+  if(!d.team){
+    box.innerHTML=`<div class="team-empty">
+      <div class="panel"><h3>🛡️ Team gründen</h3><p class="muted small">Gründe ein Team mit bis zu ${TEAM_MAX} Spielern. Ihr sammelt gemeinsam XP. Schafft ihr das Wochenziel, bekommt jedes Mitglied ${TEAM_COINS} 🪙.</p>
+        <div class="fr-search"><input id="tname" maxlength="24" placeholder="Teamname" autocomplete="off" aria-label="Teamname"><button class="btn primary small" id="tnew">Gründen</button></div></div>
+      <div class="panel"><h3>🔑 Team beitreten</h3><p class="muted small">Gib den Team-Code ein, den du von einem Mitglied bekommen hast.</p>
+        <div class="fr-search"><input id="tcode" maxlength="6" placeholder="z. B. K7PX2M" autocomplete="off" aria-label="Team-Code" class="tcode-in"><button class="btn small" id="tjoin">Beitreten</button></div></div>
+      <p class="fr-note" id="tmsg"></p></div>`;
+    const msg=t=>{$('#tmsg').textContent=t};
+    $('#tnew').onclick=()=>{const n=$('#tname').value.trim();if(n.length<3)return msg('Der Teamname braucht mindestens 3 Zeichen.');
+      d.team={id:teamCode(),name:n};teamCache.id=null;Store.save();Store.push();toast('🛡️','Team gegründet',`Teile den Code ${d.team.id} mit deinen Freunden`);viewTeam()};
+    $('#tjoin').onclick=async()=>{const c=$('#tcode').value.trim().toUpperCase();if(c.length!==6)return msg('Der Team-Code hat 6 Zeichen.');
+      msg('Team wird gesucht…');let ms;try{ms=await window.fbTeam.members(c)}catch(e){return msg('Suche fehlgeschlagen. Bist du online?')}
+      const others=ms.filter(m=>m.uid!==myUid());if(!others.length)return msg('Kein Team mit diesem Code gefunden.');if(others.length>=TEAM_MAX)return msg('Dieses Team ist schon voll.');
+      d.team={id:c,name:others[0].teamName||'Team'};teamCache.id=null;Store.save();Store.push();toast('🛡️','Team beigetreten',d.team.name);viewTeam()};
+    $('#tname').onkeydown=e=>{if(e.key==='Enter')$('#tnew').click()};$('#tcode').onkeydown=e=>{if(e.key==='Enter')$('#tjoin').click()};
+    return}
+  box.innerHTML=`<div class="team">
+    <div class="panel team-top"><div class="lg-badge">🛡️</div><div class="tt"><h2>${esc(d.team.name)}</h2><p class="muted small">Team-Code <b class="tcode">${esc(d.team.id)}</b> <button class="linkbtn" id="tcopy">kopieren</button></p></div><button class="btn ghost small" id="tleave">Verlassen</button></div>
+    <div class="panel team-goal" id="tgoal"><p class="muted small">Wird geladen…</p></div>
+    <div class="panel lg-table" id="tmem"></div></div>`;
+  $('#tcopy').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(d.team.id).then(()=>toast('📋','Code kopiert',d.team.id),()=>{})};
+  $('#tleave').onclick=()=>{const m=modal(`<h3>Team verlassen?</h3><p class="muted">Du kannst jederzeit wieder beitreten, solange du den Code ${esc(d.team.id)} kennst.</p><div class="acts"><button class="btn primary" id="lvy">Verlassen</button><button class="btn ghost" id="lvn">Abbrechen</button></div>`);
+    $('#lvn',m).onclick=()=>m.remove();$('#lvy',m).onclick=()=>{m.remove();d.team=null;teamCache.id=null;Store.save();Store.push();viewTeam()}};
+  let ms;try{ms=await teamLoad(true)}catch(e){$('#tgoal').innerHTML='<p class="muted small">Team konnte nicht geladen werden.</p>';return}
+  if(!$('#tmem'))return;
+  const rows=teamRows(ms),sum=rows.reduce((a,r)=>a+r.xp,0),goal=teamGoal(rows.length),done=sum>=goal;
+  $('#tgoal').innerHTML=`<div class="wq-h"><b>Wochenziel</b><span class="muted small">${weekLeftText()}</span></div>
+    <span class="tg-bar${done?' ok':''}"><i style="width:${Math.min(100,sum/goal*100)}%"></i></span>
+    <p class="muted small" style="margin:6px 0 0">${fmtN(sum)} von ${fmtN(goal)} XP${done?` – geschafft! Jedes Mitglied bekommt ${TEAM_COINS} 🪙.`:`. Das Ziel wächst mit jedem Mitglied (${fmtN(TEAM_GOAL)} XP pro Person).`}</p>`;
+  $('#tmem').innerHTML=`<h3>Mitglieder <span class="muted small">${rows.length}/${TEAM_MAX}</span></h3>`+rows.map((r,i)=>`<div class="lg-row${r.me?' me':''}"><span class="pos">${i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()}`:`${fAva(r)} ${nameHTML(r.name,r.nameFx)}`}</span><span class="lp">${fmtN(r.xp)} XP</span></div>`).join('');
+  teamCheck()}
+
+/* ---------- Freunde einladen ---------- */
+const INV_NEW=300,INV_COINS=500,INV_LV=3;
+const inviteLink=()=>`https://www.zehnfingernulllangeweile.de/?ref=${myUid()}`;
+async function viewInvite(){
+  const box=$('#invbox'),d=Store.data;if(!box)return;const link=inviteLink();
+  box.innerHTML=`<div class="inv-grid">
+    <div class="panel"><h3>✉️ Freunde einladen</h3><p class="muted small">Schick deinen Link an Freunde. Wer sich darüber registriert, bekommt ${INV_NEW} 🪙 Startbonus und schickt dir automatisch eine Freundschaftsanfrage. Sobald die Person Level ${INV_LV} erreicht, bekommst du ${INV_COINS} 🪙.</p>
+      <div class="fr-search"><input id="invl" readonly value="${esc(link)}" aria-label="Dein Einladungslink"><button class="btn primary small" id="invc">Kopieren</button>${navigator.share?'<button class="btn small" id="invs">Teilen</button>':''}</div></div>
+    <div class="panel"><h3>Deine Einladungen</h3><div id="invlist"><p class="muted small">Wird geladen…</p></div></div></div>`;
+  $('#invl').onclick=e=>e.target.select();
+  $('#invc').onclick=()=>{const done=()=>toast('📋','Link kopiert','Jetzt nur noch verschicken!');
+    if(navigator.clipboard)navigator.clipboard.writeText(link).then(done,()=>{$('#invl').select();document.execCommand('copy');done()});else{$('#invl').select();document.execCommand('copy');done()}};
+  if($('#invs'))$('#invs').onclick=()=>navigator.share({title:'Zehnfinger',text:'Lern mit mir Zehnfinger-Tippen – mit Spielen, Liga und Freunden!',url:link}).catch(()=>{});
+  let ms;try{ms=await window.fbInvites()}catch(e){if($('#invlist'))$('#invlist').innerHTML='<p class="muted small">Konnte nicht geladen werden.</p>';return}
+  d.refClaimed=d.refClaimed||[];let got=0;
+  ms.forEach(u=>{if((u.level||1)>=INV_LV&&!d.refClaimed.includes(u.uid)){d.refClaimed.push(u.uid);d.coins+=INV_COINS;got+=INV_COINS}});
+  if(got){Store.save();refreshMe(true);toast('🎉','Einladungs-Belohnung',`+${fmtN(got)} 🪙 für eingeladene Freunde`);Sound.ach()}
+  const el=$('#invlist');if(!el)return;
+  el.innerHTML=ms.length?ms.map(u=>{const ok=d.refClaimed.includes(u.uid);return `<div class="fr-u">${fAva(u)}<div class="nm"><b>${nameHTML(u.name,u.nameFx)}</b><span>Level ${u.level||1}</span></div><span class="tag">${ok?`✓ +${INV_COINS} 🪙`:`ab Level ${INV_LV}`}</span></div>`}).join('')
+    :'<p class="muted small">Noch niemand. Sobald sich jemand über deinen Link registriert, erscheint die Person hier.</p>'}
+
+/* ---------- Freundes-Herausforderungen ----------
+   Wer herausfordert, speichert {id,to,g,s,t} in seinem öffentlichen Profil (ch).
+   Die Antwort (geschlagen / abgelehnt) steht im Profil des Herausgeforderten (chr). */
+const CH_DAYS=7,CH_COINS=100;
+function chOutgoing(){const now=Date.now();return (Store.data.chOut||[]).filter(c=>now-c.t<CH_DAYS*864e5).slice(-12)}
+function chAnswers(){const now=Date.now(),o={};Object.entries(Store.data.chAns||{}).forEach(([id,a])=>{if(now-a.t<14*864e5)o[id]={w:a.w?1:0,s:a.s||0,x:a.x?1:0}});return o}
+function chIncoming(){const me=myUid(),now=Date.now(),ans=Store.data.chAns||{};if(!me)return [];
+  return Social.friends.flatMap(f=>(f.ch||[]).filter(c=>c&&c.to===me&&now-c.t<CH_DAYS*864e5&&!ans[c.id]&&GAMES.some(g=>g.id===c.g)).map(c=>({...c,from:f})))}
+const chGame=id=>GAMES.find(g=>g.id===id);
+const chBeats=(g,mine,theirs)=>g.id==='blitz'?mine>0&&mine<theirs:mine>theirs;
+const chLeft=c=>{const dd=Math.ceil((c.t+CH_DAYS*864e5-Date.now())/864e5);return dd<=1?'nur noch heute':`noch ${dd} Tage`};
+/* Nach einer Runde: Hat der neue Rekord eine offene Herausforderung in diesem Spiel geschlagen? */
+function chCheck(mode,extra){
+  const gid=gameIdOf(mode,extra),d=Store.data,won=[];if(!gid)return won;d.chAns=d.chAns||{};
+  chIncoming().filter(c=>c.g===gid).forEach(c=>{const g=chGame(c.g),v=gameScore(g,d);
+    if(chBeats(g,v,c.s)){d.chAns[c.id]={w:1,s:v,t:Date.now()};d.coins+=CH_COINS;won.push([c,g])}});
+  return won}
+function chDecline(id){const d=Store.data;d.chAns=d.chAns||{};d.chAns[id]={w:0,x:1,t:Date.now()};Store.save();updateFriendBadge();renderFriendsLive()}
+function chSend(f){
+  const d=Store.data,list=GAMES.filter(g=>g.id!=='daily'&&g.id!=='online'&&gameScore(g,d)>0);
+  if(!list.length){toast('⚔️','Noch keine Rekorde','Spiel erst ein paar Spiele, dann kannst du Freunde herausfordern.');return}
+  const m=modal(`<h3>⚔️ ${esc(f.name)} herausfordern</h3><p class="muted small">Wähle ein Spiel. ${esc(f.name)} muss deinen Rekord schlagen und hat dafür ${CH_DAYS} Tage Zeit. Gelingt es, gibt es ${CH_COINS} 🪙.</p>
+    <div class="ch-pick">${list.map(g=>`<button class="ch-g" data-cg="${g.id}"><span class="gi">${g.i}</span><b>${esc(g.n)}</b><em>${esc(safeRec(g,d))}</em></button>`).join('')}</div>
+    <div class="acts"><button class="btn ghost" id="chx">Abbrechen</button></div>`);
+  const close=()=>{m.remove();if(!activity)setHandler(null)};$('#chx',m).onclick=close;setHandler({char(){},esc:close});
+  $$('[data-cg]',m).forEach(b=>b.onclick=()=>{const g=chGame(b.dataset.cg);
+    d.chOut=(d.chOut||[]).filter(c=>!(c.to===f.uid&&c.g===g.id)).concat({id:Date.now().toString(36)+rnd(100,999),to:f.uid,g:g.id,s:gameScore(g,d),t:Date.now()}).slice(-12);
+    Store.save();Store.push();close();toast('⚔️','Herausforderung gesendet',`${f.name} muss in ${g.n} ${scoreText(g,gameScore(g,d))} schlagen`);if(currentTab==='friends')renderFriendsLive()})}
+function chPanel(){
+  const inc=chIncoming(),out=chOutgoing();let h='';
+  if(inc.length)h+=`<div class="panel ch-panel"><h3>⚔️ Herausforderungen <span class="muted small">${inc.length}</span></h3>${inc.map(c=>{const g=chGame(c.g);
+    return `<div class="fr-u">${fAva(c.from)}<div class="nm"><b>${g.i} ${esc(g.n)}</b><span>${esc(c.from.name)}: ${esc(scoreText(g,c.s))} · ${chLeft(c)}</span></div><div class="acts"><button class="btn primary small" data-cp="${esc(c.g)}">Spielen</button><button class="btn ghost small" data-cx="${esc(c.id)}" title="Ablehnen" aria-label="Ablehnen">✕</button></div></div>`}).join('')}</div>`;
+  const sent=out.map(c=>{const f=Social.friends.find(x=>x.uid===c.to),g=chGame(c.g);if(!f||!g)return '';const a=(f.chr||{})[c.id];
+    return `<div class="fr-u">${fAva(f)}<div class="nm"><b>${g.i} ${esc(g.n)}</b><span>${esc(f.name)}: ${a?(a.x?'abgelehnt':`geschafft mit ${esc(scoreText(g,a.s))} 💥`):`muss ${esc(scoreText(g,c.s))} schlagen`}</span></div></div>`}).join('');
+  if(sent)h+=`<div class="panel ch-panel"><h3>Gesendete Herausforderungen</h3>${sent}</div>`;
+  return h}
+/* Neue Herausforderungen einmal melden */
+function chNotify(){
+  const d=Store.data;d.chSeen=d.chSeen||[];let n=0;
+  chIncoming().forEach(c=>{if(d.chSeen.includes(c.id))return;d.chSeen.push(c.id);n++;const g=chGame(c.g);
+    if(!activity)toast('⚔️',`${c.from.name} fordert dich heraus`,`${g.n}: schlag ${scoreText(g,c.s)}`)});
+  if(n){d.chSeen=d.chSeen.slice(-60);Store.save()}}
+
 /* ---------- Leagues ---------- */
 const LEAGUES=[['Bronze','🥉','#C98B5A',60],['Silber','🥈','#B8C2CC',90],['Gold','🥇','#FFC857',120],['Platin','💠','#7FE0D4',155],['Jade','🍀','#5FD38D',190],['Smaragd','💚','#2ECC71',230],['Saphir','🔷','#4F8BFF',270],
   ['Rubin','♦️','#FF5A6E',315],['Amethyst','🔮','#B36BFF',360],['Diamant','💎','#7CC8FF',410],['Meister','🏆','#B79CFF',470],['Großmeister','🎖️','#FF9F43',540],['Champion','⚔️','#FF6B6B',620],['Legende','👑','#FF8FB8',720]];
@@ -4875,10 +5230,10 @@ let friendSel=null,friendSub='overview',friendSort='level',frSearchT=0,frLastQ='
 
 /* Wird vom Firebase-Modul aufgerufen, sobald sich Freunde oder Anfragen ändern */
 function onSocial(s){
-  Object.assign(Social,s,{ready:true});updateFriendBadge();
+  Object.assign(Social,s,{ready:true});chNotify();updateFriendBadge();
   if(currentTab==='friends'&&!activity&&!$('.modal'))renderFriendsLive();
 }
-function updateFriendBadge(){const b=$('#frb');if(!b)return;const n=Social.incoming.length;b.hidden=!n;b.textContent=n}
+function updateFriendBadge(){const b=$('#frb');if(!b)return;const n=Social.incoming.length+chIncoming().length;b.hidden=!n;b.textContent=n}
 
 /* Öffentliche Zusammenfassung des eigenen Spielstands – das sehen Freunde */
 function publicSummary(){
@@ -4893,7 +5248,13 @@ function publicSummary(){
       avgWpm:Math.round(avg(typing.map(x=>x.wpm))),avgAcc:Math.round(avg(typing.map(x=>x.acc))*10)/10,
       count:d.count||d.history.length,totalSecs:Math.round(d.totalSecs||0),strokes:d.strokes||0,ach:Object.keys(d.ach).length,
       lessons:d.lessons||{},high:d.high||{},ghosts:flag(d.ghosts),story:flag(d.story),daily,
-      league:{week:String(L.week),lp:L.lp||0,idx:L.idx||0,prevWeek:h0?String(h0.week):'',prevLp:h0?(h0.lp||0):0}}
+      league:{week:String(L.week),lp:L.lp||0,idx:L.idx||0,prevWeek:h0?String(h0.week):'',prevLp:h0?(h0.lp||0):0},
+      wk:wkXp()},
+    prestige:d.prestige||0,
+    team:(d.team&&d.team.id)||'',teamName:(d.team&&d.team.name)||'',
+    tourKey:(d.tour&&d.tour.k)||'',tour:d.tour?{wpm:d.tour.wpm,acc:d.tour.acc}:{},
+    tourPrevKey:(d.tourPrev&&d.tourPrev.k)||'',tourPrev:d.tourPrev?{wpm:d.tourPrev.wpm,acc:d.tourPrev.acc}:{},
+    ch:chOutgoing(),chr:chAnswers()
   };
 }
 
@@ -4927,9 +5288,17 @@ const FR_SORTS=[['level','Level'],['wpm','WPM'],['streak','Streak'],['league','L
 function sortVal(p,k){const st=p.stats||{};return k==='level'?(p.level||1)*1e7+(st.xp||0):k==='wpm'?(st.bestWpm||0):k==='streak'?(st.streak||0):leagueIdxOf(st)*1e7+leagueLpOf(st)}
 function relState(uid){if(Social.friends.some(f=>f.uid===uid))return 'friend';if(Social.outgoing.some(f=>f.uid===uid))return 'out';if(Social.incoming.some(f=>f.uid===uid))return 'in';return ''}
 
+let frTab='friends';
 function viewFriends(){
   if(friendSel){const f=Social.friends.find(x=>x.uid===friendSel);if(f){viewFriend(f);return}friendSel=null}
-  main.innerHTML=`<div class="page-head"><h1 class="ph">Freunde</h1><p class="muted">Vergleicht eure Rekorde in jedem Spiel und jeder Lektion. Freunde treten automatisch in deiner Liga gegen dich an.</p></div>
+  const subs={friends:'Vergleicht eure Rekorde, fordert euch heraus und trefft euch in der Liga.',team:'Sammelt gemeinsam XP und knackt jede Woche euer Team-Ziel.',invite:'Lade Freunde ein – ihr bekommt beide Münzen.'};
+  const nCh=chIncoming().length;
+  const head=`<div class="page-head fr-head"><div><h1 class="ph">Freunde</h1><p class="muted">${subs[frTab]}</p></div>
+    <div class="seg" id="frtab">${[['friends','👥 Freunde'+(nCh?` <em class="tbadge">${nCh}</em>`:'')],['team','🛡️ Team'],['invite','✉️ Einladen']].map(([k,v])=>`<button data-ft="${k}" aria-pressed="${k===frTab}">${v}</button>`).join('')}</div></div>`;
+  const tabs=()=>$$('#frtab button').forEach(b=>b.onclick=()=>{frTab=b.dataset.ft;viewFriends()});
+  if(frTab==='team'){main.innerHTML=head+'<div id="teambox"></div>';tabs();viewTeam();return}
+  if(frTab==='invite'){main.innerHTML=head+'<div id="invbox"></div>';tabs();viewInvite();return}
+  main.innerHTML=`${head}
     <div class="fr-grid">
       <div class="fr-side">
         <div class="panel"><h3>Freund hinzufügen</h3>
@@ -4940,6 +5309,7 @@ function viewFriends(){
       </div>
       <div class="panel" id="frlist"></div>
     </div>`;
+  tabs();
   const q=$('#frq'),run=()=>frSearch(q.value);
   q.oninput=()=>{clearTimeout(frSearchT);frSearchT=setTimeout(run,350)};
   q.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(frSearchT);run()}};
@@ -4971,7 +5341,10 @@ function renderFriendsLive(){
   let h='';
   if(Social.incoming.length)h+=`<div class="panel"><h3>Anfragen <span class="muted small">${Social.incoming.length}</span></h3>${Social.incoming.map(u=>`<div class="fr-u">${fAva(u)}<div class="nm"><b>${esc(u.name)}</b><span>Level ${u.level} · möchte dein Freund sein</span></div><div class="acts"><button class="btn primary small" data-fa="${u.uid}">Annehmen</button><button class="btn ghost small" data-fd="${u.uid}" aria-label="Ablehnen" title="Ablehnen">✕</button></div></div>`).join('')}</div>`;
   if(Social.outgoing.length)h+=`<div class="panel"><h3>Gesendet</h3>${Social.outgoing.map(u=>`<div class="fr-u">${fAva(u)}<div class="nm"><b>${esc(u.name)}</b><span>Wartet auf Bestätigung</span></div><button class="btn ghost small" data-fc="${u.uid}">Zurückziehen</button></div>`).join('')}</div>`;
+  h=chPanel()+h;
   req.innerHTML=h;
+  $$('[data-cp]',req).forEach(b=>b.onclick=()=>startGame(b.dataset.cp));
+  $$('[data-cx]',req).forEach(b=>b.onclick=()=>chDecline(b.dataset.cx));
   if(!Social.ready){list.innerHTML='<div class="fr-empty"><b>⏳</b>Freunde werden geladen…</div>';return}
   if(!Social.friends.length){list.innerHTML=`<div class="fr-empty"><b>🤝</b><p>Noch keine Freunde. Suche nach einem Benutzernamen und schick eine Anfrage.</p><p class="small">Sobald ihr euch gegenseitig hinzugefügt habt, seht ihr alle Rekorde voneinander und trefft euch in der Liga.</p></div>`;return}
   const me={me:true,name:userName(),level:levelInfo(Store.data.xp).level,stats:publicSummary().stats};
@@ -5022,13 +5395,14 @@ function viewFriend(f){
       <div class="fd-id"><h1>${nameHTML(f.name,f.nameFx)}</h1><p><span class="dot${on?' on':''}"></span>${esc(agoText(f))}${f.title?` · „${esc(f.title)}"`:''}</p></div>
       <div class="fd-score" title="Gewonnene Kategorien aus Überblick, Lektionen und Spielen">
         <div class="${W>Lz?'win':''}"><b>${W}</b><span>Du</span></div><i>:</i><div class="${Lz>W?'win':''}"><b>${Lz}</b><span>${esc(f.name)}</span></div></div>
-      <button class="btn primary small" data-ch="${f.uid}">🌐 Herausfordern</button>
+      <button class="btn primary small" data-ch="${f.uid}">🌐 Live-Duell</button>
+      <button class="btn small" id="fdchs">⚔️ Rekord-Challenge</button>
       <button class="btn ghost small" id="fdrm">Entfernen</button>
     </div>
     <div id="fdbody"></div></div>`;
   $('#fdback').onclick=()=>{friendSel=null;go('friends')};
   $$('#fdsub button').forEach(b=>b.onclick=()=>{friendSub=b.dataset.fsub;viewFriend(f)});
-  $('#fdrm').onclick=()=>removeFriend(f);
+  $('#fdrm').onclick=()=>removeFriend(f);$('#fdchs').onclick=()=>chSend(f);
   const body=$('#fdbody'),hdr=`<div class="cmp-row hdr"><span></span><span class="v">Du</span><span class="v">${esc(f.name)}</span></div>`;
   const cls=w=>['v'+(w>0?' win':''),'v'+(w<0?' win':'')];
   if(friendSub==='lessons'){
@@ -5305,6 +5679,14 @@ window.startApp=async function(user,regName){
   leagueRollover();
   applySettings();applyDonate();
   checkAch(null);
+  wqEnsure();
+  // Über einen Einladungslink registriert: Startbonus
+  if(window.zfRefUsed&&!Store.data.refBonus){Store.data.refBonus=1;Store.data.coins+=INV_NEW;Store.data.notice={i:'🎉',t:'Willkommensbonus',s:`Du wurdest eingeladen: +${INV_NEW} 🪙`}}
+  // Meisterschaft rückwirkend für bestehende Rekorde, mit einer einzigen Meldung statt vielen
+  {const was=!!Store.data.mastery,c0=Store.data.coins,got=checkMastery();
+    if(got.length&&!Store.data.notice)Store.data.notice=was?{i:got[0][1]?MASTERY[got[0][1]-1][1]:'🏅',t:'Neue Medaillen',s:`${got.length} Spiele haben eine neue Meisterschafts-Stufe (+${fmtN(Store.data.coins-c0)} 🪙)`}
+      :{i:'🏅',t:'Neu: Meisterschaft',s:`Für deine bisherigen Rekorde gibt es ${medalCount()} Medaillen und ${fmtN(Store.data.coins-c0)} 🪙`}}
+  setTimeout(tourClaim,2500);
   refreshMe();
   go('lessons');
   if(Store.data.notice){const n=Store.data.notice;delete Store.data.notice;setTimeout(()=>toast(n.i,n.t,n.s),900)}
