@@ -7,6 +7,13 @@ service cloud.firestore {
 
     function signedIn() { return request.auth != null; }
     function isMe(uid)  { return signedIn() && request.auth.uid == uid; }
+    // Entwickler: wer ein Dokument admins/<eigene UID> hat (nur in der Konsole anlegbar)
+    function isAdmin()  { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+
+    // Jeder darf nur nachsehen, ob er selbst Admin ist. Schreiben geht nur über die Konsole.
+    match /admins/{uid} {
+      allow read: if isMe(uid);
+    }
 
     // Öffentliches Profil: Name, Level, Statistiken, Freundesliste, Liga, Team, Turnier, Herausforderungen.
     // Lesen dürfen alle angemeldeten Spieler (Freundessuche, Liga, Rangliste, Online-Zähler),
@@ -36,12 +43,13 @@ service cloud.firestore {
         && request.resource.data.guest == resource.data.guest;
     }
 
-    // Feedback: angemeldete Spieler dürfen senden, lesen kann es nur der Entwickler in der Konsole.
+    // Feedback: angemeldete Spieler dürfen senden, lesen und erledigen nur Admins.
     match /feedback/{id} {
       allow create: if signedIn()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.text is string
         && request.resource.data.text.size() <= 1000;
+      allow read, delete: if isAdmin();
     }
 
     // Alles andere ist gesperrt.

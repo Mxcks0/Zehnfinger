@@ -79,8 +79,10 @@
       return { uid: snap.id, name: d.name || 'Spieler', avatar: d.avatar || '🙂', frame: d.frame || 'none',
                title: d.title || '', level: d.level || 1, stats: d.stats || {}, lastActive: la,
                nameFx: d.nameFx || 'none', car: d.car || '🚗', prestige: d.prestige || 0,
-               team: d.team || '', teamName: d.teamName || '', ch: Array.isArray(d.ch) ? d.ch : [], chr: d.chr || {} };
+               team: d.team || '', teamName: d.teamName || '', ch: Array.isArray(d.ch) ? d.ch : [], chr: d.chr || {},
+               rx: Array.isArray(d.rx) ? d.rx : [] };
     };
+    const ms = v => v && typeof v.toMillis === 'function' ? v.toMillis() : 0;
     const meRef = () => doc(db, 'players', auth.currentUser.uid);
 
     /* ---------- Online-Duelle ----------
@@ -155,6 +157,40 @@
     };
     /* ---------- Feedback: landet in der Sammlung "feedback" (nur lesbar in der Firebase-Konsole) ---------- */
     window.fbFeedback = data => addDoc(collection(db, 'feedback'), { ...data, uid: auth.currentUser ? auth.currentUser.uid : '', createdAt: serverTimestamp() });
+
+    /* ---------- Team-Liga: alle Spieler, die in einem Team sind ---------- */
+    window.fbTeamLeague = async () => (await pl([where('team', '!=', ''), limit(1000)])).docs.map(plain);
+
+    /* ---------- Entwicklerbereich ----------
+       Zugang nur, wenn es admins/<uid> gibt (in der Firebase-Konsole von Hand angelegt). Die Regeln prüfen das serverseitig. */
+    const players = () => collection(db, 'players');
+    window.fbAdmin = {
+      async isAdmin(){ try{ return (await getDoc(doc(db, 'admins', auth.currentUser.uid))).exists() }catch(e){ return false } },
+      async counts(){
+        const day = new Date(); day.setHours(0, 0, 0, 0);
+        const c = q => getCountFromServer(q).then(s => s.data().count);
+        const [total, today, week] = await Promise.all([
+          c(players()),
+          c(query(players(), where('lastActive', '>=', Timestamp.fromMillis(day.getTime())))),
+          c(query(players(), where('lastActive', '>=', Timestamp.fromMillis(Date.now() - 7 * 864e5))))
+        ]);
+        return { total, today, week };
+      },
+      async recent(n = 300){
+        const res = await getDocs(query(players(), orderBy('lastActive', 'desc'), limit(n)));
+        return res.docs.map(s => { const d = s.data(); return { ...plain(s), createdAt: ms(d.createdAt), seen: ms(d.seen) } });
+      },
+      async newest(n = 10){
+        const res = await getDocs(query(players(), orderBy('createdAt', 'desc'), limit(n)));
+        return res.docs.map(s => ({ ...plain(s), createdAt: ms(s.data().createdAt) }));
+      },
+      async feedback(){
+        const res = await getDocs(query(collection(db, 'feedback'), orderBy('createdAt', 'desc'), limit(150)));
+        return res.docs.map(s => { const d = s.data(); return { id: s.id, ...d, createdAt: ms(d.createdAt) } });
+      },
+      newFeedback: since => getCountFromServer(query(collection(db, 'feedback'), where('createdAt', '>', Timestamp.fromMillis(since || 0)))).then(s => s.data().count),
+      delFeedback: id => deleteDoc(doc(db, 'feedback', id))
+    };
 
     window.fbInvites = async () => (await pl([where('refBy', '==', auth.currentUser.uid), limit(100)])).docs.map(plain);
 
@@ -2098,6 +2134,38 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .fr-dev{font-size:13px;color:var(--muted);margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line)}
 .fr-dev b{color:var(--text)}
 @media (max-width:560px){.shr{grid-template-columns:1fr}.shr img{max-width:220px;margin:0 auto}}
+/* Reaktionen, Team-Liga, Entwicklerbereich */
+.rxbar{display:flex;gap:4px;flex-wrap:wrap}
+.rxb{font-size:18px;line-height:1;width:36px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;display:grid;place-items:center;transition:transform .1s,border-color .1s}
+.rxb:hover{border-color:var(--caret);transform:translateY(-2px) scale(1.08)}
+.rx-panel .rxb{width:30px;height:28px;font-size:15px}
+.rxe{font-size:18px}
+.fd-rx{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-4px 0 12px}
+.team #tmem{grid-row:1/span 3}
+.team-league h3{margin:0}
+.adm-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.cards.compact.adm-cards{margin-bottom:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.adm-who{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:640px){.cards.compact.adm-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.adm-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.adm-col{display:grid;gap:14px}
+.adm-grid h3{margin:0 0 8px}
+.adm-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
+.adm-row:not(:has(.dot)){grid-template-columns:minmax(0,1fr) auto auto}
+.adm-row .ava{font-size:15px;margin-right:4px}
+.adm-bar{display:grid;grid-template-columns:minmax(0,170px) 1fr auto;gap:10px;align-items:center;font-size:13px;padding:4px 0}
+.adm-bar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adm-bar i{display:block;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--caret) var(--w),var(--surface2) var(--w))}
+.adm-bar b{font-variant-numeric:tabular-nums;min-width:32px;text-align:right}
+.fbk-list{display:grid;gap:10px}
+.fbk.new{border-color:var(--caret)}
+.fbk-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fbk-h .btn{margin-left:auto}
+.fbk-h em{color:var(--caret);font-style:normal;font-weight:700}
+.fbk-k{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--surface2)}
+.fbk-t{white-space:pre-wrap;margin:10px 0 6px;line-height:1.5}
+.fbk-m{margin:0}
+@media (max-width:860px){.adm-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body class="locked">
@@ -2714,7 +2782,7 @@ function recordSession(mode,label,st,extra={}){
   d.xp=(d.xp||0)+xp;const s=streak(d);d.bestStreak=Math.max(d.bestStreak||0,s);
   const newAch=checkAch(Object.assign({mode,label,st},extra));
   if(newAch.length){d.xp+=newAch.length*20;xp+=newAch.length*20}
-  wkAdd(xp);
+  wkAdd(xp);d.plays=d.plays||{};d.plays[mode]=(d.plays[mode]||0)+1;
   const mast=checkMastery(),wq=wqTrack({mode,st,xp,extra,goalMet:d.days[today]>=g}),chWon=chCheck(mode,extra);
   const levelUp=levelInfo(d.xp).level>beforeLv;
   leagueRollover();const rankBefore=myRank(false);d.league.lp+=xp;const rankAfter=myRank(false);
@@ -2989,9 +3057,9 @@ $$('.tab').forEach(b=>b.onclick=()=>go(b.dataset.tab));
 let profSub='ach';
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(b&&b.closest('.subtabs')){profSub=b.dataset.p;go(profSub)}});
 function profileHead(sub){profSub=sub;currentTab=sub;}
-function setTab(t){currentTab=t;const gb=$('#gear');if(gb)gb.classList.toggle('on',t==='settings');const nt=(t==='ach'||t==='stats')?'profile':t==='online'?'games':t;$$('.tab').forEach(b=>{if(b.dataset.tab===nt)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')})}
+function setTab(t){currentTab=t;const gb=$('#gear');if(gb)gb.classList.toggle('on',t==='settings');const nt=(t==='ach'||t==='stats'||t==='admin')?'profile':t==='online'?'games':t;$$('.tab').forEach(b=>{if(b.dataset.tab===nt)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')})}
 function show(fn){if(cleanup){cleanup();cleanup=null}$$('.modal').forEach(m=>m.remove());setHandler(null);activity=false;main.innerHTML='';fn();document.body.classList.toggle('busy',activity);window.scrollTo(0,0);if(!activity&&Store.data.league.pending&&Store.data.welcomed)setTimeout(showLeaguePending,300)}
-function go(tab){leagueRollover();show(()=>{setTab(tab);({lessons:viewLessons,free:viewFree,games:viewGames,ach:()=>{profileHead('ach');viewAch()},stats:()=>{profileHead('stats');viewStats()},league:()=>{main.innerHTML='';viewLeague()},profile:()=>{profileHead(profSub);(profSub==='stats'?viewStats:viewAch)()},settings:viewSettings,shop:viewShop,friends:viewFriends,online:viewOnline})[tab]()})}
+function go(tab){leagueRollover();show(()=>{setTab(tab);({lessons:viewLessons,free:viewFree,games:viewGames,ach:()=>{profileHead('ach');viewAch()},stats:()=>{profileHead('stats');viewStats()},league:()=>{main.innerHTML='';viewLeague()},admin:()=>{profileHead('admin');viewAdmin()},profile:()=>{profileHead(profSub);(profSub==='stats'?viewStats:profSub==='admin'?viewAdmin:viewAch)()},settings:viewSettings,shop:viewShop,friends:viewFriends,online:viewOnline})[tab]()})}
 function onRemoteLoaded(){applySettings();refreshMe();if(!activity)go(currentTab)}
 function modal(html){const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="dlg" role="dialog" aria-modal="true">${html}</div>`;document.body.appendChild(m);return m}
 const starsHTML=(n,cls='stars')=>`<span class="${cls}" aria-label="${n} von 3 Sternen">${[0,1,2].map(i=>`<span class="${i<n?'':'off'}" style="--d:${.25+i*.18}s">★</span>`).join('')}</span>`;
@@ -4427,7 +4495,7 @@ function profileTop(sub){
       <button class="btn ghost small" id="pout">Abmelden</button>
     </div>
   </div>
-  <div class="ptop"><div class="seg subtabs">${[['ach','Erfolge und Level'],['stats','Statistik']].map(([k,v])=>`<button data-p="${k}" aria-pressed="${k===sub}">${v}</button>`).join('')}</div></div>`;
+  <div class="ptop"><div class="seg subtabs">${[['ach','Erfolge und Level'],['stats','Statistik'],...(isAdm?[['admin','🛠️ Entwickler']]:[])].map(([k,v])=>`<button data-p="${k}" aria-pressed="${k===sub}">${v}</button>`).join('')}</div></div>`;
 }
 
 /* Buttons der Accountkarte: per Delegation, damit sie auch nach jedem Neurendern wirken */
@@ -5050,7 +5118,7 @@ function weekLeftText(){const e=new Date(weekId()+'T00:00:00');e.setDate(e.getDa
   return dd>0?`noch ${dd} ${dd===1?'Tag':'Tage'}`:`noch ${Math.max(1,Math.ceil(ms/36e5))} Std.`}
 /* XP dieser Woche (für Teams) */
 function wkXp(){const w=Store.data.wk;return w&&w.k===weekId()?{k:w.k,xp:w.xp||0}:{k:weekId(),xp:0}}
-function wkAdd(xp){const d=Store.data,k=weekId();if(!d.wk||d.wk.k!==k)d.wk={k,xp:0};d.wk.xp+=xp}
+function wkAdd(xp){const d=Store.data,k=weekId();if(!d.wk||d.wk.k!==k){if(d.wk&&d.wk.xp)d.wkPrev={k:d.wk.k,xp:d.wk.xp};d.wk={k,xp:0}}d.wk.xp+=xp}
 const gameIdOf=(mode,extra)=>mode==='code'?'code:'+((extra&&extra.lang)||''):MODE2GAME[mode]||null;
 const catOfMode=m=>{if(m==='code')return 'code';const g=GAMES.find(x=>x.id===MODE2GAME[m]);return g?g.cat:null};
 
@@ -5197,16 +5265,17 @@ async function viewTeam(){
       <p class="fr-note" id="tmsg"></p></div>`;
     const msg=t=>{$('#tmsg').textContent=t};
     $('#tnew').onclick=()=>{const n=$('#tname').value.trim();if(n.length<3)return msg('Der Teamname braucht mindestens 3 Zeichen.');
-      d.team={id:teamCode(),name:n};teamCache.id=null;Store.save();Store.push();toast('🛡️','Team gegründet',`Teile den Code ${d.team.id} mit deinen Freunden`);viewTeam()};
+      d.team={id:teamCode(),name:n,since:Date.now()};teamCache.id=null;Store.save();Store.push();toast('🛡️','Team gegründet',`Teile den Code ${d.team.id} mit deinen Freunden`);viewTeam()};
     $('#tjoin').onclick=async()=>{const c=$('#tcode').value.trim().toUpperCase();if(c.length!==6)return msg('Der Team-Code hat 6 Zeichen.');
       msg('Team wird gesucht…');let ms;try{ms=await window.fbTeam.members(c)}catch(e){return msg('Suche fehlgeschlagen. Bist du online?')}
       const others=ms.filter(m=>m.uid!==myUid());if(!others.length)return msg('Kein Team mit diesem Code gefunden.');if(others.length>=TEAM_MAX)return msg('Dieses Team ist schon voll.');
-      d.team={id:c,name:others[0].teamName||'Team'};teamCache.id=null;Store.save();Store.push();toast('🛡️','Team beigetreten',d.team.name);viewTeam()};
+      d.team={id:c,name:others[0].teamName||'Team',since:Date.now()};teamCache.id=null;Store.save();Store.push();toast('🛡️','Team beigetreten',d.team.name);viewTeam()};
     $('#tname').onkeydown=e=>{if(e.key==='Enter')$('#tnew').click()};$('#tcode').onkeydown=e=>{if(e.key==='Enter')$('#tjoin').click()};
     return}
   box.innerHTML=`<div class="team">
     <div class="panel team-top"><div class="lg-badge">🛡️</div><div class="tt"><h2>${esc(d.team.name)}</h2><p class="muted small">Team-Code <b class="tcode">${esc(d.team.id)}</b> <button class="linkbtn" id="tcopy">kopieren</button></p></div><button class="btn ghost small" id="tleave">Verlassen</button></div>
     <div class="panel team-goal" id="tgoal"><p class="muted small">Wird geladen…</p></div>
+    <div class="panel lg-table team-league" id="tleague"><h3>🏆 Team-Liga</h3><p class="muted small">Wird geladen…</p></div>
     <div class="panel lg-table" id="tmem"></div></div>`;
   $('#tcopy').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(d.team.id).then(()=>toast('📋','Code kopiert',d.team.id),()=>{})};
   $('#tleave').onclick=()=>{const m=modal(`<h3>Team verlassen?</h3><p class="muted">Du kannst jederzeit wieder beitreten, solange du den Code ${esc(d.team.id)} kennst.</p><div class="acts"><button class="btn primary" id="lvy">Verlassen</button><button class="btn ghost" id="lvn">Abbrechen</button></div>`);
@@ -5218,7 +5287,7 @@ async function viewTeam(){
     <span class="tg-bar${done?' ok':''}"><i style="width:${Math.min(100,sum/goal*100)}%"></i></span>
     <p class="muted small" style="margin:6px 0 0">${fmtN(sum)} von ${fmtN(goal)} XP${done?` – geschafft! Jedes Mitglied bekommt ${TEAM_COINS} 🪙.`:`. Das Ziel wächst mit jedem Mitglied (${fmtN(TEAM_GOAL)} XP pro Person).`}</p>`;
   $('#tmem').innerHTML=`<h3>Mitglieder <span class="muted small">${rows.length}/${TEAM_MAX}</span></h3>`+rows.map((r,i)=>`<div class="lg-row${r.me?' me':''}"><span class="pos">${i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()}`:`${fAva(r)} ${nameHTML(r.name,r.nameFx)}`}</span><span class="lp">${fmtN(r.xp)} XP</span></div>`).join('');
-  teamCheck()}
+  teamCheck();renderTeamLeague()}
 
 /* ---------- Freunde einladen ---------- */
 const INV_NEW=300,INV_COINS=500,INV_LV=3;
@@ -5289,6 +5358,10 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-23.4',d:'23.09.2026',items:[
+    '👏 Reaktionen: schick Freunden 👏 🔥 😂 💪 😮 ❤️ (auf der Seite eines Freundes)',
+    '🏆 Team-Liga: alle Teams kämpfen jede Woche um Platz 1 – die Top 3 bekommen Münzen',
+    '🛠️ Hinter den Kulissen: neue Werkzeuge, damit dein Feedback schneller ankommt']},
   {v:'2026-09-23.3',d:'23.09.2026',items:[
     '📋 Ergebnis teilen: Bild jetzt direkt in die Zwischenablage kopieren und überall einfügen',
     '👋 Unter „Freunde“ findest du jetzt den Entwickler Mxcks0 mit einem Klick']},
@@ -5408,6 +5481,102 @@ function shareFromLines(game,lines){
   const big=nums.length?Math.max(...nums):'';shareResult({game,big:big===''?'🎮':fmtN(big),unit:'',line:plain})}
 let curGameName='';
 
+/* ---------- Reaktionen an Freunde: nur feste Emojis, kein freier Text ---------- */
+const RX=['👏','🔥','😂','💪','😮','❤️'],RX_DAYS=3;
+const agoShort=t=>{const m=Math.round((Date.now()-t)/6e4);if(m<1)return 'gerade eben';if(m<60)return `vor ${m} Min.`;const h=Math.round(m/60);if(h<24)return `vor ${h} Std.`;const dd=Math.round(h/24);return `vor ${dd} ${dd===1?'Tag':'Tagen'}`};
+function rxOutgoing(){const now=Date.now();return (Store.data.rxOut||[]).filter(r=>now-r.t<RX_DAYS*864e5).slice(-20)}
+function rxIncoming(){const me=myUid(),now=Date.now();if(!me)return [];
+  return Social.friends.flatMap(f=>(f.rx||[]).filter(r=>r&&r.to===me&&now-r.t<RX_DAYS*864e5&&RX.includes(r.e)).map(r=>({...r,from:f}))).sort((a,b)=>b.t-a.t)}
+function rxSend(f,e){
+  const d=Store.data,now=Date.now(),last=(d.rxOut||[]).filter(r=>r.to===f.uid).pop();
+  if(last&&now-last.t<8000){toast(e,'Kurz warten','Du hast gerade erst reagiert.');return}
+  d.rxOut=(d.rxOut||[]).concat({id:now.toString(36)+rnd(10,99),to:f.uid,e,t:now}).slice(-20);Store.save();Store.push();
+  toast(e,`An ${f.name} geschickt`,'');Sound.ok()}
+function rxNotify(){
+  const d=Store.data;d.rxSeen=d.rxSeen||[];let n=0;
+  rxIncoming().forEach(r=>{if(d.rxSeen.includes(r.id))return;d.rxSeen.push(r.id);n++;if(!activity)toast(r.e,`${r.from.name} hat dir ${r.e} geschickt`,'')});
+  if(n){d.rxSeen=d.rxSeen.slice(-80);Store.save()}}
+const rxBar=(uid,set=RX)=>`<div class="rxbar">${set.map(e=>`<button class="rxb" data-rx="${e}" data-rxu="${esc(uid)}" title="${e} schicken" aria-label="${e} schicken">${e}</button>`).join('')}</div>`;
+function rxPanel(){const inc=rxIncoming().slice(0,5);if(!inc.length)return '';
+  return `<div class="panel rx-panel"><h3>Reaktionen</h3>${inc.map(r=>`<div class="fr-u">${fAva(r.from)}<div class="nm"><b>${esc(r.from.name)} <span class="rxe">${r.e}</span></b><span>${agoShort(r.t)}</span></div>${rxBar(r.from.uid,['👏','🔥','😂'])}</div>`).join('')}</div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-rx]');if(!b)return;const f=Social.friends.find(x=>x.uid===b.dataset.rxu);if(f)rxSend(f,b.dataset.rx)});
+
+/* ---------- Team-Liga: alle Teams nach XP dieser Woche ---------- */
+const TL_PRIZE=[500,300,200];
+const prevWeekId=()=>weekId(Date.now()-7*864e5);
+let tlCache={t:0,rows:null};
+async function teamLeague(force){
+  if(!force&&tlCache.rows&&Date.now()-tlCache.t<6e4)return tlCache.rows;
+  const ps=await window.fbTeamLeague(),me=myUid(),d=Store.data,k=weekId(),pk=prevWeekId(),m=new Map();
+  const add=(id,name,st)=>{if(!id)return;const t=m.get(id)||{id,name:'',n:0,xp:0,prev:0};t.n++;if(!t.name&&name)t.name=name;
+    const w=(st||{}).wk||{},wp=(st||{}).wkPrev||{};t.xp+=w.k===k?(w.xp||0):0;t.prev+=w.k===pk?(w.xp||0):wp.k===pk?(wp.xp||0):0;m.set(id,t)};
+  ps.filter(p=>p.uid!==me).forEach(p=>add(p.team,p.teamName,p.stats));
+  if(d.team)add(d.team.id,d.team.name,{wk:wkXp(),wkPrev:d.wkPrev});
+  const rows=[...m.values()].map(t=>({...t,name:t.name||'Team'}));tlCache={t:Date.now(),rows};return rows}
+/* Montags: Preis für die Top 3 der Vorwoche abholen (nur wer schon vor Wochenbeginn im Team war) */
+async function teamLeagueClaim(){
+  const d=Store.data,pk=prevWeekId();if(!d.team||d.tlClaim===pk||!window.fbTeamLeague)return;
+  if((d.team.since||0)>=new Date(weekId()+'T00:00:00').getTime()){d.tlClaim=pk;Store.save();return}
+  let rows;try{rows=await teamLeague()}catch(e){return}
+  const ranked=rows.filter(r=>r.prev>0).sort((a,b)=>b.prev-a.prev),i=ranked.findIndex(r=>r.id===d.team.id);d.tlClaim=pk;
+  if(i>=0&&i<3){d.coins+=TL_PRIZE[i];toast(['🥇','🥈','🥉'][i],`Team-Liga: Platz ${i+1}!`,`${d.team.name} war letzte Woche auf Platz ${i+1} (+${TL_PRIZE[i]} 🪙)`);Sound.level()}
+  Store.save();refreshMe(true)}
+async function renderTeamLeague(){
+  const el=$('#tleague'),d=Store.data;if(!el||!d.team)return;
+  let rows;try{rows=await teamLeague(true)}catch(e){console.warn('Team-Liga:',e);el.innerHTML='<h3>🏆 Team-Liga</h3><p class="muted small">Konnte nicht geladen werden.</p>';return}
+  const ranked=rows.filter(r=>r.xp>0||r.id===d.team.id).sort((a,b)=>b.xp-a.xp),mi=ranked.findIndex(r=>r.id===d.team.id);
+  const row=(r,i)=>`<div class="lg-row${r.id===d.team.id?' me':''}"><span class="pos">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="nm">🛡️ ${esc(r.name)} <small class="ttl">${r.n} ${r.n===1?'Mitglied':'Mitglieder'}</small></span><span class="lp">${fmtN(r.xp)} XP</span></div>`;
+  if(!$('#tleague'))return;
+  el.innerHTML=`<div class="wq-h"><h3>🏆 Team-Liga</h3><span class="muted small">${mi>=0?`Platz ${mi+1} von ${ranked.length}`:''}</span></div>
+    ${ranked.slice(0,10).map(row).join('')}${mi>=10?`<div class="lg-cut">···</div>${row(ranked[mi],mi)}`:''}
+    <p class="muted small" style="margin:8px 0 0">Alle Teams nach XP dieser Woche. Am Montag bekommt jedes Mitglied der Top 3: 🥇 ${TL_PRIZE[0]} · 🥈 ${TL_PRIZE[1]} · 🥉 ${TL_PRIZE[2]} 🪙</p>`;
+  teamLeagueClaim()}
+
+/* ---------- Entwicklerbereich: Statistik und Feedback (nur für Admins) ---------- */
+let isAdm=false,admSub='stats';
+async function adminInit(){if(!window.fbAdmin)return;isAdm=await window.fbAdmin.isAdmin();if(isAdm){adminBadge();setInterval(()=>{if(document.visibilityState==='visible')adminBadge()},12e4)}}
+async function adminBadge(){
+  if(!isAdm)return;let n=0;try{n=await window.fbAdmin.newFeedback(Store.data.fbSeenAt||0)}catch(e){return}
+  const t=$('.tab[data-tab="profile"]');let b=$('#admb');if(!b&&t){t.insertAdjacentHTML('beforeend','<span class="tbadge" id="admb" hidden></span>');b=$('#admb')}
+  if(b){b.hidden=!n;b.textContent=n;b.title=`${n} neue Feedbacks`}}
+const FB_KIND={bug:['🐞','Fehler'],idea:['💡','Idee'],other:['💬','Sonstiges']};
+const dtText=t=>t?new Date(t).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'–';
+async function viewAdmin(){
+  if(!isAdm){profSub='ach';go('ach');return}
+  main.innerHTML=`${profileTop('admin')}<div class="adm-head"><div class="seg" id="admsub">${[['stats','📊 Statistik'],['fb','💬 Feedback']].map(([k,v])=>`<button data-as="${k}" aria-pressed="${k===admSub}">${v}</button>`).join('')}</div>
+    <button class="btn ghost small" id="admre">↻ Aktualisieren</button></div><div id="admbody"><p class="muted">Wird geladen…</p></div>`;
+  $$('#admsub button').forEach(b=>b.onclick=()=>{admSub=b.dataset.as;viewAdmin()});$('#admre').onclick=viewAdmin;
+  const box=$('#admbody');
+  if(admSub==='fb'){
+    let list;try{list=await window.fbAdmin.feedback()}catch(e){box.innerHTML='<p class="muted">Feedback konnte nicht geladen werden. Sind die Datenbank-Regeln aktuell?</p>';return}
+    const seen=Store.data.fbSeenAt||0;Store.data.fbSeenAt=Date.now();Store.save();adminBadge();
+    if(!$('#admbody'))return;
+    box.innerHTML=list.length?`<div class="fbk-list">${list.map(f=>{const [i,l]=FB_KIND[f.kind]||FB_KIND.other;return `<div class="panel fbk${f.createdAt>seen?' new':''}" data-fid="${esc(f.id)}">
+      <div class="fbk-h"><span class="fbk-k">${i} ${l}</span><b>${esc(f.name||'?')}</b><span class="muted small">${dtText(f.createdAt)}${f.createdAt>seen?' · <em>neu</em>':''}</span><button class="btn ghost small" data-fdel="${esc(f.id)}">✓ Erledigt</button></div>
+      <p class="fbk-t">${esc(f.text||'')}</p><p class="muted small fbk-m">Seite: ${esc(f.page||'–')} · Version ${esc(f.v||'–')} · ${esc((f.ua||'').replace(/^Mozilla\/5\.0 /,'').slice(0,90))}</p></div>`}).join('')}</div>`
+      :'<div class="panel"><p class="muted">Noch kein Feedback da.</p></div>';
+    $$('[data-fdel]',box).forEach(b=>b.onclick=async()=>{b.disabled=true;try{await window.fbAdmin.delFeedback(b.dataset.fdel);b.closest('.fbk').remove()}catch(e){b.disabled=false;toast('⚠️','Löschen fehlgeschlagen','Sind die Datenbank-Regeln aktuell?')}});
+    return}
+  let c,rec,newest;
+  try{[c,rec,newest]=await Promise.all([window.fbAdmin.counts(),window.fbAdmin.recent(300),window.fbAdmin.newest(10)])}catch(e){console.warn('Admin:',e);box.innerHTML='<p class="muted">Statistik konnte nicht geladen werden.</p>';return}
+  if(!$('#admbody'))return;
+  const day=new Date();day.setHours(0,0,0,0);const now=Date.now();
+  const online=rec.filter(p=>p.seen>now-5*6e4),today=rec.filter(p=>p.lastActive>=day.getTime());
+  const plays={};rec.forEach(p=>Object.entries((p.stats||{}).plays||{}).forEach(([m,n])=>{const g=MODE2GAME[m]||m;plays[g]=(plays[g]||0)+(+n||0)}));
+  const top=Object.entries(plays).sort((a,b)=>b[1]-a[1]).slice(0,12),max=top.length?top[0][1]:1;
+  const label=g=>{const x=GAMES.find(y=>y.id===g);return x?`${x.i} ${x.n}`:g==='lesson'?'📚 Lektionen':g==='free'?'✍️ Freies Üben':g==='code'?'💻 Code-Tippen':g==='tour'?'🏆 Wochen-Turnier':esc(MODE_LABEL[g]||g)};
+  const who=p=>`<span class="adm-who">${fAva(p)} <b>${nameHTML(p.name,p.nameFx)}</b></span>`;
+  box.innerHTML=`<div class="cards compact adm-cards">
+      <div class="card"><b>${fmtN(c.total)}</b><span>Spieler gesamt</span></div><div class="card"><b>${fmtN(c.today)}</b><span>heute aktiv</span></div>
+      <div class="card"><b>${fmtN(c.week)}</b><span>in 7 Tagen aktiv</span></div><div class="card"><b>🟢 ${fmtN(online.length)}</b><span>gerade online</span></div></div>
+    <div class="adm-grid">
+      <div class="panel"><h3>Heute aktiv <span class="muted small">${today.length}</span></h3>${today.map(p=>`<div class="adm-row"><span class="dot${p.seen>now-5*6e4?' on':''}"></span>${who(p)}<span class="muted small">Lv ${p.level||1}</span><span class="muted small">${agoShort(p.lastActive)}</span></div>`).join('')||'<p class="muted small">Heute noch niemand.</p>'}</div>
+      <div class="adm-col">
+        <div class="panel"><h3>Beliebteste Spiele</h3>${top.map(([g,n])=>`<div class="adm-bar"><span>${label(g)}</span><i style="--w:${n/max*100}%"></i><b>${fmtN(n)}</b></div>`).join('')||'<p class="muted small">Spielzahlen werden ab jetzt gesammelt und erscheinen, sobald Spieler neue Runden spielen.</p>'}
+          <p class="muted small" style="margin:8px 0 0">Gezählte Runden der ${rec.length} zuletzt aktiven Spieler.</p></div>
+        <div class="panel"><h3>Neueste Spieler</h3>${newest.map(p=>`<div class="adm-row">${who(p)}<span class="muted small">Lv ${p.level||1}</span><span class="muted small">${dtText(p.createdAt)}</span></div>`).join('')||'<p class="muted small">Keine Daten.</p>'}</div>
+      </div></div>`}
+
 /* ---------- Leagues ---------- */
 const LEAGUES=[['Bronze','🥉','#C98B5A',60],['Silber','🥈','#B8C2CC',90],['Gold','🥇','#FFC857',120],['Platin','💠','#7FE0D4',155],['Jade','🍀','#5FD38D',190],['Smaragd','💚','#2ECC71',230],['Saphir','🔷','#4F8BFF',270],
   ['Rubin','♦️','#FF5A6E',315],['Amethyst','🔮','#B36BFF',360],['Diamant','💎','#7CC8FF',410],['Meister','🏆','#B79CFF',470],['Großmeister','🎖️','#FF9F43',540],['Champion','⚔️','#FF6B6B',620],['Legende','👑','#FF8FB8',720]];
@@ -5506,7 +5675,7 @@ let friendSel=null,friendSub='overview',friendSort='level',frSearchT=0,frLastQ='
 
 /* Wird vom Firebase-Modul aufgerufen, sobald sich Freunde oder Anfragen ändern */
 function onSocial(s){
-  Object.assign(Social,s,{ready:true});chNotify();updateFriendBadge();
+  Object.assign(Social,s,{ready:true});chNotify();rxNotify();updateFriendBadge();
   if(currentTab==='friends'&&!activity&&!$('.modal'))renderFriendsLive();
 }
 function updateFriendBadge(){const b=$('#frb');if(!b)return;const n=Social.incoming.length+chIncoming().length;b.hidden=!n;b.textContent=n}
@@ -5525,12 +5694,12 @@ function publicSummary(){
       count:d.count||d.history.length,totalSecs:Math.round(d.totalSecs||0),strokes:d.strokes||0,ach:Object.keys(d.ach).length,
       lessons:d.lessons||{},high:d.high||{},ghosts:flag(d.ghosts),story:flag(d.story),daily,
       league:{week:String(L.week),lp:L.lp||0,idx:L.idx||0,prevWeek:h0?String(h0.week):'',prevLp:h0?(h0.lp||0):0},
-      wk:wkXp()},
+      wk:wkXp(),wkPrev:Store.data.wkPrev||null,plays:d.plays||{}},
     prestige:d.prestige||0,
     team:(d.team&&d.team.id)||'',teamName:(d.team&&d.team.name)||'',
     tourKey:(d.tour&&d.tour.k)||'',tour:d.tour?{wpm:d.tour.wpm,acc:d.tour.acc}:{},
     tourPrevKey:(d.tourPrev&&d.tourPrev.k)||'',tourPrev:d.tourPrev?{wpm:d.tourPrev.wpm,acc:d.tourPrev.acc}:{},
-    ch:chOutgoing(),chr:chAnswers()
+    ch:chOutgoing(),chr:chAnswers(),rx:rxOutgoing()
   };
 }
 
@@ -5619,7 +5788,7 @@ function renderFriendsLive(){
   let h='';
   if(Social.incoming.length)h+=`<div class="panel"><h3>Anfragen <span class="muted small">${Social.incoming.length}</span></h3>${Social.incoming.map(u=>`<div class="fr-u">${fAva(u)}<div class="nm"><b>${esc(u.name)}</b><span>Level ${u.level} · möchte dein Freund sein</span></div><div class="acts"><button class="btn primary small" data-fa="${u.uid}">Annehmen</button><button class="btn ghost small" data-fd="${u.uid}" aria-label="Ablehnen" title="Ablehnen">✕</button></div></div>`).join('')}</div>`;
   if(Social.outgoing.length)h+=`<div class="panel"><h3>Gesendet</h3>${Social.outgoing.map(u=>`<div class="fr-u">${fAva(u)}<div class="nm"><b>${esc(u.name)}</b><span>Wartet auf Bestätigung</span></div><button class="btn ghost small" data-fc="${u.uid}">Zurückziehen</button></div>`).join('')}</div>`;
-  h=chPanel()+h;
+  h=chPanel()+rxPanel()+h;
   req.innerHTML=h;
   $$('[data-cp]',req).forEach(b=>b.onclick=()=>startGame(b.dataset.cp));
   $$('[data-cx]',req).forEach(b=>b.onclick=()=>chDecline(b.dataset.cx));
@@ -5677,6 +5846,7 @@ function viewFriend(f){
       <button class="btn small" id="fdchs">⚔️ Rekord-Challenge</button>
       <button class="btn ghost small" id="fdrm">Entfernen</button>
     </div>
+    <div class="fd-rx"><span class="muted small">Schick ${esc(f.name)} eine Reaktion:</span>${rxBar(f.uid)}</div>
     <div id="fdbody"></div></div>`;
   $('#fdback').onclick=()=>{friendSel=null;go('friends')};
   $$('#fdsub button').forEach(b=>b.onclick=()=>{friendSub=b.dataset.fsub;viewFriend(f)});
@@ -5958,6 +6128,7 @@ window.startApp=async function(user,regName){
   applySettings();applyDonate();
   checkAch(null);
   wqEnsure();
+  adminInit();setTimeout(teamLeagueClaim,4000);
   // Über einen Einladungslink registriert: Startbonus
   if(window.zfRefUsed&&!Store.data.refBonus){Store.data.refBonus=1;Store.data.coins+=INV_NEW;Store.data.notice={i:'🎉',t:'Willkommensbonus',s:`Du wurdest eingeladen: +${INV_NEW} 🪙`}}
   // Meisterschaft rückwirkend für bestehende Rekorde, mit einer einzigen Meldung statt vielen
