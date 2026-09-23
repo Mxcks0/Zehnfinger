@@ -1597,6 +1597,66 @@ body.kbt-steampunk .kb::after{content:'⚙';position:absolute;right:-12px;top:-1
 .today.online-hero em{color:var(--f1)}
 .today.online-hero .go{background:var(--f1);color:#10152e}
 @media (max-width:900px){.today-row{grid-template-columns:1fr}}
+/* ---- Spiele-Übersicht v2: Abschnitte statt Seiten ---- */
+.grecent{display:flex;gap:8px;align-items:center;overflow-x:auto;scrollbar-width:none;margin:14px 0 0;padding-bottom:2px}
+.grecent::-webkit-scrollbar{display:none}
+.grecent-l{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;margin-right:4px}
+.gchip{font:inherit;font-size:14px;font-weight:600;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 8px;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;flex:none;transition:border-color .12s}
+.gchip span{width:24px;height:24px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:14px}
+.gchip:hover{border-color:var(--muted)}
+.gtools{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+.gtools .gfilter{margin:0;padding:0;border:0}
+.gsearch{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 14px;min-width:220px;flex:0 1 280px}
+.gsearch span{font-size:13px;opacity:.7}
+.gsearch input{font:inherit;font-size:14px;color:var(--text);background:none;border:0;outline:0;padding:7px 0;width:100%}
+.gsearch:focus-within{border-color:var(--caret)}
+.gsec{margin-top:26px}
+.gsec-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.gsec-i{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:20px;background:color-mix(in srgb,var(--gc) 18%,var(--surface));border:1px solid color-mix(in srgb,var(--gc) 45%,transparent);flex:none}
+.gsec-h h2{margin:0;font-size:20px;line-height:1.2}
+.gsec-h h2 em{font-style:normal;font-size:13px;font-weight:600;color:var(--muted);margin-left:4px}
+.gsec-h p{margin:1px 0 0}
+.gsec .gtiles{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.gsec .gtile{border-top:3px solid color-mix(in srgb,var(--gc) 70%,transparent)}
+.gsec .gtile:hover{border-color:var(--gc)}
+.gsec .gtile .gi{background:color-mix(in srgb,var(--gc) 16%,var(--surface2))}
+.gsec .gtile .gs{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em}
+.gsec .gtile em{color:var(--gc)}
+.gnone{margin-top:28px;text-align:center}
+@media (max-width:640px){.gsearch{flex:1 1 100%;min-width:0}.gsec .gtiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Neue Spiele */
+.mole-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:min(560px,100%)}
+.mhole{position:relative;height:clamp(78px,13vh,112px);border-radius:50% 50% 18px 18px/34% 34% 18px 18px;background:radial-gradient(90% 60% at 50% 88%,color-mix(in srgb,var(--text) 22%,var(--bg)),var(--surface2) 72%);border:1px solid var(--line);overflow:hidden;display:grid;place-items:end center}
+.mole{display:grid;justify-items:center;gap:2px;transform:translateY(105%);transition:transform .16s ease-out;padding-bottom:6px}
+.mhole.up .mole{transform:translateY(0)}
+.mole .me{font-size:clamp(26px,4.5vh,38px);line-height:1}
+.mole .mw{font-family:var(--mono);font-size:15px;font-weight:600;background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:1px 8px}
+.mole .mw i{font-style:normal;color:var(--caret)}
+.mhole.gold .mw{border-color:var(--caret);color:var(--caret)}
+.mhole.hurry .mw{border-color:var(--bad)}
+
+.bomb{display:grid;justify-items:center;gap:6px;width:100%}
+.bomb .be{font-size:clamp(44px,8vh,72px);line-height:1;transition:transform .1s}
+.bomb.tick .be{animation:bombtick .5s infinite}
+@keyframes bombtick{50%{transform:scale(1.08) rotate(-4deg)}}
+.fuse{width:min(420px,80%);height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.fuse i{display:block;height:100%;background:linear-gradient(90deg,var(--bad),var(--caret));border-radius:4px}
+.bcode{font-family:var(--mono);font-size:clamp(24px,4.4vw,40px);font-weight:600;letter-spacing:.04em;text-align:center;word-break:break-all}
+.bcode .ok{color:var(--good)}
+.bcode .cur{border-bottom:3px solid var(--caret)}
+.bcode .todo{color:var(--muted)}
+.hang{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;width:min(640px,100%)}
+.hang svg{width:clamp(110px,18vh,160px);height:auto;stroke:var(--text);stroke-width:5;stroke-linecap:round;fill:none}
+.hang svg .p{opacity:.1;transition:opacity .2s,stroke .2s}
+.hang svg .p.on{opacity:1;stroke:var(--bad)}
+.hang svg .base{stroke:var(--muted)}
+.hword{font-family:var(--mono);font-size:clamp(26px,4.6vw,42px);font-weight:600;letter-spacing:.18em;word-break:break-all}
+.hword .miss{color:var(--bad)}
+.hused{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.hused span{font-family:var(--mono);font-size:14px;width:26px;height:28px;display:grid;place-items:center;border-radius:6px;background:var(--surface2);color:var(--muted)}
+.hused span.hit{background:color-mix(in srgb,var(--good) 25%,var(--surface2));color:var(--good)}
+.hused span.bad{background:color-mix(in srgb,var(--bad) 22%,var(--surface2));color:var(--bad);text-decoration:line-through}
+@media (max-width:640px){.hang{grid-template-columns:1fr;justify-items:center;text-align:center}.hused{justify-content:center}}
 .on-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start}
 .on-grid .panel{margin-top:0;padding:14px 16px}
 .on-grid h3{margin:0 0 10px;font-size:17px}
@@ -3209,7 +3269,7 @@ function codeGame(lang){
 }
 
 /* ---------- Views: Games ---------- */
-const GAME_SECS=[['tempo','Tempo','Schnell und sauber gegen Uhr und Gegner'],['arcade','Arcade','Action mit Punkten und Leben'],['brain','Köpfchen','Reaktion, Gedächtnis und Geschichten'],['code','Programmieren','Echten Code tippen – mit Klammern und Einrückung']];
+const GAME_SECS=[['tempo','Tempo','Schnell und sauber gegen Uhr und Gegner','🏁','--f4'],['arcade','Arcade','Action mit Punkten und Leben','🕹️','--f5'],['brain','Köpfchen','Reaktion, Gedächtnis und Geschichten','🧠','--f1'],['code','Programmieren','Echten Code tippen – mit Klammern und Einrückung','💻','--f2']];
 const GAMES=[
  {id:'daily',cat:'today',i:'📅',n:'Tägliche Challenge',s:'Jeden Tag ein neuer Text',rec:d=>{const k=(isEN()?'en-':'')+dayKey();return d.daily[k]?`Heute ${d.daily[k].wpm} WPM`:'Heute noch offen'}},
  {id:'timed',cat:'tempo',i:'⏱️',n:'Zeit-Challenge',s:'Wörter gegen die Uhr',rec:d=>`${d.high.sixty||0} WPM`},
@@ -3219,6 +3279,7 @@ const GAMES=[
  {id:'duel',cat:'tempo',i:'🤖',n:'KI-Duell',s:'Ein Gegner, der mitwächst',rec:d=>`${d.high.duel||0} WPM geschlagen`},
  {id:'ladder',cat:'tempo',i:'🪜',n:'Tempo-Leiter',s:'Jede Stufe 5 WPM schneller',rec:d=>`${d.high.ladder||0} WPM erreicht`},
  {id:'sudden',cat:'tempo',i:'💥',n:'Sudden Death',s:'Ein Fehler, Runde vorbei',rec:d=>`${d.high.sudden||0} Zeichen`},
+ {id:'bomb',cat:'tempo',i:'💣',n:'Bombe entschärfen',s:'Tippe den Code, bevor der Zünder abläuft',rec:d=>`${d.high.bomb||0} entschärft`},
  {id:'rain',cat:'arcade',i:'🌧️',n:'Wortregen',s:'Wörter stapeln sich',rec:d=>`${d.high.rain||0} Punkte`},
  {id:'blaster',cat:'arcade',i:'🚀',n:'Wort-Blaster',s:'Schieß Wörter ab',rec:d=>`${d.high.blaster||0} Punkte`},
  {id:'zombie',cat:'arcade',i:'🧟',n:'Zombie-Angriff',s:'Angriff von allen Seiten',rec:d=>`${d.high.zombie||0} Punkte`},
@@ -3227,6 +3288,7 @@ const GAMES=[
  {id:'balloon',cat:'arcade',i:'🎈',n:'Ballon-Platzen',s:'Einzelne Buchstaben, ideal zum Start',rec:d=>`${d.high.balloon||0} Punkte`},
  {id:'runner',cat:'arcade',i:'🏃',n:'Endlos-Läufer',s:'Spring über Hindernisse',rec:d=>`${d.high.runner||0} Punkte`},
  {id:'rhythm',cat:'arcade',i:'🥁',n:'Rhythmus',s:'Tasten im Takt',rec:d=>`${d.high.rhythm||0} Punkte`},
+ {id:'mole',cat:'arcade',i:'🔨',n:'Maulwurf-Jagd',s:'Tippe die Wörter, bevor die Maulwürfe abtauchen',rec:d=>`${d.high.mole||0} Punkte`},
  {id:'blitz',cat:'brain',i:'⚡',n:'Blitztasten',s:'Reaktionstest',rec:d=>d.high.blitz?`${d.high.blitz} ms`:'–'},
  {id:'memory',cat:'brain',i:'🧠',n:'Gedächtnis',s:'Aus dem Kopf tippen',rec:d=>`${d.high.memory||0} Zeichen`},
  {id:'anagram',cat:'brain',i:'🔀',n:'Buchstabensalat',s:'Ordne die Buchstaben',rec:d=>`${d.high.anagram||0} Punkte`},
@@ -3234,34 +3296,50 @@ const GAMES=[
  {id:'kitchen',cat:'brain',i:'🍳',n:'Küchen-Chaos',s:'Zutaten tippen, Bestellungen retten',rec:d=>`${d.high.kitchen||0} Punkte`},
  {id:'puzzle',cat:'brain',i:'🧱',n:'Satz-Puzzle',s:'Wörter in die richtige Reihenfolge',rec:d=>`${d.high.puzzle||0} Punkte`},
  {id:'math',cat:'brain',i:'🔢',n:'Kopfrechnen',s:'Zahlenreihe mit Köpfchen',rec:d=>`${d.high.math||0} Punkte`},
+ {id:'hangman',cat:'brain',i:'❓',n:'Galgenraten',s:'Errate das Wort Buchstabe für Buchstabe',rec:d=>`${d.high.hangman||0} Wörter`},
  {id:'story',cat:'brain',i:'📖',n:'Story-Modus',s:'Geschichte mit Entscheidungen',rec:d=>`${Object.keys(d.story).length}/3 Enden`},
  ...Object.entries(CODE_LANGS).map(([k,L])=>({id:'code:'+k,cat:'code',i:L.i,n:L.n,s:L.d,rec:d=>`${d.high['code_'+k]||0} WPM`}))
 ];
-const NEW_GAMES=new Set(['online','tower','balloon','duel','kitchen','puzzle','math']);
-const MODE2GAME={online:'online',sixty:'timed',timed:'timed',race:'race',ghost:'ghost',sudden:'sudden',ladder:'ladder',duel:'duel',rain:'rain',blaster:'blaster',zombie:'zombie',runner:'runner',tower:'tower',balloon:'balloon',boss:'boss',rhythm:'rhythm',blitz:'blitz',memory:'memory',story:'story',anagram:'anagram',gaps:'gaps',kitchen:'kitchen',puzzle:'puzzle',math:'math'};
-let gameFilter='all';
+const NEW_GAMES=new Set(['bomb','mole','hangman']);
+const MODE2GAME={bomb:'bomb',mole:'mole',hangman:'hangman',online:'online',sixty:'timed',timed:'timed',race:'race',ghost:'ghost',sudden:'sudden',ladder:'ladder',duel:'duel',rain:'rain',blaster:'blaster',zombie:'zombie',runner:'runner',tower:'tower',balloon:'balloon',boss:'boss',rhythm:'rhythm',blitz:'blitz',memory:'memory',story:'story',anagram:'anagram',gaps:'gaps',kitchen:'kitchen',puzzle:'puzzle',math:'math'};
+let gameFilter='all',gameQuery='';
+/* Spiele-Übersicht: alle Spiele auf einer Seite, nach Kategorie gruppiert. Online-Duell und
+   Tägliche Challenge stehen oben als große Karten und nicht noch einmal im Raster. */
 function viewGames(){
   const d=Store.data,D=GAMES[0],done=!!d.daily[(isEN()?'en-':'')+dayKey()];
   const codeMap={Python:'code:py',JavaScript:'code:js','HTML & CSS':'code:web',SQL:'code:sql'};
-  const recent=[...new Set(d.history.slice().reverse().map(h=>h.mode==='code'?codeMap[(h.label||'').replace('Code: ','')]:MODE2GAME[h.mode]).filter(Boolean))].slice(0,8).map(id=>GAMES.find(g=>g.id===id)).filter(Boolean);
-  const tabs=[['all','Alle',GAMES.length-1],...(recent.length?[['recent','Zuletzt',recent.length]]:[]),...GAME_SECS.map(([k,t])=>[k,t,GAMES.filter(g=>g.cat===k).length])];
-  if(!tabs.some(t=>t[0]===gameFilter))gameFilter='all';
-  const list=gameFilter==='all'?GAMES.filter(g=>g.cat!=='today'):gameFilter==='recent'?recent:GAMES.filter(g=>g.cat===gameFilter);
-  const tile=g=>`<button class="gtile" data-g="${g.id}">${NEW_GAMES.has(g.id)?'<span class="newb">Neu</span>':''}<span class="gi">${g.i}</span><b>${g.n}</b><span class="gs">${g.s}</span><em>${g.rec(d)}</em></button>`;
-  main.innerHTML=`<div class="games-head"><div class="page-head"><h1 class="ph">Spiele</h1><p class="muted">${GAMES.length-1} Spiele für Tempo, Treffsicherheit und Reaktion.</p></div>
+  const pool=GAMES.filter(g=>g.cat!=='today'&&g.id!=='online');
+  const recent=[...new Set(d.history.slice().reverse().map(h=>h.mode==='code'?codeMap[(h.label||'').replace('Code: ','')]:MODE2GAME[h.mode]).filter(Boolean))].map(id=>pool.find(g=>g.id===id)).filter(Boolean).slice(0,6);
+  if(!['all',...GAME_SECS.map(s=>s[0])].includes(gameFilter))gameFilter='all';
+  const secOf=k=>GAME_SECS.find(s=>s[0]===k)||[];
+  const tile=g=>`<button class="gtile" data-g="${g.id}">${NEW_GAMES.has(g.id)?'<span class="newb">Neu</span>':''}<span class="gi">${g.i}</span><b>${g.n}</b><span class="gs">${g.s}</span><em>${safeRec(g,d)}</em></button>`;
+  main.innerHTML=`<div class="games-head"><div class="page-head"><h1 class="ph">Spiele</h1><p class="muted">${pool.length+1} Spiele für Tempo, Treffsicherheit und Reaktion.</p></div>
     <div class="langsw"><div class="seg" id="glang"><button data-l="de" aria-pressed="${!isEN()}">🇩🇪 Deutsch</button><button data-l="en" aria-pressed="${isEN()}">🇬🇧 English</button></div></div></div>
     <div class="today-row"><button class="today${done?' done':''}" data-g="daily"><span class="gi">${D.i}</span><span class="tt"><b>${D.n}</b><span class="muted small">${D.s}, ${new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})}</span></span><em>${D.rec(d)}</em><span class="go">${done?'Nochmal':'Spielen'}</span></button>
     <button class="today online-hero" id="onhero"><span class="gi">🌐</span><span class="tt"><b>Online-Duell</b><span class="muted small">${(()=>{const n=Social.friends.filter(isOnline).length;return n?`${n} ${n===1?'Freund ist':'Freunde sind'} gerade online`:'Fordere deine Freunde live heraus'})()}</span></span><em>${d.high.online||0} ${(d.high.online||0)===1?'Sieg':'Siege'}</em><span class="go">Herausfordern</span></button></div>
-    <div class="gfilter" role="tablist">${tabs.map(([k,t,n])=>`<button data-gf="${k}" aria-pressed="${k===gameFilter}">${t} <em>${n}</em></button>`).join('')}${gameFilter!=='all'&&gameFilter!=='recent'?`<span class="muted small gdesc">${(GAME_SECS.find(x=>x[0]===gameFilter)||[])[2]||''}</span>`:''}</div>
-    <div id="ggrid"></div>`;
+    ${recent.length?`<div class="grecent"><span class="grecent-l">Weiterspielen</span>${recent.map(g=>`<button class="gchip" data-g="${g.id}"><span>${g.i}</span>${g.n}</button>`).join('')}</div>`:''}
+    <div class="gtools"><div class="gfilter" role="tablist"><button data-gf="all" aria-pressed="${gameFilter==='all'}">Alle <em>${pool.length}</em></button>${GAME_SECS.map(([k,t,,ic])=>`<button data-gf="${k}" aria-pressed="${k===gameFilter}">${ic} ${t} <em>${pool.filter(g=>g.cat===k).length}</em></button>`).join('')}</div>
+      <label class="gsearch"><span aria-hidden="true">🔍</span><input id="gq" type="search" placeholder="Spiel suchen …" autocomplete="off" value="${esc(gameQuery)}"></label></div>
+    <div id="gsecs"></div>`;
+  const draw=()=>{
+    const q=gameQuery.trim().toLowerCase(),hit=g=>!q||(g.n+' '+g.s).toLowerCase().includes(q);
+    const secs=GAME_SECS.filter(s=>gameFilter==='all'||s[0]===gameFilter).map(s=>[s,pool.filter(g=>g.cat===s[0]&&hit(g))]).filter(([,l])=>l.length);
+    $('#gsecs').innerHTML=secs.map(([[k,t,desc,ic,col],l])=>`<section class="gsec" style="--gc:var(${col})"><div class="gsec-h"><span class="gsec-i">${ic}</span><div><h2>${t} <em>${l.length}</em></h2><p class="muted small">${desc}</p></div></div>
+      <div class="gtiles">${l.map(tile).join('')}</div></section>`).join('')||`<p class="muted gnone">Kein Spiel gefunden für „${esc(gameQuery)}“.</p>`;
+    $$('#gsecs [data-g]').forEach(b=>b.onclick=()=>startGame(b.dataset.g))};
+  draw();
   $('.today[data-g=daily]').onclick=()=>startGame('daily');$('#onhero').onclick=()=>go('online');
-  $$('[data-gf]').forEach(b=>b.onclick=()=>{gameFilter=b.dataset.gf;viewGames()});
+  $$('.gchip').forEach(b=>b.onclick=()=>startGame(b.dataset.g));
+  $$('[data-gf]').forEach(b=>b.onclick=()=>{gameFilter=b.dataset.gf;$$('[data-gf]').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
+  $('#gq').oninput=e=>{gameQuery=e.target.value;draw()};
   $$('#glang button').forEach(b=>b.onclick=()=>{Store.data.settings.gameLang=b.dataset.l;Store.save();viewGames()});
-  paged($('#ggrid'),'games-'+gameFilter,'gtiles',list,tile,grid=>$$('[data-g]',grid).forEach(b=>b.onclick=()=>startGame(b.dataset.g)));
 }
 function startGame(k){
   const S=Store.data.settings;
   if(k==='online')return go('online');
+  if(k==='bomb')return bombGame();
+  if(k==='mole')return moleGame();
+  if(k==='hangman')return hangmanGame();
   if(k.startsWith('code:'))return codeGame(k.slice(5));
   if(k==='ladder')return practice(ladderCfg(1));
   if(k==='duel')return practice(duelCfg());
@@ -3900,9 +3978,135 @@ function mathGame(){
   });
 }
 
+/* Wörter nur aus Kleinbuchstaben (ohne ß), für Spiele, die Buchstabe für Buchstabe prüfen */
+const plainWords=(min,max)=>[...new Set(gameWords(false).map(w=>w.toLowerCase()))].filter(w=>w.length>=min&&w.length<=max&&(isEN()?/^[a-z]+$/:/^[a-zäöü]+$/).test(w));
+
+/* ---------- Maulwurf-Jagd ---------- */
+function moleGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data,W=plainWords(3,8);
+    const body=gameShell('Maulwurf-Jagd','Maulwürfe tauchen mit einem Wort auf. Tippe das Wort – sobald es stimmt, gibt es eins mit dem Hammer. Goldene Maulwürfe zählen doppelt. Entwischen dir drei, ist Schluss.',
+      `<span>Punkte <b id="os">0</b></span><span>Getroffen <b id="on">0</b></span><span>Leben <b id="ol">♥♥♥</b></span><span class="rec">Rekord <b>${d.high.mole||0}</b></span>`);
+    body.innerHTML=`<div class="bigstage idle" id="ost"><div class="mole-grid">${Array.from({length:9},()=>`<div class="mhole"><div class="mole"><span class="me">🐹</span><span class="mw"></span></div></div>`).join('')}</div>
+      <div class="membuf" id="obuf"><span>…</span></div><button class="btn primary" id="ogo">Spiel starten</button><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    const els=$$('.mhole');
+    let state='ready',holes=Array(9).fill(null),buf='',score=0,hits=0,lives=3,combo=0,ok=0,err=0,secs=0,spawnT=0,iv=0;
+    const target=()=>buf?holes.findIndex(h=>h&&h.w.startsWith(buf)):-1;
+    function spawn(){
+      const free=holes.map((h,i)=>h?-1:i).filter(i=>i>=0);if(!free.length)return;
+      const used=new Set(holes.filter(Boolean).map(h=>h.w[0])),maxLen=4+Math.min(4,Math.floor(hits/6));
+      const cand=W.filter(w=>w.length<=maxLen&&!used.has(w[0]));if(!cand.length)return;
+      const lim=Math.max(2.4,5.2-hits*.07);holes[pick(free)]={w:pick(cand),left:lim,lim,gold:Math.random()<.12}}
+    function render(){const t=target();
+      holes.forEach((h,i)=>{const el=els[i];if(!h){el.classList.remove('up','gold','hurry');return}
+        el.classList.add('up');el.classList.toggle('gold',h.gold);el.classList.toggle('hurry',h.left<1.3);
+        el.querySelector('.mw').innerHTML=i===t?`<i>${esc(buf)}</i>${esc(h.w.slice(buf.length))}`:esc(h.w)});
+      $('#obuf').innerHTML=buf?esc(buf):'<span>…</span>';$('#os').textContent=score;$('#on').textContent=hits;$('#ol').textContent='♥'.repeat(lives)||'–'}
+    function start(){state='play';holes=Array(9).fill(null);buf='';score=0;hits=0;lives=3;combo=0;ok=0;err=0;secs=0;spawnT=0;
+      $('#ost').classList.remove('idle');$('#ogo').hidden=true;focusCap();render();
+      clearInterval(iv);iv=setInterval(()=>{if(!focused||state!=='play')return;secs+=.1;spawnT-=.1;
+        holes.forEach((h,i)=>{if(h&&(h.left-=.1)<=0){if(i===target())buf='';holes[i]=null;lives--;combo=0;Sound.hurt();bump(els[i],'shake')}});
+        if(lives<=0)return end();
+        if(spawnT<=0&&holes.filter(Boolean).length<Math.min(4,2+Math.floor(hits/6))){spawn();spawnT=Math.max(.5,1.5-hits*.03)}
+        render()},100)}
+    function onChar(ch){
+      if(state==='ready'){if(ch===' ')start();return}if(state!=='play'||ch===' ')return;
+      const c=ch.toLowerCase(),t0=target(),nb=buf+c,t=holes.findIndex(h=>h&&h.w.startsWith(nb));
+      if(t<0){err++;combo=0;if(t0>=0)recKey(holes[t0].w[buf.length],false);Sound.err();Mash.err();bump($('#obuf'),'shake');return}
+      buf=nb;ok++;recKey(c,true);Sound.key();
+      if(holes[t].w===buf){const h=holes[t];combo++;hits++;const pts=(h.w.length*10+Math.min(combo,10)*2)*(h.gold?2:1);score+=pts;
+        holes[t]=null;buf='';Sound.ok();bump(els[t],'hitfx');floatText($('#ost'),'+'+pts)}
+      render()}
+    function end(){if(state!=='play')return;state='done';clearInterval(iv);render();const prev=d.high.mole||0,rec=score>prev;if(rec)d.high.mole=score;
+      const info=recordSession('mole','Maulwurf-Jagd',{wpm:ok/5/(Math.max(secs,1)/60),acc:ok+err?ok/(ok+err)*100:100,secs,ok,err,typed:ok+err},{chars:ok,bonus:hits*2});
+      if(rec&&prev){Sound.win();confetti(110)}
+      gameOverModal(rec&&prev?'Neuer Rekord!':'Die Maulwürfe haben gewonnen',[`${hits} Maulwürfe erwischt, ${score} Punkte.`],info.xp,()=>moleGame())}
+    $('#ogo').onclick=start;cleanup=()=>clearInterval(iv);
+    setHandler({guard:true,char:onChar,back:()=>{if(state==='play'){buf=buf.slice(0,-1);render()}},enter:()=>{if(state==='ready')start()},esc:()=>go('games')});
+  });
+}
+
+/* ---------- Bombe entschärfen ---------- */
+function bombGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data,S=d.settings,W=plainWords(3,7);
+    const body=gameShell('Bombe entschärfen','Tippe den Entschärfungscode, bevor der Zünder abbrennt. Jede Bombe hat einen längeren Code und weniger Zeit. Ein falsches Zeichen kostet eine Sekunde.',
+      `<span>Entschärft <b id="bn">0</b></span><span>Punkte <b id="bs">0</b></span><span>Fehler <b id="be">0</b></span><span class="rec">Rekord <b>${d.high.bomb||0} entschärft</b></span>`);
+    body.innerHTML=`<div class="bigstage idle" id="bst"><div class="bomb" id="bb"><div class="be" id="bi">💣</div><div class="fuse"><i id="bf" style="width:100%"></i></div><span class="muted small" id="bt">&nbsp;</span></div>
+      <div class="bcode" id="bc"></div><p class="muted small" id="bm">Groß- und Kleinschreibung zählt.</p><button class="btn primary" id="bgo">Spiel starten</button><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    let state='ready',code='',pos=0,left=0,lim=0,n=0,score=0,ok=0,err=0,secs=0,iv=0;
+    const capW=w=>S.caps?capFirst(w):w;
+    function makeCode(){const w=()=>pick(W);
+      if(n<3)return w();
+      if(n<6)return w()+'-'+w();
+      if(n<10)return w()+'-'+rnd(10,99);
+      return capW(w())+rnd(1,9)+pick(['!','?','.','-'])+w()}
+    function next(){code=makeCode();pos=0;lim=2.5+code.length*Math.max(.3,.62-n*.02);left=lim;state='play';$('#bi').textContent='💣';$('#bb').classList.add('tick');render()}
+    function render(){$('#bc').innerHTML=`<span class="ok">${esc(code.slice(0,pos))}</span><span class="cur">${esc(code[pos]||'')}</span><span class="todo">${esc(code.slice(pos+1))}</span>`;
+      $('#bf').style.width=Math.max(0,left/lim*100)+'%';$('#bt').textContent=Math.max(0,left).toFixed(1)+' s';
+      $('#bn').textContent=n;$('#bs').textContent=score;$('#be').textContent=err}
+    function start(){n=0;score=0;ok=0;err=0;secs=0;$('#bst').classList.remove('idle');$('#bgo').hidden=true;$('#bm').textContent='Groß- und Kleinschreibung zählt.';focusCap();next();
+      clearInterval(iv);iv=setInterval(()=>{if(!focused||state!=='play')return;secs+=.1;left-=.1;if(left<=0)return boom();render()},100)}
+    function onChar(ch){
+      if(state==='ready'){if(ch===' ')start();return}if(state!=='play')return;
+      if(ch===code[pos]){pos++;ok++;recKey(ch,true);Sound.key();
+        if(pos>=code.length){n++;const pts=Math.round(left*10)+code.length*5;score+=pts;state='wait';$('#bb').classList.remove('tick');$('#bi').textContent='✅';
+          $('#bm').textContent=pick(['Entschärft!','Sauber!','Knapp, aber geschafft!','Weiter so!']);Sound.ok();floatText($('#bst'),'+'+pts);render();setTimeout(()=>{if(state==='wait')next()},650)}
+        else render()}
+      else{err++;left-=1;recKey(code[pos],false);Sound.err();Mash.err();bump($('#bc'),'shake');if(left<=0)return boom();render()}}
+    function boom(){state='done';clearInterval(iv);left=0;render();$('#bb').classList.remove('tick');$('#bi').textContent='💥';$('#bm').textContent='BUMM!';Sound.hurt();bump($('#bst'),'shake');
+      const prev=d.high.bomb||0,rec=n>prev;if(rec)d.high.bomb=n;
+      const info=recordSession('bomb','Bombe entschärfen',{wpm:ok/5/(Math.max(secs,1)/60),acc:ok+err?ok/(ok+err)*100:100,secs,ok,err,typed:ok+err},{chars:ok,bonus:n*3});
+      setTimeout(()=>{if(rec&&prev){Sound.win();confetti(110)}
+        gameOverModal(rec&&prev?'Neuer Rekord!':'Bumm!',[`${n} ${n===1?'Bombe':'Bomben'} entschärft, ${score} Punkte.`,`Der letzte Code war „${esc(code)}“.`],info.xp,()=>bombGame())},700)}
+    $('#bgo').onclick=start;cleanup=()=>clearInterval(iv);
+    setHandler({guard:true,char:onChar,enter:()=>{if(state==='ready')start()},esc:()=>go('games')});
+  });
+}
+
+/* ---------- Galgenraten ---------- */
+const HANG_PARTS=['<line x1="115" y1="15" x2="115" y2="40"/>','<circle cx="115" cy="58" r="18"/>','<line x1="115" y1="76" x2="115" y2="130"/>',
+  '<line x1="115" y1="92" x2="92" y2="114"/>','<line x1="115" y1="92" x2="138" y2="114"/>','<line x1="115" y1="130" x2="95" y2="166"/>','<line x1="115" y1="130" x2="135" y2="166"/>'];
+function hangmanGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data,MAX=HANG_PARTS.length;
+    const W=isEN()?plainWords(5,10):[...new Set(NOUNS.map(w=>w.toLowerCase()))].filter(w=>w.length>=5&&w.length<=11&&/^[a-zäöü]+$/.test(w));
+    const ABC=[...(isEN()?'abcdefghijklmnopqrstuvwxyz':'abcdefghijklmnopqrstuvwxyzäöü')];
+    const body=gameShell('Galgenraten','Errate das Wort, indem du Buchstaben tippst. Nach sieben falschen Buchstaben ist das Wort verloren – und damit die Runde. Wie viele Wörter schaffst du am Stück?',
+      `<span>Wörter <b id="hn">0</b></span><span>Punkte <b id="hs">0</b></span><span>Fehlversuche <b id="hx">0/${MAX}</b></span><span class="rec">Rekord <b>${d.high.hangman||0} Wörter</b></span>`);
+    body.innerHTML=`<div class="bigstage idle" id="hst"><div class="hang"><svg viewBox="0 0 160 200" aria-hidden="true"><g class="base"><line x1="10" y1="190" x2="110" y2="190"/><line x1="35" y1="190" x2="35" y2="15"/><line x1="35" y1="15" x2="115" y2="15"/><line x1="35" y1="45" x2="65" y2="15"/></g>${HANG_PARTS.map(p=>p.replace('/>',' class="p"/>')).join('')}</svg>
+      <div><div class="hword" id="hw"></div><div class="hused" id="hu"></div><p class="muted small" id="hm" style="margin:10px 0 0">Tippe einen Buchstaben.</p></div></div>
+      <button class="btn primary" id="hgo">Spiel starten</button><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    let state='ready',word='',used=new Set(),wrong=0,n=0,score=0,ok=0,err=0,t0=0,last='';
+    const solved=()=>[...word].every(c=>used.has(c));
+    function next(){do{word=pick(W)}while(word===last&&W.length>1);last=word;used=new Set();wrong=0;state='play';$('#hm').textContent='Tippe einen Buchstaben.';render()}
+    function render(reveal){
+      $('#hw').innerHTML=[...word].map(c=>used.has(c)?esc(c.toUpperCase()):reveal?`<span class="miss">${esc(c.toUpperCase())}</span>`:'_').join('');
+      $('#hu').innerHTML=ABC.map(c=>`<span class="${used.has(c)?(word.includes(c)?'hit':'bad'):''}">${c.toUpperCase()}</span>`).join('');
+      $$('#hst svg .p').forEach((p,i)=>p.classList.toggle('on',i<wrong));
+      $('#hn').textContent=n;$('#hs').textContent=score;$('#hx').textContent=`${wrong}/${MAX}`}
+    function start(){n=0;score=0;ok=0;err=0;t0=performance.now();$('#hst').classList.remove('idle');$('#hgo').hidden=true;focusCap();next()}
+    function onChar(ch){
+      if(state==='ready'){if(ch===' ')start();return}if(state!=='play')return;
+      const c=ch.toLowerCase();if(!ABC.includes(c))return;
+      if(used.has(c)){$('#hm').textContent=`${c.toUpperCase()} hattest du schon.`;return}
+      used.add(c);
+      if(word.includes(c)){ok++;recKey(c,true);Sound.key();$('#hm').textContent=`${c.toUpperCase()} ist dabei!`;
+        if(solved()){n++;const pts=10+(MAX-wrong)*5+word.length*2;score+=pts;state='wait';Sound.ok();bump($('#hw'),'hitfx');floatText($('#hst'),'+'+pts);$('#hm').textContent='Richtig! Nächstes Wort …';render();setTimeout(()=>{if(state==='wait')next()},1100);return}}
+      else{err++;wrong++;Sound.err();Mash.err();bump($('#hw'),'shake');$('#hm').textContent=`Kein ${c.toUpperCase()}.`;if(wrong>=MAX)return lost()}
+      render()}
+    function lost(){state='done';render(true);Sound.hurt();$('#hm').textContent='Leider verloren.';const prev=d.high.hangman||0,rec=n>prev;if(rec)d.high.hangman=n;const secs=(performance.now()-t0)/1000;
+      const info=recordSession('hangman','Galgenraten',{wpm:(ok+err)/5/(Math.max(secs,1)/60),acc:ok+err?ok/(ok+err)*100:100,secs,ok,err,typed:ok+err},{chars:ok*3,bonus:n*6});
+      setTimeout(()=>{if(rec&&prev){Sound.win();confetti(110)}
+        gameOverModal(rec&&prev?'Neuer Rekord!':'Verloren',[`Das Wort war „${esc(word.toUpperCase())}“.`,`${n} ${n===1?'Wort':'Wörter'} erraten, ${score} Punkte.`],info.xp,()=>hangmanGame())},1200)}
+    $('#hgo').onclick=start;
+    setHandler({char:onChar,enter:()=>{if(state==='ready')start()},esc:()=>go('games')});
+  });
+}
+
 /* ---------- Views: Achievements & Level ---------- */
 /* ---------- Views: Stats ---------- */
-const MODE_LABEL={lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
+const MODE_LABEL={bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
 function chartSVG(h){
   const pts=h.slice(-40);if(pts.length<2)return '<p class="muted">Nach zwei Übungen erscheint hier dein Verlauf.</p>';
   const W=680,H=220,PL=34,PR=10,PT=12,PB=26;const max=Math.ceil(Math.max(20,...pts.map(p=>p.wpm))*1.15/10)*10;
