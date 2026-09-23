@@ -1148,6 +1148,9 @@ body.locked{overflow:hidden}
 .amsg.err{color:var(--bad)}
 .amsg.ok{color:var(--good)}
 .ahint{font-size:13px;color:var(--muted);margin:14px 0 0}
+.alegal{font-size:12px;color:var(--muted);margin:14px 0 0;text-align:center}
+.alegal a{color:var(--muted)}
+.alegal a:hover{color:var(--text)}
 .auth .seg{margin-top:4px}
 
 /* ---- v11: fit to screen ---- */
@@ -1965,6 +1968,7 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 
     <p class="ahint" id="authHint">Noch keinen Account? Wechsle oben zu „Registrieren“.</p>
     <a class="donate inline" href="https://www.paypal.com/paypalme/maxgrimberg" target="_blank" rel="noopener" aria-label="Mit PayPal spenden"><span class="dn-heart" aria-hidden="true">❤️</span><span class="dn-txt"><b>Gefällt dir Zehnfinger?</b><em>Unterstütze die Entwicklung</em></span><span class="dn-pp"><img src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-100px.png" alt="PayPal" onerror="this.parentNode.textContent='PayPal'"></span></a>
+    <p class="alegal"><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
   </div>
 </div>
 <textarea id="cap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Eingabe"></textarea>
@@ -4350,7 +4354,9 @@ function viewSettings(){
         ${row('Tagesziel','',seg('goal',[[5,'5'],[10,'10'],[15,'15'],[20,'20'],[30,'30 Min']]))}`),
     data:()=>group('Backup',`<p class="muted small">Speichere deinen Fortschritt als Datei, zum Beispiel um ihn auf ein anderes Gerät zu übertragen.</p>
         <div class="row"><button class="btn primary" id="exp">Backup speichern</button><label class="btn" for="impf">Backup laden</label><input type="file" id="impf" accept=".json,application/json" hidden></div>`)+
-      group('Zurücksetzen',`<div class="row"><button class="btn" id="sdef">Einstellungen zurücksetzen</button><button class="btn ghost" id="swel">Willkommen erneut anzeigen</button></div>`)
+      group('Zurücksetzen',`<div class="row"><button class="btn" id="sdef">Einstellungen zurücksetzen</button><button class="btn ghost" id="swel">Willkommen erneut anzeigen</button></div>`)+
+      group('Rechtliches',`<p class="muted small">Wie Zehnfinger mit deinen Daten umgeht und wer hinter dem Spiel steht.</p>
+        <div class="row"><a class="btn" href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a><a class="btn ghost" href="impressum.html" target="_blank" rel="noopener">Impressum</a></div>`)
   };
   const update=()=>{applySettings();Store.save();refreshMe();typer.cur()};
   function renderCat(){
