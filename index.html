@@ -81,7 +81,7 @@
                nameFx: d.nameFx || 'none', car: d.car || '🚗', prestige: d.prestige || 0,
                team: d.team || '', teamName: d.teamName || '', ch: Array.isArray(d.ch) ? d.ch : [], chr: d.chr || {},
                rx: Array.isArray(d.rx) ? d.rx : [], news: Array.isArray(d.news) ? d.news : [], abc: d.abc || 0,
-               tinv: Array.isArray(d.tinv) ? d.tinv : [] };
+               tinv: Array.isArray(d.tinv) ? d.tinv : [], gift: Array.isArray(d.gift) ? d.gift : [] };
     };
     const ms = v => v && typeof v.toMillis === 'function' ? v.toMillis() : 0;
     const meRef = () => doc(db, 'players', auth.currentUser.uid);
@@ -2407,6 +2407,64 @@ button.comm-card{cursor:pointer}
 .px-time{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
 .px-tb{display:flex;gap:6px;flex-wrap:wrap}
 @media (max-width:760px){.px-hero{grid-template-columns:1fr}.px-card{grid-template-columns:auto minmax(0,1fr)}.px-go{grid-column:2;justify-self:start}}
+/* ---- Lern-Weltkarte ---- */
+.lv-toggle{display:flex;justify-content:flex-end;margin:0 0 10px}
+.wmap{display:grid;gap:16px}
+.isle{position:relative;padding:14px 16px 18px;border-radius:22px;border:1px solid var(--line);overflow:hidden;background:var(--surface)}
+.isle::before{content:"";position:absolute;inset:0;opacity:.22;pointer-events:none}
+.isle-g::before{background:radial-gradient(90% 120% at 10% 110%,#F6D58E,transparent 60%),radial-gradient(80% 90% at 100% 0%,#6EC6E8,transparent 60%)}
+.isle-a::before{background:radial-gradient(90% 120% at 90% 110%,#9AA7B8,transparent 60%),radial-gradient(70% 90% at 0% 0%,#E8F1FF,transparent 60%)}
+.isle-p::before{background:radial-gradient(90% 120% at 10% 110%,#3F9C5A,transparent 60%),radial-gradient(70% 90% at 100% 0%,#A7E0A0,transparent 60%)}
+.isle-m::before{background:radial-gradient(90% 120% at 90% 110%,#E0532F,transparent 60%),radial-gradient(70% 90% at 0% 0%,#FFB347,transparent 60%)}
+.isle>*{position:relative}
+.isle-h{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.isle-h>div{display:grid;flex:1;min-width:0}
+.isle-h b{font-size:18px}
+.isle-e{font-size:34px;line-height:1}
+.isle-done{font-size:13px;font-weight:800;color:var(--caret)}
+.isle-path{display:flex;flex-wrap:wrap;gap:14px 10px;align-items:flex-start;padding:22px 4px 4px;
+  background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--text) 22%,transparent) 0 8px,transparent 8px 16px) 0 50px/100% 2px no-repeat}
+.node{font:inherit;color:var(--text);position:relative;display:grid;justify-items:center;gap:3px;width:86px;padding:0;border:0;background:none;cursor:pointer;transform:translateY(calc(sin(var(--k) * 1.3rad) * 12px))}
+.node>b{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:800;background:var(--surface2);border:3px solid var(--line);box-shadow:0 4px 0 color-mix(in srgb,var(--bg) 60%,transparent);transition:transform .12s}
+.node:hover>b{transform:translateY(-3px)}
+.node.done>b{background:color-mix(in srgb,var(--good) 30%,var(--surface2));border-color:var(--good)}
+.node.cur>b{border-color:var(--caret);box-shadow:0 0 0 5px color-mix(in srgb,var(--caret) 25%,transparent)}
+.node-st{font-size:11px;color:var(--caret);letter-spacing:1px}
+.node-t{font-size:11px;color:var(--muted);text-align:center;line-height:1.2;max-width:86px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.node-ava{position:absolute;top:-26px;font-size:24px;animation:avabob 1.4s ease-in-out infinite;z-index:1}
+@keyframes avabob{50%{transform:translateY(-5px)}}
+.node.boss>b{width:66px;height:66px;font-size:32px;border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--surface2))}
+.node.boss.locked>b{font-size:22px;border-color:var(--line);background:var(--surface2);opacity:.7}
+.node.boss.beat>b{border-color:var(--caret);background:color-mix(in srgb,var(--caret) 22%,var(--surface2))}
+@media (prefers-reduced-motion:reduce){.node-ava{animation:none}.node{transform:none}}
+/* ---- Avatar-Werte ---- */
+.rpg{display:grid;gap:6px}
+.rpg-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:2px}
+.rpg-cls{font-size:12px;font-weight:700;color:var(--caret)}
+.rpg-row{display:grid;grid-template-columns:118px 1fr 26px;gap:8px;align-items:center;font-size:13px}
+.rpg-bar{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden}
+.rpg-bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--f1),var(--f2),var(--caret))}
+.rpg-row b{text-align:right;font-variant-numeric:tabular-nums}
+@media (min-width:1000px){.ach-top{grid-template-columns:1fr 1.3fr 1fr}}
+@media (max-width:999px){.rpg-panel{grid-column:1/-1}}
+.pm-rpg{margin-top:12px;padding:12px;border-radius:12px;background:var(--surface2)}
+.pm-rpg .rpg-bar{background:var(--surface)}
+/* ---- Geschenke ---- */
+.gcoins,.gmsg{display:flex;flex-wrap:wrap;gap:6px}
+.gcoins button,.gmsg button,.gitems button{font:inherit;color:var(--text);border:1px solid var(--line);background:var(--surface2);border-radius:10px;cursor:pointer}
+.gcoins button{padding:8px 14px;font-weight:700}
+.gmsg button{padding:6px 10px;font-size:13px}
+.gitems{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;max-height:220px;overflow:auto}
+.gitems button{display:grid;justify-items:center;padding:6px 2px}
+.gitems button span{font-size:26px}
+.gitems button em{font-style:normal;font-size:11px;color:var(--muted)}
+.gcoins button[aria-pressed="true"],.gmsg button[aria-pressed="true"],.gitems button[aria-pressed="true"]{border-color:var(--caret);background:color-mix(in srgb,var(--caret) 16%,var(--surface2))}
+.invite.gift-inv{border-color:var(--f5)}
+.gift-box{font-size:28px;animation:giftwob 1.6s ease-in-out infinite}
+@keyframes giftwob{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-12deg)}90%{transform:rotate(10deg)}95%{transform:rotate(-6deg)}}
+.gift-open{font-size:72px;line-height:1.1;animation:giftwob .45s ease-in-out 2}
+.gift-msg{font-weight:700;margin:4px 0}
+.gift-res{font-size:18px;font-weight:800;color:var(--caret);min-height:1.4em}
 </style>
 </head>
 <body class="locked">
@@ -3007,6 +3065,18 @@ const ACH=[
  {id:'lv5',i:'🥉',n:'Level 5',d:'Erreiche Level 5.',c:d=>levelInfo(d.xp).level>=5},
  {id:'lv10',i:'🥈',n:'Level 10',d:'Erreiche Level 10.',c:d=>levelInfo(d.xp).level>=10},
  {id:'lv20',i:'💎',n:'Level 20',d:'Erreiche Level 20.',c:d=>levelInfo(d.xp).level>=20},
+ /* Geheime Erfolge (sec): unsichtbar, bis man sie zufällig freischaltet */
+ {id:'s_ghost',sec:1,i:'👻',n:'Geisterstunde',d:'Übe zwischen 3 und 4 Uhr nachts.',c:c0=>false,cc:(d,c)=>c&&new Date().getHours()===3},
+ {id:'s_perfect',sec:1,i:'💎',n:'Perfektionist',d:'Schaffe den Blindflug mit 100 % Genauigkeit.',c:c0=>false,cc:(d,c)=>c&&c.mode==='blind'&&c.st.acc>=100&&(c.st.progress||0)>=1},
+ {id:'s_name',sec:1,i:'🪞',n:'Namensgeber',d:'Tippe irgendwo im Spiel „Zehnfinger“.',c:c0=>false},
+ {id:'s_konami',sec:1,i:'🕹️',n:'Retro-Gamer',d:'Gib auf der Startseite den geheimen Code ↑↑↓↓←→←→ B A ein.',c:c0=>false},
+ {id:'s_chaos',sec:1,i:'🌪️',n:'Tastenchaos',d:'Beende eine Runde mit über 60 Fehlern.',c:c0=>false,cc:(d,c)=>c&&(c.st.err||0)>60},
+ {id:'s_sit',sec:1,i:'🪑',n:'Sitzfleisch',d:'Tippe in einer einzigen Runde länger als 10 Minuten.',c:c0=>false,cc:(d,c)=>c&&(c.st.secs||0)>=600},
+ {id:'s_jackpot',sec:1,i:'💰',n:'Glückspilz',d:'Gewinne den Hauptpreis am Glücksrad.',c:c0=>false},
+ {id:'s_gift',sec:1,i:'🎁',n:'Großzügig',d:'Verschenke etwas an einen Freund.',c:c0=>false},
+ {id:'s_abc',sec:1,i:'🚀',n:'Lichtgeschwindigkeit',d:'Schaffe den Alphabet-Sprint in unter 3 Sekunden.',c:d=>(d.high.abc||0)>=1500&&d.high.abc<3000},
+ {id:'s_td1',sec:1,i:'🔮',n:'Hellseher',d:'Löse ein Tippdle schon im ersten Versuch.',c:c0=>false},
+ {id:'s_newyear',sec:1,i:'🎆',n:'Neujahrs-Tipper',d:'Übe am 1. Januar.',c:c0=>false,cc:(d,c)=>{const t=new Date();return c&&t.getMonth()===0&&t.getDate()===1}},
 ];
 function checkAch(ctx){
   const d=Store.data,got=[];
@@ -3355,8 +3425,10 @@ function paged(host,key,cls,items,render,bind,reserve=58){
 let rzT=0;addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(!activity&&!$('.modal')&&!$('.welcome')&&currentTab!=='settings')go(currentTab)},250)});
 
 /* ---------- Views: Lessons (fit) ---------- */
-let courseSel=null;
+let courseSel=null,firstLoadMap=false;
+let lessonView=(()=>{try{return Store.data.settings.lessonView||'map'}catch(e){return 'map'}})();
 function viewLessons(){
+  lessonView=Store.data.settings.lessonView||'map';
   const d=Store.data;
   const s0=d.startIdx||0;let ri=LESSONS.findIndex((l,i)=>i>=s0&&((d.lessons[l.id]||{}).stars||0)<2);if(ri<0)ri=LESSONS.findIndex(l=>((d.lessons[l.id]||{}).stars||0)<2);if(ri<0)ri=LESSONS.length-1;
   const R=LESSONS[ri];if(!courseSel)courseSel=R.sec;
@@ -3385,11 +3457,14 @@ function viewLessons(){
       <div class="legend mini">${[5,4,3,2,1].map(n=>`<span class="chip" style="--fc:var(--f${n})" title="${FINGER_NAMES[n]}"><i></i>${({5:'Klein',4:'Ring',3:'Mittel',2:'Zeige',1:'Daumen'})[n]}</span>`).join('')}</div>
     </div>
     <div class="comm" id="comm"></div>
-    <div class="courses" role="tablist" aria-label="Kurse">${secStats.map(x=>`<button role="tab" data-c="${x.id}" aria-selected="${x.id===courseSel}"><b>${x.t}</b><span class="cbar"><i style="width:${x.done/x.total*100}%"></i></span><span class="muted small">${x.done}/${x.total} · ${x.d}</span></button>`).join('')}</div>
-    <div id="lgrid"></div>
+    <div class="lv-toggle"><div class="seg small" id="lvt"><button data-lv="map" aria-pressed="${lessonView==='map'}">🗺️ Karte</button><button data-lv="list" aria-pressed="${lessonView==='list'}">☰ Liste</button></div></div>
+    ${lessonView==='map'?viewMap(ri):`<div class="courses" role="tablist" aria-label="Kurse">${secStats.map(x=>`<button role="tab" data-c="${x.id}" aria-selected="${x.id===courseSel}"><b>${x.t}</b><span class="cbar"><i style="width:${x.done/x.total*100}%"></i></span><span class="muted small">${x.done}/${x.total} · ${x.d}</span></button>`).join('')}</div>
+    <div id="lgrid"></div>`}
   </section>`;
   firstLoad=false;animRings();
   $('#cont').onclick=()=>practice(lessonCfg(ri));$('#slg').onclick=()=>go('league');$('#swq').onclick=wqModal;$('#swh').onclick=wheelModal;renderCommunity();
+  $$('#lvt button').forEach(b=>b.onclick=()=>{lessonView=b.dataset.lv;Store.data.settings.lessonView=lessonView;Store.save();viewLessons()});
+  if(lessonView==='map'){$$('.wmap [data-li]').forEach(b=>b.onclick=()=>practice(lessonCfg(+b.dataset.li)));$$('.wmap [data-isle]').forEach(b=>b.onclick=()=>isleBoss(b.dataset.isle));const c=$('.node.cur');if(c&&!firstLoadMap){firstLoadMap=true;setTimeout(()=>c.scrollIntoView({block:'center',behavior:reduced()?'auto':'smooth'}),250)}return}
   $$('.courses button').forEach(b=>b.onclick=()=>{courseSel=b.dataset.c;viewLessons()});
   paged($('#lgrid'),'les-'+courseSel,'lessons',LESSONS.map((l,i)=>[l,i]).filter(([l])=>l.sec===courseSel),card,grid=>$$('.lesson',grid).forEach(b=>b.onclick=()=>practice(lessonCfg(+b.dataset.i))));
 }
@@ -3516,6 +3591,12 @@ function practice(cfg){
         extra.bonus=rec&&!p?40:rec?15:0;celebrate=rec&&!!p;
         title=!d.daily[k]?'Nicht gewertet':!p?'Challenge geschafft':rec?'Neuer Tagesbestwert!':'Geschafft';note=d.daily[k]?`Dein Bestwert heute: ${d.daily[k].wpm} WPM. Morgen gibt es einen neuen Text.`:'Gewertet wird ab 85 % Genauigkeit. Versuch es nochmal.';
         btns=[['Nochmal',()=>practice(cfg)]];
+      }else if(cfg.mode==='isleboss'){
+        const I=ISLES[cfg.isle],won=st.progress>=1&&st.acc>=92&&st.wpm>=cfg.target,first=won&&!(d.isles||{})[cfg.isle];
+        if(won){d.isles=d.isles||{};if(first){d.isles[cfg.isle]=Date.now();const c=150*(SECTIONS.findIndex(s=>s.id===cfg.isle)+1);d.coins+=c;extra.bonus=60;newsAdd('isle',{v:cfg.isle});note=`${I.n} ist erobert! Belohnung: ${c} 🪙.`}else note='Der Boss ist schon besiegt – aber Übung schadet nie.'}
+        else note=`Für den Sieg brauchst du ${cfg.target} WPM bei 92 % Genauigkeit. Du hattest ${Math.round(st.wpm)} WPM und ${st.acc.toFixed(0)} %.`;
+        title=won?`${I.b[0]} ${I.b[1]} besiegt!`:`${I.b[1]} war stärker`;celebrate=first;
+        btns=[['Nochmal',()=>practice(cfg)],['Zur Karte',()=>go('lessons')]];
       }else if(cfg.mode==='blind'){
         $('#tb').classList.remove('blind');$('section.blindsec')&&$('section.blindsec').classList.remove('blindsec');   // jetzt die Fehler zeigen
         const full=st.progress>=1,prev=d.high.blind||0,rec=full&&st.acc>=90&&st.wpm>prev;if(rec)d.high.blind=Math.round(st.wpm);
@@ -4736,7 +4817,7 @@ function tippdleGame(){
       render();
       if(T.done){
         const y=dayKey(new Date(Date.now()-864e5));d.tdStreak=T.won?(d.tdLast===y?(d.tdStreak||0)+1:1):0;if(T.won)d.tdLast=dayKey();
-        if(T.won){d.high.tippdle=(d.high.tippdle||0)+1;newsAdd('td',{v:T.g.length});Sound.win();confetti(120)}else Sound.hurt();
+        if(T.won){d.high.tippdle=(d.high.tippdle||0)+1;newsAdd('td',{v:T.g.length});if(T.g.length===1)setTimeout(()=>grantAch('s_td1'),1500);Sound.win();confetti(120)}else Sound.hurt();
         const secs=Math.max(5,(Date.now()-T.t0)/1000),n=T.g.length*5;
         recordSession('tippdle','Tippdle',{wpm:n/5/(secs/60),acc:T.won?100:70,secs,ok:n,err:0,typed:n},{chars:n*3,bonus:T.won?(7-T.g.length)*8:5});
         $('#tds').textContent=d.tdStreak;const hr=$('.hud .rec b');if(hr)hr.textContent=d.high.tippdle||0;finished()}
@@ -5022,7 +5103,7 @@ function hangmanGame(){
 
 /* ---------- Views: Achievements & Level ---------- */
 /* ---------- Views: Stats ---------- */
-const MODE_LABEL={tippdle:'Tippdle',dungeon:'Tipp-Dungeon',abc:'Alphabet-Sprint',emoji:'Emoji-Rätsel',detective:'Tipp-Detektiv',piano:'Tastatur-Klavier',blind:'Blindflug',chain:'Wortkette',typo:'Fehlerjagd',tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
+const MODE_LABEL={isleboss:'Insel-Boss',tippdle:'Tippdle',dungeon:'Tipp-Dungeon',abc:'Alphabet-Sprint',emoji:'Emoji-Rätsel',detective:'Tipp-Detektiv',piano:'Tastatur-Klavier',blind:'Blindflug',chain:'Wortkette',typo:'Fehlerjagd',tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
 function chartSVG(h){
   const pts=h.slice(-40);if(pts.length<2)return '<p class="muted">Nach zwei Übungen erscheint hier dein Verlauf.</p>';
   const W=680,H=220,PL=34,PR=10,PT=12,PB=26;const max=Math.ceil(Math.max(20,...pts.map(p=>p.wpm))*1.15/10)*10;
@@ -5104,7 +5185,10 @@ function viewAch(){
   const d=Store.data,li=levelInfo(d.xp),nt=nextTitle(li.level),s=streak(d),g=d.settings.goal;
   const got=ACH.filter(a=>d.ach[a.id]).length;
   const days=[];for(let i=13;i>=0;i--){const dt=new Date();dt.setDate(dt.getDate()-i);const v=(d.days[dayKey(dt)]||0)/(g*60);days.push({v,label:dt.toLocaleDateString('de-DE',{weekday:'short'}).slice(0,2),date:dt.toLocaleDateString('de-DE')})}
-  const list=ACH.filter(a=>achFilter==='all'||(achFilter==='got'?d.ach[a.id]:!d.ach[a.id]));
+  // Geheime Erfolge erscheinen erst, wenn man sie hat – bis dahin nur ein Platzhalter „???“
+  const secOpen=ACH.filter(a=>a.sec&&!d.ach[a.id]).length;
+  const list=ACH.filter(a=>(!a.sec||d.ach[a.id])&&(achFilter==='all'||(achFilter==='got'?d.ach[a.id]:!d.ach[a.id])));
+  if(secOpen&&achFilter!=='got')list.unshift({id:'__secret',i:'❓',n:`${secOpen} geheime Erfolge`,d:'Unsichtbar, bis du sie zufällig entdeckst. Probier Ungewöhnliches aus!'});
   main.innerHTML=`${profileTop('ach')}
     <div class="ach-top">
       <div class="panel lvcard"><div class="lvnum">${li.level}${d.prestige?`<span class="pst" title="Prestige ${d.prestige}">★${d.prestige}</span>`:''}</div>
@@ -5118,6 +5202,7 @@ function viewAch(){
           <div class="seg" id="gsel">${[5,10,15,20,30].map(m=>`<button data-m="${m}" aria-pressed="${m===g}">${m}</button>`).join('')}</div></div>
         <div class="days" aria-label="Letzte 14 Tage">${days.map(x=>`<div class="${x.v>=1?'full':''}" title="${x.date}: ${Math.round(Math.min(1,x.v)*100)} %" style="--o:${Math.min(1,x.v)}"><i></i><span>${x.label}</span></div>`).join('')}</div>
       </div>
+      <div class="panel rpg-panel">${rpgHTML(publicSummary().stats)}</div>
     </div>
     <div class="sec-head tight"><h2>Erfolge</h2><span class="cnt">${got} von ${ACH.length}</span>
       <div class="seg" id="afil">${[['all','Alle'],['got','Freigeschaltet'],['open','Offen']].map(([k,v])=>`<button data-af="${k}" aria-pressed="${k===achFilter}">${v}</button>`).join('')}</div></div>
@@ -5980,6 +6065,11 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-24.3',d:'24.09.2026',items:[
+    '🗺️ Lern-Weltkarte: die Lektionen sind jetzt vier Inseln – mit einem Boss am Ende jeder Insel',
+    '⚔️ Avatar-Werte wie im Rollenspiel: Tempo, Präzision, Ausdauer, Vielseitigkeit und Wissen (Profil)',
+    '🎁 Geschenke: schick Freunden Münzen oder Gegenstände – sie bekommen ein Paket zum Öffnen',
+    '🤫 Es gibt jetzt geheime Erfolge. Wie man sie bekommt? Das musst du selbst herausfinden …']},
   {v:'2026-09-24.2',d:'24.09.2026',items:[
     '🎮 Neues Design für „Spiele“: alle Tages-Highlights oben, kompakte Kacheln – viel übersichtlicher',
     '✍️ Neues Design für „Üben“: Tagesmix und Problemtasten ganz oben, klare Kacheln',
@@ -6163,6 +6253,7 @@ function newsText(n){
     case 'tour':return `🏆 ${n.v} WPM im Wochen-Turnier`;
     case 'td':return `🟩 Tippdle in ${n.v}/6 gelöst`;
     case 'dg':return `🗡️ ${n.v} Räume im Tipp-Dungeon`;
+    case 'isle':return `${(ISLES[n.v]||{e:'🏝️'}).e} ${(ISLES[n.v]||{n:'Eine Insel'}).n} erobert`;
     case 'abc':return `🔤 Alphabet in ${(n.v/1000).toFixed(2).replace('.',',')} s`;
     default:return '✨ Etwas Neues geschafft'}}
 function newsFeed(){const now=Date.now();
@@ -6340,7 +6431,7 @@ function wheelModal(){
       if(free.length){const [id]=pick(free);d.owned[C.id].push(id);text=`🎁 Neu: ${id} ${itemName(C.id,id)} – im Shop ausrüsten!`}else{d.coins+=150;text='+150 🪙 (du hast schon alles aus dieser Kategorie)'}}
     Store.save();
     const turns=5*360+(360-(idx+.5)*seg);const w=$('#whl',m);w.style.transform=`rotate(${turns}deg)`;
-    setTimeout(()=>{$('#whr',m).textContent=text;refreshMe(true);Sound.win();confetti(90)},reduced()?50:4200)}}
+    setTimeout(()=>{$('#whr',m).textContent=text;refreshMe(true);Sound.win();confetti(90);if(s.v===250)grantAch('s_jackpot')},reduced()?50:4200)}}
 
 /* Streak-Schutz automatisch einsetzen, wenn gestern verpasst wurde */
 function useFreeze(){
@@ -6436,6 +6527,7 @@ function playerModal(p){
       <div class="card"><b>🔥 ${st.bestStreak||0}</b><span>Längste Streak</span></div><div class="card"><b>${LEAGUES[L][1]}</b><span>${LEAGUES[L][0]}-Liga</span></div>
       <div class="card"><b>${st.ach||0}</b><span>Erfolge</span></div><div class="card"><b>🏅 ${medals.reduce((a,x)=>a+x[1],0)}</b><span>Medaillen</span></div></div>
     ${medals.length?`<h3 style="margin:12px 0 6px">Beste Medaillen</h3><div class="pm-med">${medals.slice(0,6).map(([g,t])=>`<span title="${esc(g.n)}: ${MASTERY[t-1][0]}">${MASTERY[t-1][1]} ${g.i} ${esc(g.n)}</span>`).join('')}</div>`:''}
+    <div class="pm-rpg">${rpgHTML(st,'Werte')}</div>
     ${p.teamName?`<p class="muted small" style="margin:10px 0 0">🛡️ Team: ${esc(p.teamName)}</p>`:''}
     <div class="acts">${act}<button class="btn ghost" id="pmx">Schließen</button></div>`);
   const close=()=>{m.remove();if(!activity)setHandler(null)};$('#pmx',m).onclick=close;setHandler({char(){},esc:close});
@@ -6445,6 +6537,100 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-pu]'
   let p=null;try{p=await window.fbWorld.one(b.dataset.pu)}catch(err){console.warn('Profil:',err)}
   if(!p){const rows=(worldCache.rows||[]).concat(commCache.rows||[]);p=rows.find(r=>r.uid===b.dataset.pu)}
   playerModal(p)});
+
+/* ---------- Geheime Erfolge: Auslöser außerhalb normaler Runden ---------- */
+function grantAch(id){
+  const d=Store.data,a=ACH.find(x=>x.id===id);if(!a||d.ach[id])return;
+  d.ach[id]=Date.now();d.xp=(d.xp||0)+20;d.coins=(d.coins||0)+15;newsAdd('a',{a:id});Store.save();refreshMe(true);
+  toast(a.i,a.sec?'Geheimer Erfolg entdeckt! 🤫':'Erfolg freigeschaltet',`${a.n} (+20 XP, +15 🪙)`);Sound.ach();confetti(80)}
+/* „Zehnfinger“ irgendwo tippen und der Konami-Code auf der Startseite */
+let secBuf='',konami=[];
+const KONAMI=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+document.addEventListener('keydown',e=>{
+  if(!Store.data||!Store.data.ach)return;
+  if(e.key&&e.key.length===1){secBuf=(secBuf+e.key.toLowerCase()).slice(-10);if(secBuf==='zehnfinger')grantAch('s_name')}
+  if(currentTab==='lessons'&&!activity){konami.push(e.key.length===1?e.key.toLowerCase():e.key);konami=konami.slice(-10);if(konami.join()===KONAMI.join())grantAch('s_konami')}
+},true);
+
+/* ---------- Avatar-Werte wie in einem Rollenspiel (aus echten Tipp-Daten) ---------- */
+const RPG=[['tempo','⚡','Tempo','Sprinter'],['acc','🎯','Präzision','Scharfschütze'],['endure','🔥','Ausdauer','Marathonläufer'],['vari','🎲','Vielseitigkeit','Allrounder'],['know','📚','Wissen','Gelehrter']];
+function rpgStats(st){
+  st=st||{};const cl=v=>Math.max(1,Math.min(99,Math.round(v)));const high=st.high||{},lessons=st.lessons||{};
+  const games=GAMES.filter(g=>g.id!=='daily'&&(()=>{try{return gameScore(g,{high,ghosts:st.ghosts||{},story:st.story||{},daily:{}})>0}catch(e){return false}})()).length;
+  const stars=Object.values(lessons).reduce((a,l)=>a+((l&&l.stars)||0),0);
+  return{tempo:cl(st.avgWpm||0),acc:cl(((st.avgAcc||80)-80)/20*99),endure:cl(Math.sqrt((st.totalSecs||0)/3600)*20),vari:cl(games/(GAMES.length-1)*99),know:cl(stars/(LESSONS.length*3)*99)}}
+function rpgHTML(st,title){
+  const r=rpgStats(st),top=RPG.reduce((a,b)=>r[b[0]]>r[a[0]]?b:a);
+  return `<div class="rpg"><div class="rpg-h"><b>${title||'Deine Werte'}</b><span class="rpg-cls">${top[1]} ${top[3]}</span></div>
+    ${RPG.map(([k,i,n])=>`<div class="rpg-row" title="${n}: ${r[k]} von 99"><span>${i} ${n}</span><span class="rpg-bar"><i style="width:${r[k]/99*100}%"></i></span><b>${r[k]}</b></div>`).join('')}</div>`}
+
+/* ---------- Geschenke an Freunde ----------
+   Der Schenkende bezahlt sofort und speichert {id,to,k,v,cat,it,m,t} in seinem Profil (gift).
+   Der Freund sieht ein Paket und öffnet es; ob es geöffnet wurde, merkt sich sein Gerät (giftAns). */
+const GIFT_DAYS=14,GIFT_COINS=[25,50,100,250],GIFT_DAILY=500;
+const GIFT_MSG=['Einfach so 😊','Alles Gute zum Geburtstag! 🎂','Danke! 🙏','Weiter so! 💪','Glückwunsch! 🎉'];
+const GIFT_CATS=['ava','pet','car'];
+function giftOut(){const now=Date.now();return (Store.data.giftOut||[]).filter(g=>now-g.t<GIFT_DAYS*864e5).slice(-20)}
+function giftIncoming(){const me=myUid(),now=Date.now(),ans=Store.data.giftAns||{};if(!me)return [];
+  return Social.friends.flatMap(f=>(f.gift||[]).filter(g=>g&&g.to===me&&now-g.t<GIFT_DAYS*864e5&&!ans[g.id]).map(g=>({...g,from:f})))}
+function giftModal(f){
+  const d=Store.data,k=dayKey();if(!d.giftDay||d.giftDay.k!==k)d.giftDay={k,c:0};
+  let kind='c',coins=50,item=null,msg=0;
+  const items=GIFT_CATS.flatMap(cid=>{const C=SHOP_CATS.find(c=>c.id===cid);return C.items.filter(([id,r,p,l,req])=>id!=='none'&&p>0&&req==null).map(([id,r,p])=>({cat:cid,id,p}))});
+  const m=modal(`<h3>🎁 Geschenk für ${esc(f.name)}</h3>
+    <div class="seg" id="gk"><button data-gk="c" aria-pressed="true">🪙 Münzen</button><button data-gk="i" aria-pressed="false">🎀 Gegenstand</button></div>
+    <div id="gbody2"></div>
+    <p class="muted small" style="margin:12px 0 4px">Nachricht dazu:</p><div class="gmsg">${GIFT_MSG.map((t,i)=>`<button data-gm="${i}" aria-pressed="${i===0}">${t}</button>`).join('')}</div>
+    <p class="fr-note" id="gnote"></p>
+    <div class="acts"><button class="btn primary" id="gsend">Verschenken</button><button class="btn ghost" id="gx">Abbrechen</button></div>`);
+  const note=t=>{$('#gnote',m).textContent=t};
+  const body=()=>{const b=$('#gbody2',m);
+    if(kind==='c')b.innerHTML=`<p class="muted small" style="margin:10px 0 6px">Du hast ${fmtN(d.coins)} 🪙. Heute kannst du noch ${fmtN(GIFT_DAILY-d.giftDay.c)} 🪙 verschenken.</p><div class="gcoins">${GIFT_COINS.map(v=>`<button data-gc="${v}" aria-pressed="${v===coins}">${v} 🪙</button>`).join('')}</div>`;
+    else b.innerHTML=`<p class="muted small" style="margin:10px 0 6px">Du bezahlst den Shop-Preis. Hat ${esc(f.name)} ihn schon, bekommt ${esc(f.name)} stattdessen die Hälfte als Münzen.</p><div class="gitems">${items.map((x,i)=>`<button data-gi="${i}" aria-pressed="${item===i}" title="${esc(itemName(x.cat,x.id))}"><span>${x.id}</span><em>${fmtN(x.p)} 🪙</em></button>`).join('')}</div>`;
+    $$('[data-gc]',b).forEach(x=>x.onclick=()=>{coins=+x.dataset.gc;body()});$$('[data-gi]',b).forEach(x=>x.onclick=()=>{item=+x.dataset.gi;body()})};
+  $$('[data-gk]',m).forEach(x=>x.onclick=()=>{kind=x.dataset.gk;$$('[data-gk]',m).forEach(y=>y.setAttribute('aria-pressed',y===x));note('');body()});
+  $$('[data-gm]',m).forEach(x=>x.onclick=()=>{msg=+x.dataset.gm;$$('[data-gm]',m).forEach(y=>y.setAttribute('aria-pressed',y===x))});
+  body();$('#gx',m).onclick=()=>m.remove();
+  $('#gsend',m).onclick=()=>{
+    let g;
+    if(kind==='c'){if(d.giftDay.c+coins>GIFT_DAILY)return note(`Du kannst pro Tag höchstens ${GIFT_DAILY} 🪙 verschenken.`);if(d.coins<coins)return note('Dafür hast du nicht genug Münzen.');
+      d.coins-=coins;d.giftDay.c+=coins;g={k:'c',v:coins}}
+    else{if(item==null)return note('Wähle zuerst einen Gegenstand aus.');const x=items[item];if(d.coins<x.p)return note('Dafür hast du nicht genug Münzen.');d.coins-=x.p;g={k:'i',cat:x.cat,it:x.id,v:x.p}}
+    d.giftOut=(d.giftOut||[]).concat({id:Date.now().toString(36)+rnd(10,99),to:f.uid,m:msg,t:Date.now(),...g}).slice(-20);
+    Store.save();Store.push();refreshMe(true);m.remove();toast('🎁','Geschenk verschickt',`${f.name} bekommt ein Paket zum Öffnen`);Sound.ok();grantAch('s_gift')}}
+function giftCards(){return giftIncoming().map(g=>`<div class="invite gift-inv" role="alertdialog" aria-label="Geschenk von ${esc(g.from.name)}"><span class="gift-box">🎁</span>
+  <div class="iv-t"><b>${esc(g.from.name)}</b><span>hat dir ein Geschenk geschickt</span></div><div class="acts"><button class="btn primary small" data-gopen="${esc(g.id)}">Öffnen</button></div></div>`).join('')}
+function giftOpen(id){
+  const d=Store.data,g=giftIncoming().find(x=>x.id===id);if(!g)return;d.giftAns=d.giftAns||{};d.giftAns[id]=Date.now();
+  let text;
+  if(g.k==='c'){const v=Math.min(250,Math.max(0,+g.v||0));d.coins+=v;text=`${fmtN(v)} 🪙`}
+  else{const C=SHOP_CATS.find(c=>c.id===g.cat),ok=C&&C.items.some(([x])=>x===g.it);
+    if(ok&&!owns(g.cat,g.it)){d.owned[g.cat].push(g.it);text=`${g.it} ${itemName(g.cat,g.it)} – im Shop ausrüsten!`}
+    else{const v=Math.round(Math.min(3500,+g.v||0)/2);d.coins+=v;text=`${fmtN(v)} 🪙 (den Gegenstand hattest du schon)`}}
+  Store.save();refreshMe(true);renderInvites();updateFriendBadge();
+  const m=modal(`<div class="lg-result"><div class="gift-open">🎁</div><h3>Geschenk von ${esc(g.from.name)}</h3><p class="gift-msg">„${esc(GIFT_MSG[g.m]||GIFT_MSG[0])}“</p><p class="gift-res" id="gres"></p>
+    <div class="acts"><button class="btn primary" id="gok">Danke!</button></div></div>`);
+  setTimeout(()=>{const b=$('.gift-open',m);if(b)b.textContent='✨';$('#gres',m).textContent=text;Sound.win();confetti(100)},reduced()?50:900);
+  const close=()=>{m.remove();if(!activity)setHandler(null)};$('#gok',m).onclick=close;setHandler({char(){},enter:close,esc:close})}
+function giftNotify(){const d=Store.data;d.giftSeen=d.giftSeen||[];let n=0;giftIncoming().forEach(g=>{if(!d.giftSeen.includes(g.id)){d.giftSeen.push(g.id);n++;if(!activity)toast('🎁',`${g.from.name} hat dir ein Geschenk geschickt`,'Öffne es oben rechts!')}});if(n){d.giftSeen=d.giftSeen.slice(-40);Store.save();Sound.ok()}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-gopen]');if(b)giftOpen(b.dataset.gopen)});
+
+/* ---------- Lern-Weltkarte: die vier Kursabschnitte als Inseln mit Boss ---------- */
+const ISLES={g:{e:'🏝️',n:'Grundreihen-Strand',b:['🦀','Krabbe Klack']},a:{e:'⛰️',n:'Zeichen-Gebirge',b:['🦅','Adler Shift']},p:{e:'🌲',n:'Wörterwald',b:['🐻','Bär Brummwort']},m:{e:'🌋',n:'Meister-Vulkan',b:['🐉','Vulkandrache']}};
+function viewMap(ri){
+  const d=Store.data;d.isles=d.isles||{};
+  return `<div class="wmap">${SECTIONS.map((sec,si)=>{const I=ISLES[sec.id]||{e:'🏝️',n:sec.t,b:['👾','Boss']},ls=LESSONS.map((l,i)=>[l,i]).filter(([l])=>l.sec===sec.id);
+    const done=ls.filter(([l])=>(d.lessons[l.id]||{}).stars>0).length,all=done===ls.length,beat=!!d.isles[sec.id],stars=ls.reduce((a,[l])=>a+((d.lessons[l.id]||{}).stars||0),0);
+    return `<section class="isle isle-${sec.id}"><div class="isle-h"><span class="isle-e">${I.e}</span><div><b>${I.n}</b><span class="muted small">${esc(sec.d)} · ${done}/${ls.length} Lektionen · ${stars}/${ls.length*3} ⭐</span></div>${beat?'<span class="isle-done">👑 erobert</span>':''}</div>
+      <div class="isle-path">${ls.map(([l,i],k)=>{const p=d.lessons[l.id]||{},cur=i===ri;
+        return `<button class="node${p.stars?' done':''}${cur?' cur':''}" data-li="${i}" style="--k:${k}" title="Lektion ${i+1}: ${esc(l.t)}${p.wpm?` · ${p.wpm} WPM`:` · Ziel ${l.target} WPM`}">${cur?`<span class="node-ava">${esc(d.settings.avatar||'🙂')}</span>`:''}<b>${i+1}</b><span class="node-st">${'★'.repeat(p.stars||0)}${'☆'.repeat(3-(p.stars||0))}</span><span class="node-t">${esc(l.t)}</span></button>`}).join('')}
+        <button class="node boss${all?'':' locked'}${beat?' beat':''}" data-isle="${sec.id}" title="${all?`Boss: ${I.b[1]}`:'Schaffe erst alle Lektionen dieser Insel'}"><b>${all?I.b[0]:'🔒'}</b><span class="node-t">${beat?'Besiegt':all?I.b[1]:'Boss'}</span></button></div></section>`}).join('')}</div>`}
+function isleBoss(sid){
+  const I=ISLES[sid],ls=LESSONS.map((l,i)=>[l,i]).filter(([l])=>l.sec===sid),d=Store.data;
+  if(!ls.every(([l])=>(d.lessons[l.id]||{}).stars>0)){toast('🔒','Noch gesperrt',`Schaffe erst alle Lektionen von ${I.n}.`);return}
+  const target=Math.max(...ls.map(([l])=>l.target)),last=ls.slice(-2).map(([,i])=>i);
+  practice({tab:'lessons',mode:'isleboss',isle:sid,target,label:`Boss: ${I.b[1]}`,title:`${I.b[0]} Boss-Kampf: ${I.b[1]}`,sub:`Besiege den Boss von ${I.n}: mindestens ${target} WPM bei 92 % Genauigkeit.`,
+    text:()=>last.map(i=>lessonText0(i)).join(' '),back:()=>go('lessons')})}
 
 /* ---------- Leagues ---------- */
 const LEAGUES=[['Bronze','🥉','#C98B5A',60],['Silber','🥈','#B8C2CC',90],['Gold','🥇','#FFC857',120],['Platin','💠','#7FE0D4',155],['Jade','🍀','#5FD38D',190],['Smaragd','💚','#2ECC71',230],['Saphir','🔷','#4F8BFF',270],
@@ -6601,10 +6787,10 @@ let friendSel=null,friendSub='overview',friendSort='level',frSearchT=0,frLastQ='
 
 /* Wird vom Firebase-Modul aufgerufen, sobald sich Freunde oder Anfragen ändern */
 function onSocial(s){
-  Object.assign(Social,s,{ready:true});chNotify();rxNotify();tinvNotify();renderInvites();updateFriendBadge();
+  Object.assign(Social,s,{ready:true});chNotify();rxNotify();tinvNotify();giftNotify();renderInvites();updateFriendBadge();
   if(currentTab==='friends'&&!activity&&!$('.modal'))renderFriendsLive();
 }
-function updateFriendBadge(){const b=$('#frb');if(!b)return;const n=Social.incoming.length+chIncoming().length;b.hidden=!n;b.textContent=n}
+function updateFriendBadge(){const b=$('#frb');if(!b)return;const n=Social.incoming.length+chIncoming().length+giftIncoming().length;b.hidden=!n;b.textContent=n}
 
 /* Öffentliche Zusammenfassung des eigenen Spielstands – das sehen Freunde */
 function publicSummary(){
@@ -6625,7 +6811,7 @@ function publicSummary(){
     team:(d.team&&d.team.id)||'',teamName:(d.team&&d.team.name)||'',
     tourKey:(d.tour&&d.tour.k)||'',tour:d.tour?{wpm:d.tour.wpm,acc:d.tour.acc}:{},
     tourPrevKey:(d.tourPrev&&d.tourPrev.k)||'',tourPrev:d.tourPrev?{wpm:d.tourPrev.wpm,acc:d.tourPrev.acc}:{},
-    ch:chOutgoing(),chr:chAnswers(),rx:rxOutgoing(),tinv:tinvOut(),news:newsList(),abc:(d.high&&d.high.abc&&d.high.abc>=1500)?d.high.abc:0
+    ch:chOutgoing(),chr:chAnswers(),rx:rxOutgoing(),tinv:tinvOut(),gift:giftOut(),news:newsList(),abc:(d.high&&d.high.abc&&d.high.abc>=1500)?d.high.abc:0
   };
 }
 
@@ -6772,13 +6958,14 @@ function viewFriend(f){
       <button class="btn primary small" data-ch="${f.uid}">🌐 Live-Duell</button>
       <button class="btn small" id="fdchs">⚔️ Rekord-Challenge</button>
       ${Store.data.team&&f.team!==Store.data.team.id?`<button class="btn small" id="fdtinv">🛡️ Ins Team einladen</button>`:''}
+      <button class="btn small" id="fdgift">🎁 Geschenk</button>
       <button class="btn ghost small" id="fdrm">Entfernen</button>
     </div>
     <div class="fd-rx"><span class="muted small">Schick ${esc(f.name)} eine Reaktion:</span>${rxBar(f.uid)}</div>
     <div id="fdbody"></div></div>`;
   $('#fdback').onclick=()=>{friendSel=null;go('friends')};
   $$('#fdsub button').forEach(b=>b.onclick=()=>{friendSub=b.dataset.fsub;viewFriend(f)});
-  $('#fdrm').onclick=()=>removeFriend(f);$('#fdchs').onclick=()=>chSend(f);if($('#fdtinv'))$('#fdtinv').onclick=()=>{teamInvite(f);$('#fdtinv').outerHTML='<span class="tag">Eingeladen ✓</span>'};
+  $('#fdrm').onclick=()=>removeFriend(f);$('#fdchs').onclick=()=>chSend(f);$('#fdgift').onclick=()=>giftModal(f);if($('#fdtinv'))$('#fdtinv').onclick=()=>{teamInvite(f);$('#fdtinv').outerHTML='<span class="tag">Eingeladen ✓</span>'};
   const body=$('#fdbody'),hdr=`<div class="cmp-row hdr"><span></span><span class="v">Du</span><span class="v">${esc(f.name)}</span></div>`;
   const cls=w=>['v'+(w>0?' win':''),'v'+(w<0?' win':'')];
   if(friendSub==='lessons'){
@@ -6939,7 +7126,7 @@ function renderInvites(){
   box.innerHTML=Online.invites.map(m=>{const nm=(m.names||{})[m.host]||'Ein Freund',av=(m.avatars||{})[m.host]||'🙂';
     return `<div class="invite" role="alertdialog" aria-label="Einladung von ${esc(nm)}"><span class="ava">${esc(av)}</span>
       <div class="iv-t"><b>${esc(nm)}</b><span>fordert dich zum Online-Duell heraus</span></div>
-      <div class="acts"><button class="btn primary small" data-iva="${m.id}">Annehmen</button><button class="btn ghost small" data-ivd="${m.id}" aria-label="Ablehnen" title="Ablehnen">✕</button></div></div>`}).join('')+tinvCards();
+      <div class="acts"><button class="btn primary small" data-iva="${m.id}">Annehmen</button><button class="btn ghost small" data-ivd="${m.id}" aria-label="Ablehnen" title="Ablehnen">✕</button></div></div>`}).join('')+tinvCards()+giftCards();
 }
 setInterval(()=>{if(Online.invites.length)renderInvites()},5000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&/Duell-Einladung/.test(document.title))document.title='Zehnfinger – Tipptrainer'});
