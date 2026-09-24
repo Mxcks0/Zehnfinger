@@ -15,7 +15,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
              onAuthStateChanged, signOut, updateProfile, deleteUser, EmailAuthProvider,
-             reauthenticateWithCredential, updatePassword, signInAnonymously, linkWithCredential } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+             reauthenticateWithCredential, updatePassword, signInAnonymously, linkWithCredential,
+             GoogleAuthProvider, signInWithPopup, linkWithPopup, signInWithCredential, reauthenticateWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, getDocs, serverTimestamp, collection, query, where,
              orderBy, startAt, endAt, limit, onSnapshot, arrayUnion, arrayRemove, deleteField,
              addDoc, updateDoc, deleteDoc, getCountFromServer, getAggregateFromServer, average, increment, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -145,9 +146,12 @@
     };
     /* ---------- Konto: Passwort ändern, Konto löschen ----------
        Beides verlangt Firebase nur nach frischer Anmeldung, deshalb zuerst mit dem aktuellen Passwort bestätigen. */
-    const reauth = pass => { const u = auth.currentUser; return reauthenticateWithCredential(u, EmailAuthProvider.credential(u.email, pass)) };
+    // Mit Google angemeldet (ohne Passwort)? Dann wird über das Google-Fenster bestätigt.
+    const isGoogle = () => { const u = auth.currentUser; return !!u && u.providerData.some(p => p.providerId === 'google.com') && !u.providerData.some(p => p.providerId === 'password') };
+    const reauth = pass => { const u = auth.currentUser; return isGoogle() ? reauthenticateWithPopup(u, new GoogleAuthProvider()) : reauthenticateWithCredential(u, EmailAuthProvider.credential(u.email, pass)) };
     window.fbAccount = {
       email: () => auth.currentUser ? auth.currentUser.email : '',
+      google: isGoogle,
       async changePassword(oldPass, newPass){ await reauth(oldPass); await updatePassword(auth.currentUser, newPass) },
       async deleteAll(pass){
         await reauth(pass);
@@ -383,25 +387,8 @@
           // War der Spieler als Gast (anonym) angemeldet, wird dieses Konto zum echten Konto – gleiche Kennung, nichts geht verloren
           const anon = auth.currentUser && auth.currentUser.isAnonymous ? auth.currentUser : null;
           const cred = anon ? await linkWithCredential(anon, EmailAuthProvider.credential(email, pass)) : await createUserWithEmailAndPassword(auth, email, pass);
-          if(anon){ window.zfFromGuest = true; setDoc(doc(db, 'guests', anon.uid), { converted: true, last: serverTimestamp() }, { merge: true }).catch(()=>{}) }
-          await updateProfile(cred.user, { displayName: name });
-          // Spielerprofil in Firestore anlegen. Kam der Spieler über einen Einladungslink, wird der
-          // Einladende vermerkt und bekommt direkt eine Freundschaftsanfrage.
-          let ref = '';
-          try{ ref = localStorage.getItem('zf-ref') || '' }catch(e){}
-          if(ref === cred.user.uid) ref = '';
-          await setDoc(doc(db, 'players', cred.user.uid), {
-            name: name,
-            nameLower: name.toLowerCase(),
-            level: 1,
-            friends: ref ? [ref] : [],
-            declined: [],
-            ...(ref ? { refBy: ref } : {}),
-            ...(anon ? { fromGuest: true } : {}),
-            createdAt: serverTimestamp(),
-            lastActive: serverTimestamp()
-          }, { merge: true });
-          if(ref){ window.zfRefUsed = ref; try{ localStorage.removeItem('zf-ref') }catch(e){} }
+          if(anon) guestConverted(anon.uid);
+          await createProfile(cred.user, name, !!anon);
           say('Account erstellt – los geht\'s!','ok');
           if(anon) enterApp(cred.user);   // Beim Übernehmen eines Gast-Kontos meldet Firebase keinen neuen Login
         } else {
@@ -417,6 +404,102 @@
         ui.submit.disabled = false;
       }
       // Bei Erfolg uebernimmt onAuthStateChanged: Bildschirm schliessen + App starten
+    }
+
+    function guestConverted(uid){
+      window.zfFromGuest = true;
+      setDoc(doc(db, 'guests', uid), { converted: true, last: serverTimestamp() }, { merge: true }).catch(()=>{});
+    }
+
+    // Spielerprofil in Firestore anlegen. Kam der Spieler über einen Einladungslink, wird der
+    // Einladende vermerkt und bekommt direkt eine Freundschaftsanfrage.
+    async function createProfile(user, name, fromGuest){
+      await updateProfile(user, { displayName: name });
+      let ref = '';
+      try{ ref = localStorage.getItem('zf-ref') || '' }catch(e){}
+      if(ref === user.uid) ref = '';
+      await setDoc(doc(db, 'players', user.uid), {
+        name: name,
+        nameLower: name.toLowerCase(),
+        level: 1,
+        friends: ref ? [ref] : [],
+        declined: [],
+        ...(ref ? { refBy: ref } : {}),
+        ...(fromGuest ? { fromGuest: true } : {}),
+        createdAt: serverTimestamp(),
+        lastActive: serverTimestamp()
+      }, { merge: true });
+      if(ref){ window.zfRefUsed = ref; try{ localStorage.removeItem('zf-ref') }catch(e){} }
+    }
+
+    /* ---------- Mit Google anmelden ----------
+       Neue Google-Spieler wählen danach einen Benutzernamen – ihr echter Name wird nie angezeigt. */
+    let gFlow = false;           // Google-Anmeldung läuft: onAuthStateChanged wartet
+    const isGoogleUser = u => !!u && u.providerData.some(p => p.providerId === 'google.com');
+
+    async function google(){
+      if(busy) return;
+      busy = true; gFlow = true;
+      say('Google-Fenster ist offen…');
+      try{
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const anon = auth.currentUser && auth.currentUser.isAnonymous ? auth.currentUser : null;
+        let user;
+        if(anon){
+          // Gast wird zum Google-Konto. Gibt es das Google-Konto schon, einfach dort anmelden.
+          try{ user = (await linkWithPopup(anon, provider)).user; guestConverted(anon.uid) }
+          catch(e){
+            const c = e && e.code === 'auth/credential-already-in-use' && GoogleAuthProvider.credentialFromError(e);
+            if(!c) throw e;
+            window.zfFromGuest = true;
+            user = (await signInWithCredential(auth, c)).user;
+          }
+        } else user = (await signInWithPopup(auth, provider)).user;
+        await afterGoogle(user, !!anon);
+      }catch(e){
+        gFlow = false; busy = false;
+        const code = e && e.code;
+        if(code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return say('');
+        say(({
+          'auth/popup-blocked':'Dein Browser hat das Google-Fenster blockiert. Erlaube Pop-ups für diese Seite und versuch es noch einmal.',
+          'auth/operation-not-allowed':'Die Google-Anmeldung ist in der Firebase-Konsole noch nicht aktiviert.',
+          'auth/unauthorized-domain':'Diese Adresse ist in Firebase noch nicht für die Google-Anmeldung freigegeben.',
+          'auth/account-exists-with-different-credential':'Zu dieser E-Mail gibt es schon ein Konto mit Passwort. Melde dich damit an.'
+        })[code] || errText(code), 'err');
+      }
+    }
+
+    // Hat der Google-Spieler schon ein Profil? Dann los, sonst erst den Benutzernamen wählen.
+    async function afterGoogle(user, fromGuest){
+      let p = null;
+      try{ const s = await getDoc(doc(db, 'players', user.uid)); p = s.exists() ? s.data() : null }catch(e){ console.warn('Profil:', e) }
+      if(p && p.name){
+        pendingName = p.name;
+        setDoc(doc(db, 'players', user.uid), { lastActive: serverTimestamp() }, { merge: true }).catch(()=>{});
+        return enterApp(user);
+      }
+      nameStep(user, fromGuest);
+    }
+
+    function nameStep(user, fromGuest){
+      const card = ui.screen.querySelector('.acard'), inp = $id('gName'), btn = $id('gGo'), msg = $id('gMsg');
+      card.classList.add('gstep');
+      $id('gStep').hidden = false;
+      ui.title.textContent = 'Fast geschafft!';
+      ui.lead.textContent = 'Wie sollen dich andere Spieler sehen? Dein echter Name aus Google wird nicht angezeigt.';
+      busy = false;
+      inp.focus();
+      const go = async () => {
+        const name = inp.value.trim();
+        if(name.length < 3){ msg.textContent = 'Dein Benutzername braucht mindestens 3 Zeichen.'; msg.className = 'amsg err'; return inp.focus() }
+        btn.disabled = true; msg.textContent = 'Konto wird eingerichtet…'; msg.className = 'amsg';
+        try{ pendingName = name; await createProfile(user, name, fromGuest); enterApp(user) }
+        catch(e){ console.warn('Google-Profil:', e); btn.disabled = false; msg.textContent = errText(e && e.code); msg.className = 'amsg err' }
+      };
+      btn.onclick = go;
+      inp.onkeydown = e => { if(e.key === 'Enter'){ e.preventDefault(); go() } };
+      $id('gBack').onclick = () => signOut(auth).finally(() => location.reload());
     }
 
     async function enterApp(user){
@@ -444,6 +527,7 @@
       ui.tabLogin.addEventListener('click', () => setMode('login'));
       ui.tabReg.addEventListener('click',   () => setMode('register'));
       ui.submit.addEventListener('click', submit);
+      $id('googleBtn').addEventListener('click', google);
       [ui.email, ui.pass, ui.name].forEach(inp => inp.addEventListener('keydown', e => {
         if(e.key === 'Enter'){ e.preventDefault(); submit() }
       }));
@@ -461,7 +545,9 @@
       // Bereits angemeldet? Dann direkt in die App, ohne Startbildschirm.
       onAuthStateChanged(auth, user => {
         // Anonyme Gast-Konten starten die App nicht automatisch – dafür gibt es den Gast-Knopf
-        if(user && !user.isAnonymous) enterApp(user);
+        // Google-Spieler: erst prüfen, ob schon ein Benutzername gewählt wurde
+        if(!user || user.isAnonymous || gFlow) return;
+        if(isGoogleUser(user)){ gFlow = true; afterGoogle(user, false) } else enterApp(user);
       });
     });
 </script>
@@ -2514,6 +2600,14 @@ button.comm-card{cursor:pointer}
 .guest-or{display:flex;align-items:center;gap:10px;margin:16px 0 10px;color:var(--muted);font-size:13px}
 .guest-or::before,.guest-or::after{content:"";flex:1;height:1px;background:var(--line)}
 .guest-btn{width:100%}
+.google-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#1f1f1f;border-color:#dadce0}
+.google-btn:hover{background:#f3f4f6}
+.google-btn svg{flex:none}
+.aform .guest-or{margin:14px 0 12px}
+#gStep .btn{width:100%}
+#gStep .linkbtn{display:block;margin:10px auto 0}
+/* Benutzername nach der Google-Anmeldung: nur Titel und Namensfeld zeigen */
+.acard.gstep>:not(.alogo):not(h1):not(.wlead):not(#gStep){display:none}
 .guestbar{max-width:1080px;margin:10px auto 0;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border:1px dashed var(--caret);border-radius:12px;background:color-mix(in srgb,var(--caret) 8%,var(--surface));font-size:14px}
 @media (max-width:1120px){.guestbar{margin:10px 16px 0}}
 /* ---- Posteingang ---- */
@@ -2585,7 +2679,9 @@ button.comm-card{cursor:pointer}
       <button id="tabRegister" data-mode="register" aria-pressed="false">Registrieren</button>
     </div>
 
-    <div class="aform">
+    <div class="aform" id="aform">
+      <button class="btn big google-btn" id="googleBtn" type="button"><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Mit Google fortfahren</button>
+      <div class="guest-or"><span>oder mit E-Mail</span></div>
       <div class="afield">
         <label for="email">E-Mail</label>
         <input type="email" id="email" autocomplete="email" placeholder="du@beispiel.de">
@@ -2600,6 +2696,16 @@ button.comm-card{cursor:pointer}
       </div>
       <button class="btn primary big" id="authSubmit">Anmelden</button>
       <p class="amsg" id="statusMsg" aria-live="polite"></p>
+    </div>
+
+    <div class="aform" id="gStep" hidden>
+      <div class="afield">
+        <label for="gName">Benutzername</label>
+        <input type="text" id="gName" autocomplete="nickname" maxlength="20" placeholder="So sehen dich andere">
+      </div>
+      <button class="btn primary big" id="gGo">Los geht's</button>
+      <p class="amsg" id="gMsg" aria-live="polite"></p>
+      <button class="linkbtn" id="gBack" type="button">Abbrechen</button>
     </div>
 
     <p class="ahint" id="authHint">Noch keinen Account? Wechsle oben zu „Registrieren“.</p>
@@ -5476,7 +5582,8 @@ function viewSettings(){
     data:()=>group('Backup',`<p class="muted small">Speichere deinen Fortschritt als Datei, zum Beispiel um ihn auf ein anderes Gerät zu übertragen.</p>
         <div class="row"><button class="btn primary" id="exp">Backup speichern</button><label class="btn" for="impf">Backup laden</label><input type="file" id="impf" accept=".json,application/json" hidden></div>`)+
       group('Zurücksetzen',`<div class="row"><button class="btn" id="sdef">Einstellungen zurücksetzen</button><button class="btn ghost" id="swel">Willkommen erneut anzeigen</button></div>`)+
-      group('Konto',`<p class="muted small">Angemeldet als ${esc((window.fbAccount&&window.fbAccount.email())||'')}. Merk dir dein Passwort gut: Mit einer ausgedachten E-Mail lässt es sich nicht zurücksetzen.</p>
+      group('Konto',window.fbAccount&&window.fbAccount.google()?`<p class="muted small">Angemeldet mit Google als ${esc(window.fbAccount.email()||'')}.</p>
+        <div class="row"><button class="btn ghost" id="sdel">🗑️ Konto löschen</button></div>`:`<p class="muted small">Angemeldet als ${esc((window.fbAccount&&window.fbAccount.email())||'')}. Merk dir dein Passwort gut: Mit einer ausgedachten E-Mail lässt es sich nicht zurücksetzen.</p>
         <div class="row"><button class="btn" id="spw">🔑 Passwort ändern</button><button class="btn ghost" id="sdel">🗑️ Konto löschen</button></div>`)+
       group('Hilfe',`<div class="row"><button class="btn" id="sfb">💬 Feedback geben</button><button class="btn ghost" id="snew">✨ Was ist neu?</button></div>`)+
       group('Rechtliches',`<p class="muted small">Wie Zehnfinger mit deinen Daten umgeht und wer hinter dem Spiel steht.</p>
@@ -5499,7 +5606,7 @@ function viewSettings(){
     $$('[data-sel]',el).forEach(i=>i.onchange=()=>{S[i.dataset.sel]=i.value;update();if(i.dataset.sel==='errSound')Sound.err()});
     if(setCat==='data'){
       $('#swel').onclick=()=>{go('lessons');showWelcome()};
-      $('#spw').onclick=()=>accountModal('password');$('#sdel').onclick=()=>accountModal('delete');$('#sfb').onclick=feedbackModal;$('#snew').onclick=()=>whatsNew(true);
+      if($('#spw'))$('#spw').onclick=()=>accountModal('password');$('#sdel').onclick=()=>accountModal('delete');$('#sfb').onclick=feedbackModal;$('#snew').onclick=()=>whatsNew(true);
       $('#exp').onclick=exportData;$('#impf').onchange=e=>{const f=e.target.files[0];if(f)importData(f)};
       $('#sdef').onclick=()=>{const m=modal(`<h3>Einstellungen zurücksetzen?</h3><p class="muted">Alle Einstellungen gehen auf den Standard zurück. Dein Fortschritt bleibt erhalten.</p><div class="acts"><button class="btn" id="no">Abbrechen</button><button class="btn primary" id="yes">Zurücksetzen</button></div>`);
         $('#no',m).onclick=()=>m.remove();$('#yes',m).onclick=()=>{const own=S.own;Store.data.settings=DEFAULT().settings;Store.data.settings.own=own;Store.save();applySettings();refreshMe();go('settings')}};
@@ -6183,6 +6290,9 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-24.5',d:'24.09.2026',items:[
+    '🔐 Neu: Mit Google anmelden – ein Klick, kein Passwort merken. Deinen Benutzernamen wählst du trotzdem selbst.'
+  ]},
   {v:'2026-09-24.4',d:'24.09.2026',items:[
     '📬 Posteingang oben: Anfragen, Einladungen, Geschenke, Herausforderungen und Reaktionen an einem Ort',
     '🔐 Neues Spiel „Escape Room“: fünf Rätsel-Schlösser, jede Woche ein neuer Raum',
@@ -6281,17 +6391,17 @@ function feedbackModal(){
 
 /* ---------- Konto: Passwort ändern und Konto löschen ---------- */
 function accountModal(kind){
-  const del=kind==='delete';
+  const del=kind==='delete',gg=!!(window.fbAccount&&window.fbAccount.google());   // Google-Konten bestätigen über das Google-Fenster
   const m=modal(`<h3>${del?'🗑️ Konto löschen':'🔑 Passwort ändern'}</h3>
-    ${del?`<p class="muted small">Dein Konto, dein Spielstand und dein öffentliches Profil werden endgültig gelöscht. Das kann nicht rückgängig gemacht werden.</p>`:`<p class="muted small">Angemeldet als ${esc(window.fbAccount?window.fbAccount.email():'')}</p>`}
-    <div class="acc-form"><label>Aktuelles Passwort<input type="password" id="apo" autocomplete="current-password"></label>
+    ${del?`<p class="muted small">Dein Konto, dein Spielstand und dein öffentliches Profil werden endgültig gelöscht. Das kann nicht rückgängig gemacht werden.${gg?' Zur Sicherheit bestätigst du danach kurz mit Google.':''}</p>`:`<p class="muted small">Angemeldet als ${esc(window.fbAccount?window.fbAccount.email():'')}</p>`}
+    <div class="acc-form">${gg?'':`<label>Aktuelles Passwort<input type="password" id="apo" autocomplete="current-password"></label>`}
       ${del?`<label>Zur Bestätigung „LÖSCHEN“ eingeben<input type="text" id="apc" autocomplete="off"></label>`:`<label>Neues Passwort<input type="password" id="apn" autocomplete="new-password" placeholder="Mindestens 6 Zeichen"></label><label>Neues Passwort wiederholen<input type="password" id="apn2" autocomplete="new-password"></label>`}</div>
     <p class="fr-note" id="apm"></p>
     <div class="acts"><button class="btn ${del?'danger':'primary'}" id="aps">${del?'Endgültig löschen':'Passwort ändern'}</button><button class="btn ghost" id="apx">Abbrechen</button></div>`);
-  const msg=x=>{$('#apm',m).textContent=x};setTimeout(()=>$('#apo',m).focus(),50);
+  const msg=x=>{$('#apm',m).textContent=x};setTimeout(()=>($('#apo',m)||$('#apc',m)).focus(),50);
   $('#apx',m).onclick=()=>m.remove();
   $('#aps',m).onclick=async()=>{
-    const old=$('#apo',m).value;if(!old)return msg('Bitte gib dein aktuelles Passwort ein.');
+    const old=gg?'':$('#apo',m).value;if(!gg&&!old)return msg('Bitte gib dein aktuelles Passwort ein.');
     if(del){if($('#apc',m).value.trim().toUpperCase()!=='LÖSCHEN')return msg('Bitte tippe zur Bestätigung LÖSCHEN ein.')}
     else{const n=$('#apn',m).value;if(n.length<6)return msg('Das neue Passwort braucht mindestens 6 Zeichen.');if(n!==$('#apn2',m).value)return msg('Die beiden neuen Passwörter sind nicht gleich.')}
     $('#aps',m).disabled=true;msg(del?'Konto wird gelöscht…':'Passwort wird geändert…');
