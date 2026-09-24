@@ -437,9 +437,14 @@
     let gFlow = false;           // Google-Anmeldung läuft: onAuthStateChanged wartet
     const isGoogleUser = u => !!u && u.providerData.some(p => p.providerId === 'google.com');
 
+    // Beim Registrieren darf Google nur neue Konten anlegen – bestehende sollen über „Anmelden“ rein
+    const EXISTS = 'Für diese E-Mail gibt es schon einen Account. Bitte melde dich an.';
+    function toLogin(){ gFlow = false; busy = false; setMode('login'); say(EXISTS, 'err') }
+
     async function google(){
       if(busy) return;
       busy = true; gFlow = true;
+      const reg = mode === 'register';
       say('Google-Fenster ist offen…');
       try{
         const provider = new GoogleAuthProvider();
@@ -447,19 +452,20 @@
         const anon = auth.currentUser && auth.currentUser.isAnonymous ? auth.currentUser : null;
         let user;
         if(anon){
-          // Gast wird zum Google-Konto. Gibt es das Google-Konto schon, einfach dort anmelden.
+          // Gast wird zum Google-Konto. Gibt es das Google-Konto schon, beim Anmelden einfach dort anmelden.
           try{ user = (await linkWithPopup(anon, provider)).user; guestConverted(anon.uid) }
           catch(e){
             // Google-Konto oder E-Mail gehört schon einem bestehenden Konto: dort anmelden, der Gast-Stand wird übernommen, falls es leer ist
             const taken = e && ['auth/credential-already-in-use', 'auth/email-already-in-use', 'auth/account-exists-with-different-credential'].includes(e.code);
             if(!taken) throw e;
+            if(reg) return toLogin();
             const c = GoogleAuthProvider.credentialFromError(e);
             window.zfFromGuest = true;
             if(c) user = (await signInWithCredential(auth, c)).user;
             else { await signOut(auth); gFlow = false; busy = false; return say('Du hast schon ein Konto. Tippe noch einmal auf „Mit Google fortfahren“.', 'ok') }
           }
         } else user = (await signInWithPopup(auth, provider)).user;
-        await afterGoogle(user, !!anon);
+        await afterGoogle(user, !!anon, reg);
       }catch(e){
         gFlow = false; busy = false;
         const code = e && e.code;
@@ -474,11 +480,12 @@
     }
 
     // Hat der Google-Spieler schon ein Profil? Dann los, sonst erst den Benutzernamen wählen.
-    async function afterGoogle(user, fromGuest){
+    async function afterGoogle(user, fromGuest, reg){
       try{ if(localStorage.getItem('zf-guest')) window.zfFromGuest = true }catch(e){}   // Gast-Stand übernehmen (nur wenn das Konto noch leer ist)
       let p = null;
       try{ const s = await getDoc(doc(db, 'players', user.uid)); p = s.exists() ? s.data() : null }catch(e){ console.warn('Profil:', e) }
       if(p && p.name){
+        if(reg){ await signOut(auth).catch(()=>{}); return toLogin() }
         pendingName = p.name;
         setDoc(doc(db, 'players', user.uid), { lastActive: serverTimestamp() }, { merge: true }).catch(()=>{});
         return enterApp(user);
