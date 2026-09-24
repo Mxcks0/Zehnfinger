@@ -450,10 +450,13 @@
           // Gast wird zum Google-Konto. Gibt es das Google-Konto schon, einfach dort anmelden.
           try{ user = (await linkWithPopup(anon, provider)).user; guestConverted(anon.uid) }
           catch(e){
-            const c = e && e.code === 'auth/credential-already-in-use' && GoogleAuthProvider.credentialFromError(e);
-            if(!c) throw e;
+            // Google-Konto oder E-Mail gehört schon einem bestehenden Konto: dort anmelden, der Gast-Stand wird übernommen, falls es leer ist
+            const taken = e && ['auth/credential-already-in-use', 'auth/email-already-in-use', 'auth/account-exists-with-different-credential'].includes(e.code);
+            if(!taken) throw e;
+            const c = GoogleAuthProvider.credentialFromError(e);
             window.zfFromGuest = true;
-            user = (await signInWithCredential(auth, c)).user;
+            if(c) user = (await signInWithCredential(auth, c)).user;
+            else { await signOut(auth); gFlow = false; busy = false; return say('Du hast schon ein Konto. Tippe noch einmal auf „Mit Google fortfahren“.', 'ok') }
           }
         } else user = (await signInWithPopup(auth, provider)).user;
         await afterGoogle(user, !!anon);
@@ -472,6 +475,7 @@
 
     // Hat der Google-Spieler schon ein Profil? Dann los, sonst erst den Benutzernamen wählen.
     async function afterGoogle(user, fromGuest){
+      try{ if(localStorage.getItem('zf-guest')) window.zfFromGuest = true }catch(e){}   // Gast-Stand übernehmen (nur wenn das Konto noch leer ist)
       let p = null;
       try{ const s = await getDoc(doc(db, 'players', user.uid)); p = s.exists() ? s.data() : null }catch(e){ console.warn('Profil:', e) }
       if(p && p.name){
