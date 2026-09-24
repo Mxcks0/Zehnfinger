@@ -6,8 +6,20 @@
 <title>Zehnfinger – Tipptrainer</title>
 <meta name="description" content="Zehnfinger: Lerne kostenlos das Zehnfinger-Schreiben – mit Lektionen, über 40 Tipp-Spielen, Ligen, Turnieren und Duellen gegen Freunde. Direkt im Browser, ohne Download.">
 <link rel="canonical" href="https://www.zehnfingernulllangeweile.de/">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5747466582898616"
-     crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-5747466582898616">
+<script>
+/* Werbung erst nachladen, wenn die Seite schon läuft (ca. 3 Sekunden nach dem Laden, wenn der Browser Luft hat).
+   So startet die Seite deutlich schneller. Das Meta-Tag oben bestätigt AdSense die Seite trotzdem. */
+(function(){var done=false;function ads(){if(done)return;done=true;var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';
+  s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5747466582898616';document.head.appendChild(s)}
+  addEventListener('load',function(){setTimeout(function(){if('requestIdleCallback' in window)requestIdleCallback(ads,{timeout:5000});else ads()},3000)})})();
+</script>
+<!-- Verbindungen zu Firebase früh aufbauen und die Hauptschrift sofort laden -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com">
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+<link rel="preconnect" href="https://securetoken.googleapis.com">
+<link rel="preload" href="fonts/bricolage-grotesque-400-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link href="fonts/fonts.css" rel="stylesheet">
 
 <!-- Firebase SDK über CDN einbinden -->
@@ -714,7 +726,7 @@ body.unfocused .typebox .focus-hint,body.unfocused .stage .focus-hint{display:gr
 .hide{display:none!important}
 
 /* Modal */
-.modal{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 72%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;z-index:20;padding:20px}
+.modal{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 84%,transparent);display:grid;place-items:center;z-index:20;padding:20px}
 .dlg{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:26px;max-width:540px;width:100%;max-height:90vh;overflow:auto}
 .dlg h3{margin:0 0 6px;font-size:26px}
 .res{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
@@ -1872,6 +1884,45 @@ body.kbt-vintage .kb .key.next{background:linear-gradient(180deg,#fff,#b4bac3)}
 :is(body.kbt-steampunk .kb,.kth-steampunk) .key{--cap:#2a1d12;--cap-top:#4d3824;--cap-base:#3a2410;--leg:#f3d9a0;--mcap:#2a1d12;--mtop:#4d3824;--mleg:#e0c083;font-weight:700;
   background:linear-gradient(180deg,#f6c58c,#a55a2a 55%,#d88e52);--face:radial-gradient(circle at 50% 30%,var(--cap-top),var(--cap) 72%)}
 body.kbt-steampunk .kb::after{content:'⚙';position:absolute;right:-12px;top:-16px;font-size:34px;color:#c8963e;text-shadow:0 2px 4px rgba(0,0,0,.5);animation:bx-spin 10s linear infinite;pointer-events:none}
+/* ---------- 14–23: neue Tastaturen ---------- */
+/* Minze */
+:is(body.kbt-mint .kb,.kth-mint){--case:#e6f5ef;--case-hi:#f6fffb;--case-edge:#b7d9cb;--kdt:5px;--fs:4px}
+:is(body.kbt-mint .kb,.kth-mint) .key{--cap:#f4fffa;--cap-top:#ffffff;--cap-side:#d3efe4;--cap-base:#7fc5aa;--leg:#1f5c47;--mcap:#9fe0c6;--mtop:#b8ead6;--mside:#86cdb1;--mbase:#4f9c80;--mleg:#0f3b2c;--kr:10px}
+/* Matcha */
+:is(body.kbt-matcha .kb,.kth-matcha){--case:#cfd8b8;--case-hi:#e2ead0;--case-edge:#9aa785;--kdt:6px}
+:is(body.kbt-matcha .kb,.kth-matcha) .key{--cap:#eef2df;--cap-top:#f7faee;--cap-side:#d9e0c4;--cap-base:#8f9c72;--leg:#3d4a2a;--mcap:#9bb07a;--mtop:#aec28d;--mside:#849964;--mbase:#5d6d44;--mleg:#f3f7e6}
+/* Ozean */
+:is(body.kbt-ocean .kb,.kth-ocean){--case:#06243a;--case-hi:#0b3452;--case-edge:#021420;--kdt:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 22px 44px -20px rgba(30,227,207,.45)}
+:is(body.kbt-ocean .kb,.kth-ocean) .key{--cap:#0f4c75;--cap-top:#1b6aa0;--cap-side:#0b3d5e;--cap-base:#1ee3cf;--leg:#dff9ff;--mcap:#0a3a5a;--mtop:#12507a;--mside:#072b44;--mbase:#12a89a;--mleg:#9fe9ff}
+/* Kirschblüte */
+:is(body.kbt-sakura .kb,.kth-sakura){--case:#f3e3e7;--case-hi:#fff4f6;--case-edge:#d9b9c1;--kdt:6px;--fs:4px}
+:is(body.kbt-sakura .kb,.kth-sakura) .key{--cap:#fde8ee;--cap-top:#fff6f8;--cap-side:#f2cfd9;--cap-base:#c98fa2;--leg:#7a3b52;--mcap:#f7c6d4;--mtop:#fbd9e2;--mside:#e8aebf;--mbase:#b07488;--mleg:#5e2338;--kr:10px}
+/* Zuckerwatte: jede Reihe in einer anderen Bonbonfarbe */
+:is(body.kbt-candy .kb,.kth-candy){--case:#fdf0f7;--case-hi:#fff8fc;--case-edge:#e8c9dc;--kdt:6px;--fs:4px}
+:is(body.kbt-candy .kb,.kth-candy) .key{--cap:#ffd9ec;--cap-top:#ffeaf5;--cap-side:#f5bcd9;--cap-base:#d98ab3;--leg:#7b2e5a;--mcap:#d9ccf7;--mtop:#e8e0fb;--mside:#c2b1ee;--mbase:#8d77c9;--mleg:#3b2a6e;--kr:12px}
+:is(body.kbt-candy .kb,.kth-candy) .kr:nth-child(2) .key:not(.mod){--cap:#dbe9ff;--cap-top:#ecf3ff;--cap-side:#bcd3f5;--cap-base:#7fa0d4;--leg:#27456f}
+:is(body.kbt-candy .kb,.kth-candy) .kr:nth-child(3) .key:not(.mod){--cap:#fff1c9;--cap-top:#fff8e3;--cap-side:#f3dfa3;--cap-base:#c9a95a;--leg:#6b5215}
+:is(body.kbt-candy .kb,.kth-candy) .kr:nth-child(4) .key:not(.mod){--cap:#d8f5e5;--cap-top:#ebfbf2;--cap-side:#b5e6cc;--cap-base:#6fb892;--leg:#1f5a3c}
+/* Mitternacht: dunkelblau mit goldener Schrift */
+:is(body.kbt-midnight .kb,.kth-midnight){--case:#0b1026;--case-hi:#141a38;--case-edge:#05081a;--kdt:5px}
+:is(body.kbt-midnight .kb,.kth-midnight) .key{--cap:#1a2147;--cap-top:#242d5c;--cap-side:#121838;--cap-base:#070b1d;--leg:#ffd76a;--lsh:0 0 4px rgba(255,215,106,.45);--mcap:#2a2f5e;--mtop:#353b72;--mside:#1f2450;--mbase:#070b1d;--mleg:#ffe7a3}
+/* Polar: eisblau mit frostigem Schimmer */
+:is(body.kbt-arctic .kb,.kth-arctic){--case:#dff3fb;--case-hi:#f2fbff;--case-edge:#a8d4e6;--kdt:5px}
+:is(body.kbt-arctic .kb,.kth-arctic) .key{--cap:#eaf8ff;--cap-top:#ffffff;--cap-side:#c9e9f7;--cap-base:#7fbfdc;--leg:#1d5a78;--mcap:#bfe6f6;--mtop:#d6f0fb;--mside:#a5d9ef;--mbase:#5ea6c6;--mleg:#0f3f57;
+  box-shadow:0 var(--kd) 0 var(--cap-base),0 0 12px -3px rgba(127,191,220,.7)}
+/* Lava: schwarz mit glühend orangem Licht */
+:is(body.kbt-lava .kb,.kth-lava){--case:#120a08;--case-hi:#1e120e;--case-edge:#000;--kdt:6px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 0 1px #000,0 0 40px -12px rgba(255,90,20,.65)}
+:is(body.kbt-lava .kb,.kth-lava) .key{--cap:#1b1411;--cap-top:#2a1f1a;--cap-side:#120c0a;--cap-base:#ff5a14;--leg:#ffb27a;--lsh:0 0 6px #ff5a14;--mcap:#1b1411;--mtop:#2a1f1a;--mside:#120c0a;--mbase:#ff5a14;--mleg:#ffcf9e;
+  box-shadow:0 var(--kd) 0 #3a1204,0 calc(var(--kd) + 2px) 12px -2px rgba(255,90,20,.7)}
+/* Carbon: Kohlefaser-Rahmen, graue Kappen, rote Sondertasten */
+:is(body.kbt-carbon .kb,.kth-carbon){--kdt:6px;background:repeating-linear-gradient(45deg,#18181c 0 5px,#222228 5px 10px);box-shadow:inset 0 0 0 1px #000,inset 0 1px 0 rgba(255,255,255,.06),0 20px 40px -20px rgba(0,0,0,.8)}
+:is(body.kbt-carbon .kb,.kth-carbon) .key{--cap:#3a3b41;--cap-top:#4a4b52;--cap-side:#2c2d32;--cap-base:#111114;--leg:#e8e8ea;--mcap:#b3202a;--mtop:#cf2f3a;--mside:#8f1820;--mbase:#4d0b10;--mleg:#ffffff;--kr:6px}
+/* Goldrausch: goldene Kappen im schwarzen Rahmen */
+:is(body.kbt-gold .kb,.kth-gold){--case:#0c0c0c;--case-hi:#1a1a1a;--case-edge:#000;--kdt:6px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 0 1px #000,0 0 34px -12px rgba(243,215,122,.6)}
+:is(body.kbt-gold .kb,.kth-gold) .key{--cap:#caa13a;--cap-top:#f3d77a;--cap-side:#a47a22;--cap-base:#5c420f;--leg:#3b2a05;--face:linear-gradient(180deg,#fff1b8,#e3b64a 45%,#b8862a);--mcap:#1a1a1a;--mtop:#2a2a2a;--mside:#111;--mbase:#000;--mleg:#f3d77a}
+:is(body.kbt-gold .kb,.kth-gold) .key.mod{--face:linear-gradient(180deg,var(--mtop),var(--mcap))}
+/* Sondertasten der neuen Tastaturen in ihrer eigenen Farbe */
+:is(body.kbt-mint .kb,.kth-mint,body.kbt-matcha .kb,.kth-matcha,body.kbt-ocean .kb,.kth-ocean,body.kbt-sakura .kb,.kth-sakura,body.kbt-candy .kb,.kth-candy,body.kbt-midnight .kb,.kth-midnight,body.kbt-arctic .kb,.kth-arctic,body.kbt-lava .kb,.kth-lava,body.kbt-carbon .kb,.kth-carbon,body.kbt-gold .kb,.kth-gold) .key.mod{--cap:var(--mcap);--cap-top:var(--mtop);--cap-side:var(--mside);--cap-base:var(--mbase);--leg:var(--mleg)}
 /* ================= Shop: aufgeräumte Navigation ================= */
 .shop.shop2{display:block}
 .shop-nav{display:grid;gap:12px;margin-bottom:16px}
@@ -2479,6 +2530,9 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 /* Jahreszeiten-Deko */
 #season{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
 #season .sp{position:absolute;top:-40px;opacity:.55;animation:spfall linear infinite}
+/* Leistung: Solange ein Fenster offen ist oder getippt wird, ruhen die Deko-Animationen im Hintergrund */
+body:has(.modal) #season .sp,body.busy #season .sp{animation-play-state:paused}
+body:has(.modal)::after{display:none}
 #season .sp-halloween,#season .sp-easter{animation-name:spfloat;top:auto;bottom:-40px;opacity:.45}
 @keyframes spfall{to{transform:translateY(calc(100vh + 80px)) rotate(200deg)}}
 @keyframes spfloat{0%{transform:translate(0,0)}50%{transform:translate(18px,-55vh)}100%{transform:translate(-10px,calc(-100vh - 80px))}}
@@ -3412,12 +3466,22 @@ const Store={data:DEFAULT(),ref:null,chain:Promise.resolve(),timer:null,
       if(legacy&&!owner){try{this.data=this.merge(JSON.parse(legacy))}catch(e){this.data=DEFAULT()}try{localStorage.setItem(LS_KEY+':owner',uid)}catch(e){}}
       else{this.data=DEFAULT();this.data.settings=Object.assign(this.data.settings,keepSettings);this.data.updatedAt=0}
     }
-    try{
-      const remote=window.fbLoadProgress?await window.fbLoadProgress():null;
-      if(remote&&remote.data&&(remote.updatedAt||0)>(this.data.updatedAt||0))this.data=this.merge(JSON.parse(remote.data));
-      this.sync=true;   // nur synchronisieren, wenn der Cloud-Stand sicher gelesen wurde
-    }catch(e){console.warn('Cloud-Spielstand nicht geladen – es wird nur lokal gespeichert:',e)}
-    this.writeLocal();
+    // Schneller Start: Gibt es schon einen Spielstand auf diesem Gerät, geht es sofort los,
+    // und der Cloud-Stand wird im Hintergrund nachgeladen. Nur beim allerersten Mal wird gewartet.
+    const base=this.data.updatedAt||0;   // Stand vor dem Start – spätere lokale Speicherungen zählen nicht als „neuer“
+    const baseCount=this.data.count||0;   // wurde in der Zwischenzeit schon gespielt, bleibt der lokale Stand
+    const cloud=(async()=>{
+      try{
+        const remote=window.fbLoadProgress?await window.fbLoadProgress():null;
+        if(this.uid!==uid)return false;
+        let newer=false;
+        if(remote&&remote.data&&(remote.updatedAt||0)>base&&(this.data.count||0)===baseCount){const acc=this.data.account;this.data=this.merge(JSON.parse(remote.data));if(acc)this.data.account=acc;newer=true}
+        this.sync=true;   // nur synchronisieren, wenn der Cloud-Stand sicher gelesen wurde
+        this.writeLocal();return newer;
+      }catch(e){console.warn('Cloud-Spielstand nicht geladen – es wird nur lokal gespeichert:',e);return false}
+    })();
+    if(!raw){await cloud;this.writeLocal();return}
+    cloud.then(newer=>{if(newer)try{onRemoteLoaded()}catch(e){}else if(this.sync)this.push()});
   }
 };
 /* Freunde-Zustand, wird live vom Firebase-Modul befüllt (siehe onSocial) */
@@ -3652,23 +3716,45 @@ function toast(icon,title,text){
   t.innerHTML=`<span class="ti">${icon}</span><div><b>${esc(title)}</b><span class="tx">${esc(text)}</span></div>`;
   w.appendChild(t);setTimeout(()=>t.classList.add('out'),4200);setTimeout(()=>t.remove(),4700);
 }
+/* Konfetti – schnell auch auf schwachen Handys:
+   eine gemeinsame Zeichenfläche für alle Konfetti-Schübe, höchstens 1,5-fache Auflösung,
+   Emojis werden nur einmal gezeichnet und danach als kleines Bild wiederverwendet,
+   weniger Teilchen auf schwachen Geräten, und alles hört sauber auf, sobald nichts mehr fliegt. */
+const Confetti={c:null,x:null,ps:[],raf:0,W:0,H:0,dpr:1,spr:new Map(),last:0};
+const lowEnd=(()=>{try{return (navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=4}catch(e){return false}})();
+function confSprite(e){let s=Confetti.spr.get(e);if(s)return s;const n=48;s=document.createElement('canvas');s.width=s.height=n;const g=s.getContext('2d');
+  g.font=`${n*.8}px system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText(e,n/2,n/2+2);Confetti.spr.set(e,s);return s}
 function confetti(n=130){
   if(reduced()||!Store.data.settings.confetti)return;
-  const c=document.createElement('canvas');c.className='confetti';document.body.appendChild(c);
-  const dpr=devicePixelRatio||1,W=innerWidth,H=innerHeight;c.width=W*dpr;c.height=H*dpr;const x=c.getContext('2d');x.scale(dpr,dpr);
-  const cols=['--f1','--f2','--f3','--f4','--f5','--caret'].map(css);
+  const C=Confetti;
+  if(!C.c){C.c=document.createElement('canvas');C.c.className='confetti';document.body.appendChild(C.c);C.x=C.c.getContext('2d');
+    C.dpr=Math.min(1.5,devicePixelRatio||1);C.W=innerWidth;C.H=innerHeight;C.c.width=Math.round(C.W*C.dpr);C.c.height=Math.round(C.H*C.dpr)}
+  const W=C.W,H=C.H,cols=['--f1','--f2','--f3','--f4','--f5','--caret'].map(css);
   const st=Store.data.settings.confettiStyle||'classic',emo=['stars','hearts','coins','snow','party','food','music','space'].includes(st)?CONF_EMO[st]:st==='classic'&&hwActive()?['🎃','🦇','👻','🍬']:null,fw=st==='fireworks',px=st==='pixel',snow=st==='snow';
-  const origins=fw?[[W*.25,H*.35],[W*.5,H*.25],[W*.75,H*.38]]:null;
-  const ps=Array.from({length:n},(_,k)=>{if(fw){const o=origins[k%3],a=Math.random()*Math.PI*2,s=150+Math.random()*350;return{x:o[0],y:o[1],vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:3+Math.random()*2,c:pick(cols),fw:1}}
-    return{x:snow?Math.random()*W:W/2+(Math.random()-.5)*W*.35,y:snow?-20-Math.random()*H*.5:H*.4,vx:snow?(Math.random()-.5)*60:(Math.random()-.5)*1000,vy:snow?60+Math.random()*80:-Math.random()*800-250,r:Math.random()*7+5,a:Math.random()*6,va:(Math.random()-.5)*14,c:pick(cols),e:emo?pick(emo):null}});
-  let last=performance.now();const t0=last;
-  const f=ts=>{const dt=Math.min(.05,(ts-last)/1000);last=ts;x.clearRect(0,0,W,H);
-    const age=(ts-t0)/2800;
-    ps.forEach(p=>{if(p.fw){p.vy+=220*dt;p.vx*=.97;p.vy*=.97;p.x+=p.vx*dt;p.y+=p.vy*dt;x.globalAlpha=Math.max(0,1-age);x.fillStyle=p.c;x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill();x.globalAlpha=1;return}
-      p.vy+=(snow?0:1500)*dt;p.vx*=.985;p.x+=p.vx*dt;p.y+=p.vy*dt;p.a+=p.va*dt;x.save();x.translate(p.x,p.y);
-      if(p.e){x.rotate(p.a*.3);x.font=`${Math.round(p.r*2.6)}px system-ui`;x.fillText(p.e,0,0)}else if(px){x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/2,p.r,p.r)}else{x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2)}x.restore()});
-    if(ts-t0<2800)requestAnimationFrame(f);else c.remove()};
-  requestAnimationFrame(f);
+  n=Math.round(n*(lowEnd?.5:1)*(emo?.6:1));n=Math.max(0,Math.min(n,260-C.ps.length));   // nie mehr als 260 Teilchen gleichzeitig
+  const origins=fw?[[W*.25,H*.35],[W*.5,H*.25],[W*.75,H*.38]]:null,now=performance.now();
+  for(let k=0;k<n;k++){
+    if(fw){const o=origins[k%3],a=Math.random()*Math.PI*2,s=150+Math.random()*350;C.ps.push({x:o[0],y:o[1],vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:3+Math.random()*2,c:pick(cols),fw:1,t0:now});continue}
+    const e=emo?pick(emo):null;
+    C.ps.push({x:snow?Math.random()*W:W/2+(Math.random()-.5)*W*.35,y:snow?-20-Math.random()*H*.5:H*.4,vx:snow?(Math.random()-.5)*60:(Math.random()-.5)*1000,vy:snow?60+Math.random()*80:-Math.random()*800-250,
+      r:Math.random()*7+5,a:Math.random()*6,va:(Math.random()-.5)*14,c:pick(cols),img:e?confSprite(e):null,px,snow,t0:now});
+  }
+  if(!C.raf){C.last=now;C.raf=requestAnimationFrame(confTick)}
+}
+function confTick(ts){
+  const C=Confetti,x=C.x,d=C.dpr,W=C.W,H=C.H,dt=Math.min(.05,(ts-C.last)/1000);C.last=ts;
+  x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,C.c.width,C.c.height);
+  C.ps=C.ps.filter(p=>ts-p.t0<2800&&p.y<H+60&&p.x>-60&&p.x<W+60);
+  for(const p of C.ps){
+    if(p.fw){p.vy+=220*dt;p.vx*=.97;p.vy*=.97;p.x+=p.vx*dt;p.y+=p.vy*dt;x.setTransform(d,0,0,d,0,0);x.globalAlpha=Math.max(0,1-(ts-p.t0)/2800);x.fillStyle=p.c;x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill();continue}
+    p.vy+=(p.snow?0:1500)*dt;p.vx*=.985;p.x+=p.vx*dt;p.y+=p.vy*dt;p.a+=p.va*dt;x.globalAlpha=1;
+    const rot=p.img?p.a*.3:p.px?0:p.a,cs=Math.cos(rot)*d,sn=Math.sin(rot)*d;x.setTransform(cs,sn,-sn,cs,p.x*d,p.y*d);
+    if(p.img){const z=p.r*2.6;x.drawImage(p.img,-z/2,-z/2,z,z)}
+    else{x.fillStyle=p.c;if(p.px)x.fillRect(-p.r/2,-p.r/2,p.r,p.r);else x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2)}
+  }
+  x.globalAlpha=1;
+  if(C.ps.length)C.raf=requestAnimationFrame(confTick);
+  else{C.raf=0;C.c.remove();C.c=null;C.x=null}
 }
 function countUp(el,to,dec=0,suffix=''){
   if(!el)return;if(reduced()){el.textContent=to.toFixed(dec)+suffix;return}
@@ -3761,7 +3847,9 @@ function colorize(text){
 /* Schreibmaschinen: bündeln Tastatur-Look, Klang und Tippbox. Überschreiben beim Tippen die eigene Auswahl. */
 /* Jede Tastatur hat ihren eigenen, festen Klang (kein separates Sound-Menü mehr) */
 const KB_SND={finger:{snd:'membrane'},mono:{snd:'laptop'},outline:{snd:'silent'},pastel:{snd:'bubble'},retro:{snd:'blue',vol:1.15},gameboy:{snd:'arcade'},
-  wood:{snd:'thock',vol:1.1},mech:{snd:'brown',vol:1.2},neon:{snd:'creamy',pitch:1.1},rgb:{snd:'red'},vintage:{snd:'typewriter',ding:1},crystal:{snd:'rain',ping:1},steampunk:{snd:'typewriter',pitch:.78,vol:1.25,ding:1}};
+  wood:{snd:'thock',vol:1.1},mech:{snd:'brown',vol:1.2},neon:{snd:'creamy',pitch:1.1},rgb:{snd:'red'},vintage:{snd:'typewriter',ding:1},crystal:{snd:'rain',ping:1},steampunk:{snd:'typewriter',pitch:.78,vol:1.25,ding:1},
+  mint:{snd:'bubble'},matcha:{snd:'brown'},ocean:{snd:'rain'},sakura:{snd:'creamy',pitch:1.08},candy:{snd:'bubble',pitch:1.2},midnight:{snd:'silent'},
+  arctic:{snd:'creamy',pitch:1.2},lava:{snd:'thock',pitch:.9,vol:1.15},carbon:{snd:'red',vol:1.1},gold:{snd:'blue',vol:1.1}};
 const typistOf=()=>KB_SND[Store.data.settings.kbTheme]||KB_SND.finger;
 const effKb=()=>Store.data.settings.kbTheme;
 const effSnd=()=>typistOf().snd;
@@ -6031,7 +6119,12 @@ const KB_THEMES={finger:['Lern-Tastatur','Jede Taste in der Farbe ihres Fingers 
   wood:['Nussholz','Walnussrahmen, Kappen aus Ahorn · tiefer Thock'],mech:['Mechanisch Schwarz','Aluminiumgehäuse, hohe Doubleshot-Kappen · taktiler Klick'],
   neon:['Neon Gaming','Dunkle Kappen mit Neon-Unterbeleuchtung · weicher Pop'],rgb:['RGB Pro','Schwebende Tasten mit Farbwelle · linearer Gaming-Anschlag'],
   vintage:['Schreibmaschine','Runde Tasten mit Chromring auf Lack · Klacken und Glocke'],crystal:['Kristall','Gläserne Tasten mit Lichtbrechung · Tropfen und helles Ping'],
-  steampunk:['Steampunk','Messingplatte mit Nieten und Kupferringen · schweres Metall-Klacken']};
+  steampunk:['Steampunk','Messingplatte mit Nieten und Kupferringen · schweres Metall-Klacken'],
+  mint:['Minze','Weiße Kappen auf Mintgrün · verspielte Blubber-Pops'],matcha:['Matcha','Cremegrüne Kappen wie Tee-Keramik · taktiler Anschlag'],
+  ocean:['Ozean','Tiefblaue Kappen über türkisem Licht · weiche Regentropfen'],sakura:['Kirschblüte','Zartrosa Kappen auf hellem Rahmen · cremiger Pop'],
+  candy:['Zuckerwatte','Jede Reihe in einer anderen Bonbonfarbe · helle Blubber-Pops'],midnight:['Mitternacht','Nachtblau mit goldener Schrift · fast lautlos'],
+  arctic:['Polar','Eisblaue Kappen mit frostigem Schimmer · heller, cremiger Klang'],lava:['Lava','Schwarze Kappen über glühendem Orange · tiefer Thock'],
+  carbon:['Carbon','Kohlefaser-Rahmen, rote Sondertasten · linearer Renn-Anschlag'],gold:['Goldrausch','Goldene Kappen im schwarzen Rahmen · edler, lauter Klick']};
 const HAND_STYLES={flat:['Flach','Schlichte Formen'],outline:['Umriss','Nur Konturen in Fingerfarben'],skin:['Hautton','Realistischere Hände in deinem Hautton'],color:['Bunt','Alle Finger dauerhaft eingefärbt'],glow:['Leuchten','Aktiver Finger leuchtet auf'],ghost:['Geist','Halb durchsichtig'],robot:['Roboter','Metallische Finger']};
 function applySettings(){
   const S=Store.data.settings,r=document.documentElement,b=document.body;
@@ -6173,7 +6266,7 @@ const nameHTML=(n,fx)=>{const f=fx&&fx!=='none'?fx:'';return f?`<span class="nfx
 const myNameHTML=()=>nameHTML(userName(),Store.data.settings.nameFx);
 const ANIM_ITEMS=new Set(['frame:aurora','frame:spooky','bg:snowfall','bg:bubbles2','bg:nebula','bg:rgbwave','bg:polar','bg:lava','bg:fireflies','bg:synth','bg:keyrain','bg:warp','bg:matrix','kb:rgb','kb:crystal','cursor:laser','cursor:star','cursor:heart','cursor:comet','cursor:fire','cursor:sword','wordSkin:neon','wordSkin:fire','wordSkin:rainbow','wordSkin:glow','wordSkin:glitch','wordFx:sparkles','wordFx:bubbles','wordFx:hearts','wordFx:confetti','wordFx:stars','wordFx:explosion','wordFx:pixels','wordFx:smoke','unbox:sparkles','unbox:confetti','unbox:goldshower','frame:pulse','frame:orbit','frame:galaxy','frame:fire']);
 /* Neu im Shop – bekommen ein „Neu“-Schild */
-const NEW_ITEMS=new Set(['ava:🐝','ava:🐨','ava:🐺','ava:🦁','ava:🧑‍🚀','ava:🧑‍🎤','ava:🦈','frame:sunset','frame:ice','frame:aurora','nfx:toxic','nfx:aurora','conf:food','conf:music','conf:space','car:🛶','car:🚒','car:🚤','car:🏇','pet:🦔','pet:🦥','pet:🦦','title:Tastenflitzer','title:Zahlenmeister','title:Diktat-Ass','title:Stadt-Land-Profi']);
+const NEW_ITEMS=new Set(['kb:mint','kb:matcha','kb:ocean','kb:sakura','kb:candy','kb:midnight','kb:arctic','kb:lava','kb:carbon','kb:gold','ava:🐝','ava:🐨','ava:🐺','ava:🦁','ava:🧑‍🚀','ava:🧑‍🎤','ava:🦈','frame:sunset','frame:ice','frame:aurora','nfx:toxic','nfx:aurora','conf:food','conf:music','conf:space','car:🛶','car:🚒','car:🚤','car:🏇','pet:🦔','pet:🦥','pet:🦦','title:Tastenflitzer','title:Zahlenmeister','title:Diktat-Ass','title:Stadt-Land-Profi']);
 const isAnimItem=(cat,id)=>ANIM_ITEMS.has(cat+':'+id)||(cat==='nfx'&&id!=='none');
 
 /* ---------- Animierte Hintergründe (Canvas) ----------
@@ -6256,7 +6349,7 @@ function applyBgFx(){
 const RARITY={c:['Gewöhnlich','#9aa3b2'],r:['Selten','#6fb6ff'],e:['Episch','#b98cff'],l:['Legendär','#ffc857']};
 const SHOP_CATS=[
  {id:'pet',i:'🐾',n:'Haustiere',set:'pet',items:[['none','c',0,1],['🐶','c',200,2],['🐱','c',200,2],['🐰','c',300,3],['🐹','c',300,4],['🐤','c',350,5],['🦊','r',700,6],['🐧','r',700,7],['🐢','r',800,8],['🦜','r',900,9],['🐙','e',1500,11],['🐉','e',1600,12],['🦄','e',1800,14],['🦖','l',3000,16],['🐲','l',3200,18],['🦔','c',350,4],['🦥','r',750,8],['🦦','r',800,9],['🐈‍⬛','e',0,1,'hw']]},
- {id:'kb',i:'⌨️',n:'Tastaturen',set:'kbTheme',items:[['finger','c',0,1],['mono','c',300,3],['outline','r',600,5],['pastel','r',800,7],['retro','r',1000,9],['gameboy','e',1600,12],['wood','e',1800,14],['mech','e',2200,16],['neon','l',3500,20],['rgb','l',3800,17],['vintage','e',2400,1,'crate'],['crystal','l',4200,1,'crate'],['steampunk','l',4500,1,'crate']]},
+ {id:'kb',i:'⌨️',n:'Tastaturen',set:'kbTheme',items:[['finger','c',0,1],['mono','c',300,3],['outline','r',600,5],['pastel','r',800,7],['retro','r',1000,9],['gameboy','e',1600,12],['wood','e',1800,14],['mech','e',2200,16],['neon','l',3500,20],['rgb','l',3800,17],['vintage','e',2400,1,'crate'],['crystal','l',4200,1,'crate'],['steampunk','l',4500,1,'crate'],['mint','c',400,4],['matcha','r',850,6],['ocean','r',900,8],['sakura','r',950,9],['candy','r',900,10],['midnight','e',1700,13],['arctic','e',1800,14],['lava','e',1900,15],['carbon','e',2100,16],['gold','l',4000,20]]},
  {id:'errorSound',i:'🔔',n:'Fehler-Sounds',set:'errSound',items:[['buzz','c',0,1],['knock','c',0,1],['beep','c',0,1],['none','c',0,1],['showbuzz','r',500,3],['airhorn','r',700,4],['wupwup','r',750,6],['glass','e',1100,8],['meow','e',1200,9],['trombone','e',1300,11],['yeet','l',2200,14]]},
  {id:'wordSkin',i:'🌈',n:'Wort-Effekte',set:'wordSkin',items:[['classic','c',0,1],['candy','r',600,3],['glow','r',650,4],['neon','r',700,5],['fire','e',1100,8],['rainbow','e',1200,9],['glitch','l',2400,14]]},
  {id:'wordFx',i:'💥',n:'Wort-Explosionen',set:'wordFx',items:[['none','c',0,1],['sparkles','r',600,3],['bubbles','r',650,4],['hearts','r',650,5],['confetti','r',700,6],['stars','e',1200,9],['explosion','e',1300,10],['pixels','e',1400,12],['smoke','l',2000,15]]},
@@ -6847,6 +6940,11 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-24.9',d:'24.09.2026',items:[
+    '⚡ Das Spiel startet jetzt deutlich schneller – dein Spielstand ist sofort da',
+    '🎉 Konfetti läuft flüssig, auch auf älteren Handys',
+    '⌨️ 10 neue Tastaturen im Shop: Minze, Matcha, Ozean, Kirschblüte, Zuckerwatte, Mitternacht, Polar, Lava, Carbon und Goldrausch – jede mit eigenem Klang'
+  ]},
   {v:'2026-09-24.8',d:'24.09.2026',items:[
     '📅 Neuer Anmelde-Bonus: Komm 7 Tage in Folge vorbei – jeden Tag mehr Münzen, am 7. Tag eine Gold-Kiste',
     '🎮 3 neue Spiele: Stadt-Land-Fluss, Diktat (der Satz wird vorgelesen) und Zahlen-Tresor',
@@ -8470,7 +8568,8 @@ window.startApp=async function(user,regName){
     Store.data.account={uid:user.uid,name,email:user.email||''};
     applySettings();
     // Freunde vor der Liga-Abrechnung laden, damit sie in der Wertung mitzählen
-    try{if(window.fbFriends)await window.fbFriends.start(onSocial)}catch(e){console.warn('Freunde:',e)}
+    // Nur wenn gerade eine Runde abgerechnet wird, auf die Freunde warten – sonst im Hintergrund laden (schnellerer Start)
+    try{if(window.fbFriends){const fp=window.fbFriends.start(onSocial);if(Store.data.league.week!==weekKey())await fp;else fp.catch(e=>console.warn('Freunde:',e))}}catch(e){console.warn('Freunde:',e)}
     try{if(window.fbOnline)window.fbOnline.invites(onInvites)}catch(e){console.warn('Einladungen:',e)}
     // Wegen Schummelns gesperrt? Dann ehrlich Bescheid geben, statt dass einfach nichts mehr gespeichert wird
     if(window.fbAmBanned)window.fbAmBanned().then(b=>{if(b)setTimeout(()=>{const m=modal(`<div class="secret"><div class="sk">⛔</div><h3>Konto gesperrt</h3>

@@ -13,7 +13,14 @@
 <meta name="theme-color" content="#17151F">
 <link href="fonts/fonts.css" rel="stylesheet">
 <link href="ratgeber.css" rel="stylesheet">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5747466582898616" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-5747466582898616">
+<script>
+/* Werbung erst nachladen, wenn die Seite schon läuft (ca. 3 Sekunden nach dem Laden, wenn der Browser Luft hat).
+   So startet die Seite deutlich schneller. Das Meta-Tag oben bestätigt AdSense die Seite trotzdem. */
+(function(){var done=false;function ads(){if(done)return;done=true;var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';
+  s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5747466582898616';document.head.appendChild(s)}
+  addEventListener('load',function(){setTimeout(function(){if('requestIdleCallback' in window)requestIdleCallback(ads,{timeout:5000});else ads()},3000)})})();
+</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
  {"@type":"Question","name":"Ist Zehnfinger für Schulen kostenlos?","acceptedAnswer":{"@type":"Answer","text":"Ja. Zehnfinger ist komplett kostenlos und läuft direkt im Browser. Es gibt keine Lizenzen und keine Installation."}},
