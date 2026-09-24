@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Zehnfinger – Tipptrainer</title>
+<meta name="description" content="Zehnfinger: Lerne kostenlos das Zehnfinger-Schreiben – mit Lektionen, über 40 Tipp-Spielen, Ligen, Turnieren und Duellen gegen Freunde. Direkt im Browser, ohne Download.">
+<link rel="canonical" href="https://www.zehnfingernulllangeweile.de/">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5747466582898616"
      crossorigin="anonymous"></script>
 <link href="fonts/fonts.css" rel="stylesheet">
@@ -350,6 +352,7 @@
       try{
         if(mode === 'register'){
           pendingName = name;
+          try{ if(localStorage.getItem('zf-guest')) window.zfFromGuest = true }catch(e){}
           const cred = await createUserWithEmailAndPassword(auth, email, pass);
           await updateProfile(cred.user, { displayName: name });
           // Spielerprofil in Firestore anlegen. Kam der Spieler über einen Einladungslink, wird der
@@ -412,7 +415,15 @@
       [ui.email, ui.pass, ui.name].forEach(inp => inp.addEventListener('keydown', e => {
         if(e.key === 'Enter'){ e.preventDefault(); submit() }
       }));
-      setMode('login');
+      setMode(new URLSearchParams(location.search).get('register') ? 'register' : 'login');
+      // Gastmodus: sofort spielen, ohne Konto. Der Fortschritt bleibt auf dem Gerät und wird beim Registrieren übernommen.
+      const gb = $id('guestBtn');
+      try{ if(localStorage.getItem('zf-guest')) gb.textContent = '🎮 Als Gast weiterspielen' }catch(e){}
+      gb.addEventListener('click', async () => {
+        if(opened) return; opened = true; window.zfGuest = true;
+        try{ await window.startApp(null) }catch(e){ console.warn('Gast:', e) }
+        document.body.classList.remove('locked'); ui.screen.classList.add('out'); setTimeout(() => ui.screen.remove(), 300);
+      });
 
       // Bereits angemeldet? Dann direkt in die App, ohne Startbildschirm.
       onAuthStateChanged(auth, user => {
@@ -2465,6 +2476,63 @@ button.comm-card{cursor:pointer}
 .gift-open{font-size:72px;line-height:1.1;animation:giftwob .45s ease-in-out 2}
 .gift-msg{font-weight:700;margin:4px 0}
 .gift-res{font-size:18px;font-weight:800;color:var(--caret);min-height:1.4em}
+/* ---- Gastmodus ---- */
+.guest-or{display:flex;align-items:center;gap:10px;margin:16px 0 10px;color:var(--muted);font-size:13px}
+.guest-or::before,.guest-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.guest-btn{width:100%}
+.guestbar{max-width:1080px;margin:10px auto 0;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border:1px dashed var(--caret);border-radius:12px;background:color-mix(in srgb,var(--caret) 8%,var(--surface));font-size:14px}
+@media (max-width:1120px){.guestbar{margin:10px 16px 0}}
+/* ---- Posteingang ---- */
+.inbox-btn{position:relative}
+.inbox-btn .tbadge{position:absolute;top:-6px;right:-6px;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;font-weight:800;line-height:1}
+.inbox-btn .tbadge[hidden]{display:none}
+.ib{max-height:min(62vh,520px);overflow:auto}
+.ib-h{margin:12px 0 2px;font-size:13px;color:var(--muted)}
+.ib .fr-u .acts{display:flex;gap:6px}
+/* ---- Haltungs-Tipps ---- */
+.ptip{position:fixed;left:16px;bottom:16px;z-index:44;width:min(380px,calc(100vw - 32px));display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;padding:12px;border-radius:16px;border:1px solid var(--line);background:var(--surface);box-shadow:0 12px 30px #0006;animation:ptin .35s ease-out}
+@keyframes ptin{from{transform:translateY(20px);opacity:0}}
+.ptip-img{width:96px;height:72px;border-radius:12px;background:var(--surface2);display:grid;place-items:center}
+.ptip-img span{font-size:40px}
+.ptip-img svg{width:92px;height:auto}
+.ptip-t{display:grid;gap:2px;font-size:13px;line-height:1.4}
+.ptip-t b{font-size:15px}
+.ptip-a{display:flex;gap:14px;margin-top:4px}
+.pt-f{fill:var(--muted);opacity:.5}.pt-s{fill:none;stroke:var(--f1);stroke-width:3}.pt-b{fill:var(--caret)}.pt-l{fill:none;stroke:var(--text);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.pt-c{fill:none;stroke:var(--muted);stroke-width:3;stroke-linecap:round}.pt-a{fill:none;stroke:var(--good);stroke-width:2.5;stroke-dasharray:5 4;stroke-linecap:round}
+.px-health{margin:18px 0 0;text-align:center}
+/* ---- Escape Room ---- */
+.esc{gap:12px}
+.esc-room{font-size:clamp(44px,8vh,64px);line-height:1}
+.esc-locks{display:flex;gap:8px}
+.esc-locks span{font-size:26px;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--surface2);border:2px solid var(--line);transition:transform .2s}
+.esc-locks span.cur{border-color:var(--caret)}
+.esc-locks span.open{border-color:var(--good);background:color-mix(in srgb,var(--good) 18%,var(--surface2))}
+.esc-card{max-width:560px;width:100%;text-align:center;padding:14px 16px;border-radius:14px;background:var(--surface2)}
+.esc-card p{margin:6px 0 0;line-height:1.5}
+.esc-code{font-family:var(--mono);font-size:1.25em;letter-spacing:.08em;color:var(--caret)}
+.esc-words{font-size:1.05em}
+/* ---- Koop-Modus ---- */
+.coop{gap:14px}
+.coop-who{font-size:15px;min-height:1.6em}
+.coop-you{color:var(--caret);font-size:17px}
+.coop-text{max-width:720px;text-align:center;font-family:var(--mono);font-size:clamp(18px,2.4vw,24px);line-height:1.8}
+.cw{padding:1px 4px;border-radius:6px}
+.cw.me{color:var(--f1)}.cw.pa{color:var(--f4)}
+.cw.ok{opacity:.35}
+.cw.now{background:var(--surface2);outline:2px solid currentColor}
+.cw i{font-style:normal;color:var(--good)}
+.coop-fr{max-height:320px;overflow:auto}
+/* ---- Fun Facts ---- */
+.ff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px}
+.ff-card{display:grid;gap:2px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.ff-i{font-size:24px}
+.ff-card b{font-size:24px;font-weight:800;color:var(--caret);font-variant-numeric:tabular-nums}
+.ff-card span:last-child{font-size:13px;color:var(--muted)}
+.ff-hours h3{margin:0 0 10px}
+.ff-bars{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;align-items:end;height:120px}
+.ff-bars i{display:block;border-radius:4px 4px 0 0;background:color-mix(in srgb,var(--f1) 60%,var(--surface2))}
+.ff-bars i.top{background:var(--caret)}
+.ff-ax{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px}
 </style>
 </head>
 <body class="locked">
@@ -2497,8 +2565,11 @@ button.comm-card{cursor:pointer}
     </div>
 
     <p class="ahint" id="authHint">Noch keinen Account? Wechsle oben zu „Registrieren“.</p>
+    <div class="guest-or"><span>oder</span></div>
+    <button class="btn big guest-btn" id="guestBtn">🎮 Erst mal ohne Konto ausprobieren</button>
+    <p class="ahint" style="margin-top:6px">Als Gast spielst du sofort los. Später kannst du ein Konto erstellen – dein Fortschritt wird übernommen.</p>
     <a class="donate inline" href="https://www.paypal.com/paypalme/maxgrimberg" target="_blank" rel="noopener" aria-label="Mit PayPal spenden"><span class="dn-heart" aria-hidden="true">❤️</span><span class="dn-txt"><b>Gefällt dir Zehnfinger?</b><em>Unterstütze die Entwicklung</em></span><span class="dn-pp"><img src="img/paypal-logo.png" alt="PayPal" onerror="this.parentNode.textContent='PayPal'"></span></a>
-    <p class="alegal"><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
+    <p class="alegal"><a href="tipptest.html">⌨️ Schneller Tipp-Test ohne Anmeldung</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
   </div>
 </div>
 <textarea id="cap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Eingabe"></textarea>
@@ -2514,6 +2585,7 @@ button.comm-card{cursor:pointer}
     <button class="tab" data-tab="profile">Profil</button>
   </nav>
   <div class="me">
+    <button class="icon inbox-btn" id="inbox" aria-label="Posteingang" title="Posteingang">📬<span class="tbadge" id="inbc" hidden></span></button>
     <span class="onl" id="onl" hidden role="status"><i aria-hidden="true"></i><b>0</b><span class="onl-t">online</span></span>
     <button class="icon" id="gear" aria-label="Einstellungen" title="Einstellungen">⚙️</button>
     <button class="icon" id="logout" aria-label="Abmelden" title="Abmelden">🚪</button>
@@ -3094,7 +3166,7 @@ function recordSession(mode,label,st,extra={}){
   d.xp=(d.xp||0)+xp;const s=streak(d);d.bestStreak=Math.max(d.bestStreak||0,s);
   const newAch=checkAch(Object.assign({mode,label,st},extra));
   if(newAch.length){d.xp+=newAch.length*20;xp+=newAch.length*20}
-  wkAdd(xp);wkcAdd(st.ok||0);d.plays=d.plays||{};d.plays[mode]=(d.plays[mode]||0)+1;
+  wkAdd(xp);wkcAdd(st.ok||0);d.hours=d.hours&&d.hours.length===24?d.hours:Array(24).fill(0);d.hours[new Date().getHours()]++;d.plays=d.plays||{};d.plays[mode]=(d.plays[mode]||0)+1;
   const mast=checkMastery(),wq=wqTrack({mode,st,xp,extra,goalMet:d.days[today]>=g}),chWon=chCheck(mode,extra);
   const levelUp=levelInfo(d.xp).level>beforeLv;
   leagueRollover();const rankBefore=myRank(false);d.league.lp+=xp;const rankAfter=myRank(false);
@@ -3372,7 +3444,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(b&
 function profileHead(sub){profSub=sub;currentTab=sub;}
 function setTab(t){currentTab=t;const gb=$('#gear');if(gb)gb.classList.toggle('on',t==='settings');const nt=(t==='ach'||t==='stats'||t==='admin')?'profile':t==='online'?'games':t;$$('.tab').forEach(b=>{if(b.dataset.tab===nt)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')})}
 function show(fn){if(cleanup){cleanup();cleanup=null}$$('.modal').forEach(m=>m.remove());setHandler(null);activity=false;main.innerHTML='';fn();document.body.classList.toggle('busy',activity);window.scrollTo(0,0);if(!activity&&Store.data.league.pending&&Store.data.welcomed)setTimeout(showLeaguePending,300)}
-function go(tab){leagueRollover();show(()=>{setTab(tab);({lessons:viewLessons,free:viewFree,games:viewGames,ach:()=>{profileHead('ach');viewAch()},stats:()=>{profileHead('stats');viewStats()},league:()=>{main.innerHTML='';viewLeague()},admin:()=>{profileHead('admin');viewAdmin()},profile:()=>{profileHead(profSub);(profSub==='stats'?viewStats:profSub==='admin'?viewAdmin:viewAch)()},settings:viewSettings,shop:viewShop,friends:viewFriends,online:viewOnline})[tab]()})}
+function go(tab){if(window.zfGuest&&(tab==='friends'||tab==='online')){needAccount(tab==='online'?'Online-Duelle':'Freunde, Teams und Geschenke');return}leagueRollover();show(()=>{setTab(tab);({lessons:viewLessons,free:viewFree,games:viewGames,ach:()=>{profileHead('ach');viewAch()},stats:()=>{profileHead('stats');viewStats()},league:()=>{main.innerHTML='';viewLeague()},admin:()=>{profileHead('admin');viewAdmin()},profile:()=>{profileHead(profSub);(profSub==='stats'?viewStats:profSub==='admin'?viewAdmin:viewAch)()},settings:viewSettings,shop:viewShop,friends:viewFriends,online:viewOnline})[tab]()})}
 function onRemoteLoaded(){applySettings();refreshMe();if(!activity)go(currentTab)}
 function modal(html){const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="dlg" role="dialog" aria-modal="true">${html}</div>`;document.body.appendChild(m);return m}
 const starsHTML=(n,cls='stars')=>`<span class="${cls}" aria-label="${n} von 3 Sternen">${[0,1,2].map(i=>`<span class="${i<n?'':'off'}" style="--d:${.25+i*.18}s">★</span>`).join('')}</span>`;
@@ -3381,7 +3453,7 @@ const todaySecs=()=>Store.data.days[dayKey()]||0;
 const bestWpm=()=>Store.data.history.reduce((a,h)=>Math.max(a,TYPING.includes(h.mode)&&h.mode!=='sudden'?h.wpm:0),0);
 
 /* ---------- Header status ---------- */
-$('#hc').onclick=()=>go('shop');
+$('#hc').onclick=()=>go('shop');$('#inbox').onclick=()=>inboxModal();
 $('#hl').onclick=()=>go('ach');$('#gear').onclick=()=>go('settings');$('#hsk').onclick=()=>go('ach');
 $('#logout').onclick=()=>logout();
 /* Spendenfläche: ✕ verkleinert sie zu einem Herz, ein Klick auf das Herz klappt sie wieder auf */
@@ -3697,7 +3769,9 @@ function viewFree(){
       ${tile('lists','📚','Wortlisten','Häufige Wörter, Umlaute, Zahlen und mehr','var(--f3)')}
     </div></section>
     <section class="px-sec"><h2>⏳ Ausdauer</h2><div class="px-time"><span class="muted">Tippe ohne Pause, bis die Zeit um ist:</span>
-      <div class="px-tb">${[1,2,5,10].map(m=>`<button class="btn${m===5?' primary':''}" data-p2="time${m}">${m} Min</button>`).join('')}</div></div></section>`;
+      <div class="px-tb">${[1,2,5,10].map(m=>`<button class="btn${m===5?' primary':''}" data-p2="time${m}">${m} Min</button>`).join('')}</div></div></section>
+    <p class="px-health"><button class="linkbtn" id="pxh">❤️ Tipps für eine gesunde Haltung beim Tippen</button></p>`;
+  $('#pxh').onclick=()=>postureCard(0);
   $$('[data-p2]').forEach(b=>b.onclick=()=>openPractice(b.dataset.p2));
 }
 function openPractice(id){
@@ -3884,6 +3958,7 @@ const GAMES=[
  {id:'sudden',cat:'tempo',i:'💥',n:'Sudden Death',s:'Ein Fehler, Runde vorbei',rec:d=>`${d.high.sudden||0} Zeichen`},
  {id:'bomb',cat:'tempo',i:'💣',n:'Bombe entschärfen',s:'Tippe den Code, bevor der Zünder abläuft',rec:d=>`${d.high.bomb||0} entschärft`},
  {id:'blind',cat:'tempo',i:'🙈',n:'Blindflug',s:'Tippen, ohne zu sehen, was du tippst',rec:d=>`${d.high.blind||0} WPM`},
+ {id:'coop',cat:'tempo',i:'🤝',n:'Koop-Modus',s:'Mit einem Freund abwechselnd Wörter tippen und gemeinsam die Zielzeit schlagen',rec:d=>`${d.high.coop||0} Siege`},
  {id:'abc',cat:'tempo',i:'🔤',n:'Alphabet-Sprint',s:'A bis Z so schnell wie möglich – mit Weltrangliste',rec:d=>d.high.abc?`${(d.high.abc/1000).toFixed(2)} s`:'–'},
  {id:'rain',cat:'arcade',i:'🌧️',n:'Wortregen',s:'Wörter stapeln sich',rec:d=>`${d.high.rain||0} Punkte`},
  {id:'blaster',cat:'arcade',i:'🚀',n:'Wort-Blaster',s:'Schieß Wörter ab',rec:d=>`${d.high.blaster||0} Punkte`},
@@ -3906,14 +3981,15 @@ const GAMES=[
  {id:'hangman',cat:'brain',i:'❓',n:'Galgenraten',s:'Errate das Wort Buchstabe für Buchstabe',rec:d=>`${d.high.hangman||0} Wörter`},
  {id:'chain',cat:'brain',i:'🔗',n:'Wortkette',s:'Jedes Wort beginnt mit dem letzten Buchstaben des vorigen',rec:d=>`${d.high.chain||0} Punkte`},
  {id:'typo',cat:'brain',i:'🔍',n:'Fehlerjagd',s:'Finde den Tippfehler im Satz',rec:d=>`${d.high.typo||0} Punkte`},
+ {id:'escape',cat:'brain',i:'🔐',n:'Escape Room',s:'Knacke fünf Tipp-Rätsel und entkomme – jede Woche ein neuer Raum',rec:d=>d.high.escape?`${fmtTime(d.high.escape)} Bestzeit`:'–'},
  {id:'tippdle',cat:'brain',i:'🟩',n:'Tippdle',s:'Das tägliche Worträtsel: 5 Buchstaben, 6 Versuche',rec:d=>`${d.high.tippdle||0} gelöst`},
  {id:'emoji',cat:'brain',i:'😀',n:'Emoji-Rätsel',s:'Errate das Wort hinter den Emojis',rec:d=>`${d.high.emoji||0} Punkte`},
  {id:'detective',cat:'brain',i:'🕵️',n:'Tipp-Detektiv',s:'Tippe die Hinweise ab und überführe den Täter',rec:d=>`${d.high.detective||0}/${DET_CASES.length} Fälle`},
  {id:'story',cat:'brain',i:'📖',n:'Story-Modus',s:'Geschichte mit Entscheidungen',rec:d=>`${Object.keys(d.story).length}/3 Enden`},
  ...Object.entries(CODE_LANGS).map(([k,L])=>({id:'code:'+k,cat:'code',i:L.i,n:L.n,s:L.d,rec:d=>`${d.high['code_'+k]||0} WPM`}))
 ];
-const NEW_GAMES=new Set(['tippdle','dungeon','abc','emoji','detective','piano']);
-const MODE2GAME={tippdle:'tippdle',dungeon:'dungeon',abc:'abc',emoji:'emoji',detective:'detective',piano:'piano',blind:'blind',chain:'chain',typo:'typo',bomb:'bomb',mole:'mole',hangman:'hangman',online:'online',sixty:'timed',timed:'timed',race:'race',ghost:'ghost',sudden:'sudden',ladder:'ladder',duel:'duel',rain:'rain',blaster:'blaster',zombie:'zombie',runner:'runner',tower:'tower',balloon:'balloon',boss:'boss',rhythm:'rhythm',blitz:'blitz',memory:'memory',story:'story',anagram:'anagram',gaps:'gaps',kitchen:'kitchen',puzzle:'puzzle',math:'math'};
+const NEW_GAMES=new Set(['escape','coop']);
+const MODE2GAME={escape:'escape',coop:'coop',tippdle:'tippdle',dungeon:'dungeon',abc:'abc',emoji:'emoji',detective:'detective',piano:'piano',blind:'blind',chain:'chain',typo:'typo',bomb:'bomb',mole:'mole',hangman:'hangman',online:'online',sixty:'timed',timed:'timed',race:'race',ghost:'ghost',sudden:'sudden',ladder:'ladder',duel:'duel',rain:'rain',blaster:'blaster',zombie:'zombie',runner:'runner',tower:'tower',balloon:'balloon',boss:'boss',rhythm:'rhythm',blitz:'blitz',memory:'memory',story:'story',anagram:'anagram',gaps:'gaps',kitchen:'kitchen',puzzle:'puzzle',math:'math'};
 let gameFilter='all',gameQuery='';
 /* Spiele-Übersicht (neues Design):
    oben eine kompakte „Heute“-Leiste mit den täglichen/wöchentlichen Highlights,
@@ -3962,6 +4038,8 @@ function startGame(k){
   if(k==='bomb')return bombGame();
   if(k==='mole')return moleGame();
   if(k==='hangman')return hangmanGame();
+  if(k==='escape')return escapeGame();
+  if(k==='coop')return coopSetup();
   if(k==='tippdle')return tippdleGame();
   if(k==='dungeon')return dungeonGame();
   if(k==='abc')return abcGame();
@@ -5103,7 +5181,7 @@ function hangmanGame(){
 
 /* ---------- Views: Achievements & Level ---------- */
 /* ---------- Views: Stats ---------- */
-const MODE_LABEL={isleboss:'Insel-Boss',tippdle:'Tippdle',dungeon:'Tipp-Dungeon',abc:'Alphabet-Sprint',emoji:'Emoji-Rätsel',detective:'Tipp-Detektiv',piano:'Tastatur-Klavier',blind:'Blindflug',chain:'Wortkette',typo:'Fehlerjagd',tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
+const MODE_LABEL={escape:'Escape Room',coop:'Koop-Modus',isleboss:'Insel-Boss',tippdle:'Tippdle',dungeon:'Tipp-Dungeon',abc:'Alphabet-Sprint',emoji:'Emoji-Rätsel',detective:'Tipp-Detektiv',piano:'Tastatur-Klavier',blind:'Blindflug',chain:'Wortkette',typo:'Fehlerjagd',tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
 function chartSVG(h){
   const pts=h.slice(-40);if(pts.length<2)return '<p class="muted">Nach zwei Übungen erscheint hier dein Verlauf.</p>';
   const W=680,H=220,PL=34,PR=10,PT=12,PB=26;const max=Math.ceil(Math.max(20,...pts.map(p=>p.wpm))*1.15/10)*10;
@@ -5822,16 +5900,16 @@ function wqModal(){
 
 /* ---------- Meisterschaft pro Spiel ---------- */
 /* Spiele, bei denen ein kleinerer Wert besser ist (Zeit in ms) */
-const LOWER_BETTER=new Set(['blitz','abc']);
+const LOWER_BETTER=new Set(['blitz','abc','escape']);
 const MASTERY=[['Bronze','🥉',25],['Silber','🥈',50],['Gold','🥇',100],['Diamant','💎',200]];
 const mBase=x=>[.2,.5,1,2].map(f=>Math.round(x*f/10)*10);
 const MASTERY_T={timed:[25,40,60,80],race:[25,40,60,80],ghost:[1,2,4,5],duel:[25,40,55,70],ladder:[25,40,55,70],sudden:[100,250,500,900],bomb:[3,8,14,20],online:[1,5,15,30],
   rain:mBase(1000),blaster:mBase(1000),zombie:mBase(1000),boss:[1,2,4,5],tower:mBase(1000),balloon:mBase(1000),runner:mBase(1000),rhythm:mBase(1000),mole:mBase(1500),
-  blitz:[900,750,600,480],memory:[5,7,10,13],anagram:mBase(500),gaps:mBase(500),kitchen:mBase(800),puzzle:mBase(500),math:mBase(300),hangman:[2,5,10,16],story:[1,2,3],code:[20,30,45,60],blind:[20,35,50,65],chain:mBase(600),typo:mBase(400),tippdle:[1,5,15,40],dungeon:[3,6,10,15],abc:[6000,4500,3500,2800],emoji:mBase(500),detective:[1,2,3,4],piano:mBase(600)};
+  blitz:[900,750,600,480],memory:[5,7,10,13],anagram:mBase(500),gaps:mBase(500),kitchen:mBase(800),puzzle:mBase(500),math:mBase(300),hangman:[2,5,10,16],story:[1,2,3],code:[20,30,45,60],blind:[20,35,50,65],chain:mBase(600),typo:mBase(400),tippdle:[1,5,15,40],dungeon:[3,6,10,15],abc:[6000,4500,3500,2800],emoji:mBase(500),detective:[1,2,3,4],piano:mBase(600),escape:[600,360,240,150],coop:[1,5,15,30]};
 const mtOf=g=>MASTERY_T[g.id.startsWith('code:')?'code':g.id];
 /* Blitztasten: weniger ms ist besser */
 function masteryTier(g,d){const t=mtOf(g);if(!t)return 0;const v=gameScore(g,d),low=LOWER_BETTER.has(g.id);return t.filter(x=>low?v>0&&v<=x:v>=x).length}
-function masteryNext(g,d){const t=mtOf(g),i=masteryTier(g,d);if(!t||i>=t.length)return '';return `${MASTERY[i][0]} ab ${g.id==='blitz'?`unter ${t[i]} ms`:g.id==='abc'?`unter ${(t[i]/1000).toFixed(1)} s`:scoreText(g,t[i])}`}
+function masteryNext(g,d){const t=mtOf(g),i=masteryTier(g,d);if(!t||i>=t.length)return '';return `${MASTERY[i][0]} ab ${g.id==='blitz'?`unter ${t[i]} ms`:g.id==='abc'?`unter ${(t[i]/1000).toFixed(1)} s`:g.id==='escape'?`unter ${fmtTime(t[i])}`:scoreText(g,t[i])}`}
 function checkMastery(){
   const d=Store.data,got=[];d.mastery=d.mastery||{};
   GAMES.forEach(g=>{const t=masteryTier(g,d),p=d.mastery[g.id]||0;if(t>p){for(let i=p;i<t;i++)d.coins+=MASTERY[i][2];d.mastery[g.id]=t;got.push([g,t])}});
@@ -5870,6 +5948,7 @@ async function tourRows(k,mine){
   if(mine)rows.push({uid:me,me:true,wpm:mine.wpm,acc:mine.acc});
   return rows.sort((a,b)=>b.wpm-a.wpm||b.acc-a.acc)}
 async function tourBoard(){
+  if(window.zfGuest){needAccount('das Wochen-Turnier');return}
   const k=weekId(),mine=tourMine();
   const m=modal(`<div class="wq-h"><h3>🏆 Wochen-Turnier</h3><span class="muted small">${weekLeftText()}</span></div>
     <p class="muted small" style="margin:0 0 10px">Ein fester Text für alle Spieler. Gewertet wird dein schnellster vollständiger Versuch mit mindestens 90 % Genauigkeit.</p>
@@ -5966,7 +6045,7 @@ function tinvCards(){return tinvIncoming().map(x=>`<div class="invite team-inv" 
   <div class="iv-t"><b>${esc(x.from.name)}</b><span>lädt dich ins Team „${esc(x.tn||'Team')}“ ein 🛡️</span></div>
   <div class="acts"><button class="btn primary small" data-tia="${esc(x.id)}">Beitreten</button><button class="btn ghost small" data-tid="${esc(x.id)}">Ablehnen</button></div></div>`).join('')}
 function tinvNotify(){const d=Store.data;d.tinvSeen=d.tinvSeen||[];let n=0;tinvIncoming().forEach(x=>{if(!d.tinvSeen.includes(x.id)){d.tinvSeen.push(x.id);n++}});
-  if(n){d.tinvSeen=d.tinvSeen.slice(-40);Store.save();Sound.ok();if(document.hidden)try{document.title='🛡️ Team-Einladung – Zehnfinger'}catch(e){}}}
+  if(n){d.tinvSeen=d.tinvSeen.slice(-40);Store.save();Sound.ok();if(!activity)toast('🛡️','Neue Team-Einladung','Schau in deinen Posteingang 📬');if(document.hidden)try{document.title='🛡️ Team-Einladung – Zehnfinger'}catch(e){}}}
 async function tinvAnswer(id,yes){
   const d=Store.data,x=tinvIncoming().find(y=>y.id===id);d.tinvAns=d.tinvAns||{};
   const done=()=>{d.tinvAns[id]={y:yes?1:0,t:Date.now()};Store.save();renderInvites();updateFriendBadge()};
@@ -6065,6 +6144,13 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-24.4',d:'24.09.2026',items:[
+    '📬 Posteingang oben: Anfragen, Einladungen, Geschenke, Herausforderungen und Reaktionen an einem Ort',
+    '🔐 Neues Spiel „Escape Room“: fünf Rätsel-Schlösser, jede Woche ein neuer Raum',
+    '🤝 Neuer Koop-Modus: mit einem Freund abwechselnd Wörter tippen und gemeinsam die Zielzeit schlagen',
+    '📊 Fun Facts unter „Liga“: spannende Zahlen aus der ganzen Community',
+    '❤️ Tipps für eine gesunde Haltung beim Tippen',
+    '🎮 Neue Besucher können jetzt ohne Konto als Gast losspielen']},
   {v:'2026-09-24.3',d:'24.09.2026',items:[
     '🗺️ Lern-Weltkarte: die Lektionen sind jetzt vier Inseln – mit einem Boss am Ende jeder Insel',
     '⚔️ Avatar-Werte wie im Rollenspiel: Tempo, Präzision, Ausdauer, Vielseitigkeit und Wissen (Profil)',
@@ -6449,7 +6535,7 @@ const wbossOf=k=>WBOSS[Math.abs([...k].reduce((a,c)=>a*31+c.charCodeAt(0),7))%WB
    Statt dass jeder Spieler alle Profile liest, gibt es EIN Dokument stats/community mit einer kompakten
    Liste aller Spieler. Es wird höchstens stündlich neu berechnet (von dem Spieler, der es zuerst veraltet vorfindet).
    Die eigenen Werte kommen immer live aus dem lokalen Spielstand. */
-const COMM_V=1,COMM_TTL=36e5;
+const COMM_V=2,COMM_TTL=36e5;
 let commData=null,commT=0,commBusy=null;
 const plausWpm=v=>{v=+v||0;return v<=250?v:0};
 function commBuild(rows){
@@ -6462,7 +6548,13 @@ function commBuild(rows){
   GAMES.forEach(g=>{if(BEST_SKIP.has(g.id))return;const f=bestField(g).split('.').slice(1),low=LOWER_BETTER.has(g.id),wpmish=WPM_GAMES.has(g.id)||g.id.startsWith('code:');
     let top=null;rows.forEach(p=>{let v=f.reduce((o,kk)=>o==null?o:o[kk],p.stats||{});v=+v||0;if(v<=0||(wpmish&&v>250))return;if(!top||(low?v<top.v:v>top.v))top={u:p.uid,n:p.name,a:p.avatar,f:p.frame,x:p.nameFx,v}});
     if(top)best[g.id]=top});
-  return{v:COMM_V,t:Date.now(),k,pk,players,best}}
+  // Fun Facts über alle Spieler
+  const sum=f=>rows.reduce((a,p)=>a+(+f(p.stats||{})||0),0),hours=Array(24).fill(0),errs={},plays={};
+  rows.forEach(p=>{const s=p.stats||{};(s.hours||[]).forEach((v,i)=>{if(i<24)hours[i]+=+v||0});Object.entries(s.errKeys||{}).forEach(([k2,v])=>errs[k2]=(errs[k2]||0)+(+v||0));Object.entries(s.plays||{}).forEach(([m,v])=>{const gid=MODE2GAME[m];if(gid&&gid!=='daily')plays[gid]=(plays[gid]||0)+(+v||0)})});
+  const wpms=rows.map(p=>plausWpm((p.stats||{}).avgWpm)).filter(v=>v>0),top=(o)=>Object.entries(o).sort((a,b)=>b[1]-a[1])[0];
+  const facts={players:rows.length,chars:sum(s=>s.strokes),secs:sum(s=>s.totalSecs),rounds:sum(s=>s.count),hours,errKey:(top(errs)||[''])[0],topGame:(top(plays)||[''])[0],
+    fastest:Math.max(0,...rows.map(p=>plausWpm((p.stats||{}).bestWpm))),avgWpm:wpms.length?Math.round(wpms.reduce((a,b)=>a+b,0)/wpms.length):0,streak:Math.max(0,...rows.map(p=>+((p.stats||{}).bestStreak)||0))};
+  return{v:COMM_V,t:Date.now(),k,pk,players,best,facts}}
 async function getComm(force){
   if(!force&&commData&&Date.now()-commT<5*6e4)return commData;
   if(commBusy)return commBusy;
@@ -6538,6 +6630,208 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-pu]'
   if(!p){const rows=(worldCache.rows||[]).concat(commCache.rows||[]);p=rows.find(r=>r.uid===b.dataset.pu)}
   playerModal(p)});
 
+/* ---------- Posteingang: alle Benachrichtigungen an einem Ort ---------- */
+const rxUnread=()=>{const r=Store.data.rxRead||[];return rxIncoming().filter(x=>!r.includes(x.id))};
+function inboxCount(){if(window.zfGuest)return 0;return Social.incoming.length+tinvIncoming().length+giftIncoming().length+chIncoming().length+(Online.invites||[]).length+rxUnread().length}
+function updInbox(){const b=$('#inbc');if(!b)return;const n=inboxCount();b.hidden=!n;b.textContent=n>9?'9+':n}
+function inboxModal(){
+  if(window.zfGuest){needAccount('Der Posteingang');return}
+  const fr=Social.incoming,ti=tinvIncoming(),gi=giftIncoming(),ch=chIncoming(),du=Online.invites||[],rx=rxIncoming().slice(0,8);
+  const sec=(t,items)=>items?`<h4 class="ib-h">${t}</h4>${items}`:'';
+  const row=(ava,title,sub,acts)=>`<div class="fr-u">${ava}<div class="nm"><b>${title}</b><span>${sub}</span></div><div class="acts">${acts}</div></div>`;
+  const body=
+    sec('🏁 Duell-Einladungen',du.map(m=>row(`<span class="ava">${esc((m.avatars||{})[m.host]||'🙂')}</span>`,esc((m.names||{})[m.host]||'Ein Freund'),m.mode==='coop'?'lädt dich zum Koop-Modus ein':'fordert dich zum Online-Duell heraus',`<button class="btn primary small" data-iva="${m.id}">Annehmen</button><button class="btn ghost small" data-ivd="${m.id}">✕</button>`)).join(''))+
+    sec('🎁 Geschenke',gi.map(g=>row('<span class="gift-box">🎁</span>',esc(g.from.name),'hat dir ein Geschenk geschickt',`<button class="btn primary small" data-gopen="${esc(g.id)}">Öffnen</button>`)).join(''))+
+    sec('🛡️ Team-Einladungen',ti.map(x=>row(fAva(x.from),esc(x.from.name),`lädt dich ins Team „${esc(x.tn||'Team')}“ ein`,`<button class="btn primary small" data-tia="${esc(x.id)}">Beitreten</button><button class="btn ghost small" data-tid="${esc(x.id)}">Ablehnen</button>`)).join(''))+
+    sec('👥 Freundschaftsanfragen',fr.map(u=>row(fAva(u),esc(u.name),`Level ${u.level||1} · möchte dein Freund sein`,`<button class="btn primary small" data-fa="${u.uid}">Annehmen</button><button class="btn ghost small" data-fd="${u.uid}">✕</button>`)).join(''))+
+    sec('⚔️ Herausforderungen',ch.map(c=>{const g=chGame(c.g);return row(fAva(c.from),`${g.i} ${esc(g.n)}`,`${esc(c.from.name)}: schlag ${esc(scoreText(g,c.s))} · ${chLeft(c)}`,`<button class="btn primary small" data-ibp="${esc(c.g)}">Spielen</button><button class="btn ghost small" data-cx="${esc(c.id)}">✕</button>`)}).join(''))+
+    sec('💬 Reaktionen',rx.map(r=>{const it=r.ref&&(Store.data.news||[]).find(x=>x.id===r.ref);return row(fAva(r.from),`${esc(r.from.name)} <span class="rxe">${r.e}</span>`,`${it?`auf: ${esc(newsText(it))} · `:''}${agoShort(r.t)}`,'')}).join(''));
+  const m=modal(`<div class="wq-h"><h3>📬 Posteingang</h3><span class="muted small">${inboxCount()} neu</span></div><div class="ib">${body||'<p class="muted" style="text-align:center;padding:18px 0">📭 Alles erledigt – keine neuen Nachrichten.</p>'}</div>
+    <div class="acts"><button class="btn ghost" id="ibx">Schließen</button></div>`);
+  // Reaktionen gelten als gelesen, sobald man den Posteingang öffnet
+  const d=Store.data;d.rxRead=[...new Set([...(d.rxRead||[]),...rx.map(r=>r.id)])].slice(-100);Store.save();
+  const close=()=>{m.remove();updInbox();if(!activity)setHandler(null)};$('#ibx',m).onclick=close;setHandler({char(){},esc:close});
+  m.addEventListener('click',e=>{const p=e.target.closest('[data-ibp]');if(p){m.remove();startGame(p.dataset.ibp);return}
+    if(e.target.closest('[data-cx]')){const id=e.target.closest('[data-cx]').dataset.cx;chDecline(id)}
+    if(e.target.closest('[data-cx],[data-fa],[data-fd],[data-tia],[data-tid],[data-gopen],[data-iva],[data-ivd]'))setTimeout(()=>{if(m.isConnected){m.remove();if(!$('.modal'))inboxModal()}},700)});
+  updInbox()}
+setInterval(()=>{if(Store.data&&Store.data.account)updInbox()},15000);
+
+/* ---------- Haltungs-Tipps: ab und zu beim Start eine kleine Karte ---------- */
+const POSTURE_SVG={
+  sit:`<svg viewBox="0 0 120 90" aria-hidden="true"><rect x="8" y="78" width="104" height="4" rx="2" class="pt-f"/><rect x="62" y="44" width="46" height="4" rx="2" class="pt-f"/><rect x="80" y="18" width="22" height="16" rx="2" class="pt-s"/><circle cx="36" cy="16" r="8" class="pt-b"/><path d="M36 25 L36 52 L58 52 L58 78" class="pt-l"/><path d="M36 32 L54 40 L66 42" class="pt-l"/><path d="M22 22 L22 64 L40 64" class="pt-c"/><path d="M52 12 L90 20" class="pt-a"/></svg>`,
+  wrist:`<svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="58" width="100" height="10" rx="3" class="pt-f"/><path d="M14 46 L58 46 Q70 46 76 52 L92 52" class="pt-l"/><path d="M92 52 L104 50" class="pt-l"/><path d="M40 70 L40 80 M60 70 L60 80" class="pt-c"/><path d="M28 34 L28 42 M28 34 L24 38 M28 34 L32 38" class="pt-a"/></svg>`,
+  screen:`<svg viewBox="0 0 120 90" aria-hidden="true"><circle cx="22" cy="32" r="8" class="pt-b"/><rect x="84" y="14" width="26" height="30" rx="3" class="pt-s"/><path d="M96 44 L96 60" class="pt-l"/><path d="M32 32 L82 22" class="pt-a"/><path d="M22 72 L96 72" class="pt-c"/><path d="M22 68 L22 76 M96 68 L96 76" class="pt-c"/></svg>`};
+const POSTURE=[
+  {s:'sit',t:'Aufrecht sitzen',x:'Rücken an die Lehne, Füße flach auf den Boden. Knie und Ellenbogen etwa im rechten Winkel.'},
+  {s:'wrist',t:'Handgelenke gerade',x:'Lass die Handgelenke locker über der Tastatur schweben – nicht aufstützen und nicht nach oben abknicken.'},
+  {s:'screen',t:'Bildschirm auf Abstand',x:'Etwa eine Armlänge Abstand. Die Oberkante des Bildschirms sollte ungefähr auf Augenhöhe sein.'},
+  {e:'👀',t:'Die 20-20-20-Regel',x:'Alle 20 Minuten für 20 Sekunden auf etwas schauen, das mindestens 6 Meter weit weg ist. Das entspannt die Augen.'},
+  {e:'💆',t:'Schultern locker',x:'Zieh die Schultern nicht hoch. Einmal kurz kreisen lassen, dann locker hängen lassen.'},
+  {e:'💡',t:'Gutes Licht',x:'Das Licht sollte von der Seite kommen, nicht von hinten auf den Bildschirm scheinen und nicht direkt blenden.'},
+  {e:'💧',t:'Trinken nicht vergessen',x:'Ein Glas Wasser neben der Tastatur hilft beim Konzentrieren – aber nicht zu nah dran!'},
+  {e:'🧘',t:'Kurze Pausen',x:'Nach einer halben Stunde üben: aufstehen, strecken, ein paar Schritte gehen. Danach tippt es sich besser.'}];
+function postureCard(i){
+  const P=POSTURE[i%POSTURE.length];let c=$('#ptip');if(c)c.remove();
+  document.body.insertAdjacentHTML('beforeend',`<div class="ptip" id="ptip" role="note"><div class="ptip-img">${P.s?POSTURE_SVG[P.s]:`<span>${P.e}</span>`}</div><div class="ptip-t"><span class="muted small">❤️ Gesund tippen</span><b>${P.t}</b><span>${P.x}</span>
+    <div class="ptip-a"><button class="linkbtn" id="ptn">Nächster Tipp</button><button class="linkbtn" id="ptx">Schließen</button></div></div></div>`);
+  $('#ptn').onclick=()=>postureCard(i+1);$('#ptx').onclick=()=>$('#ptip').remove()}
+function postureMaybe(){const d=Store.data;if(!d.welcomed||d.tipDay===dayKey()||Math.random()<.5)return;d.tipDay=dayKey();Store.save();
+  const go2=n=>{if($('.modal')||activity){if(n<10)setTimeout(()=>go2(n+1),4000);return}postureCard(rnd(0,POSTURE.length-1));setTimeout(()=>{const c=$('#ptip');if(c)c.remove()},25000)};setTimeout(()=>go2(0),5000)}
+
+/* ---------- Escape Room: jede Woche ein neuer Raum mit fünf Schlössern ---------- */
+const ESC_ROOMS=[['🏛️','Die verbotene Bibliothek'],['🧪','Das verlassene Labor'],['🏴‍☠️','Das Piratenschiff'],['🚀','Die Raumstation'],['🏰','Das Burgverlies'],['🎪','Der Geisterzirkus']];
+const escNorm=s=>String(s).toLowerCase().replace(/\s+/g,'');
+/* Alle Rätsel werden aus der Kalenderwoche erzeugt – so hat jeder Spieler denselben Raum */
+function escRoom(k){
+  const r=seededRandom('esc-'+k),p=a=>a[Math.floor(r()*a.length)],ri=(a,b)=>a+Math.floor(r()*(b-a+1));
+  const room=ESC_ROOMS[Math.abs([...k].reduce((a,c)=>a*31+c.charCodeAt(0),3))%ESC_ROOMS.length];
+  const L='ABCDEFGHJKLMNPQRSTUVWXYZ',D='23456789',g=n=>Array.from({length:n},()=>r()<.5?L[Math.floor(r()*L.length)]:D[Math.floor(r()*D.length)]).join('');
+  const code=`${g(3)}-${g(3)}-${g(2)}`;
+  const mw=p(LOWER.filter(w=>/^[a-zäöü]{5,8}$/.test(w)));
+  const a=ri(8,20),b=ri(2,6),c=ri(1,5),m1=p([
+    {q:`Auf dem Regal stehen ${a} Bücher. Du nimmst ${b} heraus und stellst ${c} zurück. Wie viele Bücher stehen jetzt auf dem Regal?`,a:a-b+c},
+    {q:`Im Raum stehen ${b} Stühle mit je 4 Beinen und ${c} Hocker mit je 3 Beinen. Wie viele Beine sind es zusammen?`,a:4*b+3*c},
+    {q:`Eine Kerze brennt ${a} Minuten. Du zündest ${b} Kerzen nacheinander an. Wie viele Minuten hast du Licht?`,a:a*b},
+    {q:`Die Truhe hat ${b} Fächer mit je ${a} Münzen. ${c} Münzen fehlen. Wie viele Münzen liegen noch darin?`,a:a*b-c}]);
+  const nouns=NOUNS.filter(w=>/^[A-ZÄÖÜ][a-zäöüß]+$/.test(w)),targets=TD_WORDS.de.filter(w=>/^[a-z]{5}$/.test(w)&&[...w].every(ch=>nouns.some(n=>n[0].toLowerCase()===ch)));
+  const tw=p(targets),acro=[...tw].map(ch=>p(nouns.filter(n=>n[0].toLowerCase()===ch)));
+  const s0=ri(2,9),st=ri(2,7),seq=p([
+    {v:[s0,s0+st,s0+2*st,s0+3*st],a:s0+4*st,h:`Es kommt immer ${st} dazu.`},
+    {v:[s0,s0*2,s0*4,s0*8],a:s0*16,h:'Jede Zahl ist doppelt so groß wie die vorige.'},
+    {v:[s0,s0+1,s0+3,s0+6,s0+10],a:s0+15,h:'Es kommt erst 1 dazu, dann 2, dann 3 …'},
+    {v:[1,4,9,16,25],a:36,h:'Das sind Quadratzahlen: 1×1, 2×2, 3×3 …'}]);
+  return{room,locks:[
+    {i:'🔢',t:'Das Code-Schloss',q:`In die Tür ist ein Code eingeritzt: <b class="esc-code">${code}</b><br>Tippe ihn genau ab, mit Bindestrichen.`,a:[code],h:'Groß- und Kleinschreibung ist egal, aber die Bindestriche müssen stimmen.'},
+    {i:'🪞',t:'Der Zauberspiegel',q:`Auf dem Spiegel steht <b class="esc-code">${esc(mw.toUpperCase())}</b>. Das Schloss öffnet sich nur, wenn du das Wort <b>rückwärts</b> tippst.`,a:[[...mw].reverse().join('')],h:`Fang mit dem letzten Buchstaben an: „${mw.slice(-1).toUpperCase()}“ …`},
+    {i:'🧮',t:'Das Zahlenschloss',q:esc(m1.q),a:[String(m1.a)],h:'Rechne Schritt für Schritt. Tippe nur die Zahl.'},
+    {i:'📜',t:'Die Geheimbotschaft',q:`Auf einem alten Zettel stehen diese Wörter:<br><b class="esc-words">${acro.map(esc).join(' · ')}</b><br>Das Passwort versteckt sich in ihnen.`,a:[tw],h:'Lies nur die Anfangsbuchstaben.'},
+    {i:'🔮',t:'Die Kristallkugel',q:`In der Kugel leuchten Zahlen auf: <b class="esc-code">${seq.v.join(', ')}, …</b><br>Welche Zahl kommt als Nächstes?`,a:[String(seq.a)],h:seq.h}]}}
+function escapeGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data,k=weekId(),R=escRoom(k),HINT=30;
+    const body=gameShell('Escape Room',`${R.room[0]} ${R.room[1]}: Knacke alle fünf Schlösser, so schnell du kannst. Enter prüft deine Antwort, Tab zeigt einen Hinweis (kostet ${HINT} Sekunden). Jede Woche wartet ein neuer Raum.`,
+      `<span>Zeit <b id="est2">0:00</b></span><span>Schloss <b id="esl">1</b>/5</span><span>Hinweise <b id="esh">0</b></span><span class="rec">Bestzeit <b>${d.high.escape?fmtTime(d.high.escape):'–'}</b></span>`);
+    body.innerHTML=`<div class="bigstage esc" id="esst"><div class="esc-room">${R.room[0]}</div><div class="esc-locks" id="eslk">${R.locks.map(()=>'<span>🔒</span>').join('')}</div>
+      <div class="esc-card" id="escq"></div><div class="membuf" id="esb"><span>…</span></div><p class="muted small" id="esm"></p><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    let i=0,buf='',hints=0,t0=0,iv=0,ok=0,err=0,state='play';
+    const msg=t=>{$('#esm').textContent=t};
+    const tnow=()=>t0?(performance.now()-t0)/1000+hints*HINT:0;
+    function render(){const L=R.locks[i];$('#escq').innerHTML=`<b>${L.i} ${L.t}</b><p>${L.q}</p>`;$('#esb').innerHTML=buf?esc(buf):'<span>…</span>';$('#esl').textContent=Math.min(5,i+1);$('#esh').textContent=hints;
+      $$('#eslk span').forEach((s,j)=>{s.textContent=j<i?'🔓':'🔒';s.classList.toggle('open',j<i);s.classList.toggle('cur',j===i)})}
+    function submit(){if(!buf.trim())return;const L=R.locks[i];
+      if(L.a.some(a=>escNorm(a)===escNorm(buf))){ok+=buf.length;[...buf].forEach(c=>recKey(c,true));buf='';i++;Sound.win();bump($('#eslk'),'hitfx');
+        if(i>=R.locks.length)return done();msg('🔓 Klick! Das Schloss springt auf.');render()}
+      else{err++;Sound.err();Mash.err();bump($('#esb'),'shake');msg('Das Schloss bleibt zu. Versuch es nochmal!')}}
+    function done(){state='done';clearInterval(iv);const secs=Math.round(tnow()),prev=d.high.escape||0,rec=!prev||secs<prev;if(rec)d.high.escape=secs;
+      $$('#eslk span').forEach(s=>{s.textContent='🔓';s.classList.add('open')});
+      const info=recordSession('escape','Escape Room',{wpm:ok/5/(Math.max(secs,1)/60),acc:ok+err?ok/(ok+err*5)*100:100,secs,ok,err,typed:ok+err},{chars:ok*3,bonus:hints?20:40});
+      if(rec){Sound.win();confetti(140)}
+      setTimeout(()=>gameOverModal(rec&&prev?'Neue Bestzeit!':'Entkommen! 🎉',[`Du bist in ${fmtTime(secs)} aus „${R.room[1]}“ entkommen${hints?` (mit ${hints} ${hints===1?'Hinweis':'Hinweisen'})`:''}.`,'Nächsten Montag wartet ein neuer Raum.'],info.xp,()=>escapeGame()),600)}
+    t0=performance.now();iv=setInterval(()=>{if(state==='play'&&focused)$('#est2').textContent=fmtTime(tnow())},250);cleanup=()=>clearInterval(iv);
+    render();msg('Tipp deine Antwort und drück Enter.');
+    setHandler({char:ch=>{if(state!=='play')return;if(buf.length<30){buf+=ch;Sound.key();render()}},back:()=>{buf=buf.slice(0,-1);render()},enter:submit,
+      tab:()=>{if(state!=='play')return;hints++;msg(`💡 Hinweis: ${R.locks[i].h} (+${HINT} Sekunden)`);render()},esc:()=>go('games')});
+  });
+}
+
+/* ---------- Koop-Modus: zwei Freunde tippen abwechselnd die Wörter eines Textes ----------
+   Läuft über dieselbe Sammlung „matches“ wie das Online-Duell (mode:'coop'). Wer dran ist, steht in „turn“ (Wort-Nummer). */
+const Coop={id:null,unsub:null,role:null,partner:null,m:null,t0:0,ok:0,err:0,buf:'',done:false};
+function coopSetup(){
+  if(window.zfGuest){needAccount('Der Koop-Modus');return}
+  const fr=[...Social.friends].sort((a,b)=>(isOnline(b)-isOnline(a))||(b.lastActive||0)-(a.lastActive||0));
+  const m=modal(`<h3>🤝 Koop-Modus</h3><p class="muted small">Ihr tippt abwechselnd je ein Wort desselben Textes und müsst gemeinsam die Zielzeit schaffen. Wähle einen Freund – am besten einen, der gerade online ist.</p>
+    <div class="coop-fr">${fr.length?fr.map(f=>`<div class="fr-u">${fAva(f)}<div class="nm"><b>${nameHTML(f.name,f.nameFx)}</b><span>${isOnline(f)?'🟢 online':esc(agoText(f))}</span></div><button class="btn${isOnline(f)?' primary':''} small" data-cpi="${esc(f.uid)}">Einladen</button></div>`).join(''):'<p class="muted small">Du hast noch keine Freunde. Füge unter „Freunde“ welche hinzu.</p>'}</div>
+    <div class="acts"><button class="btn ghost" id="cpx">Abbrechen</button></div>`);
+  $('#cpx',m).onclick=()=>m.remove();$$('[data-cpi]',m).forEach(b=>b.onclick=()=>{m.remove();coopInvite(Social.friends.find(f=>f.uid===b.dataset.cpi))})}
+async function coopInvite(f){
+  if(!f||!window.fbOnline)return;coopLeave(true);
+  const me=window.fbOnline.me(),S=Store.data.settings,text=gSent(2).replace(/\s+/g,' ').trim();
+  const dlg=modal(`<div class="onwait"><div class="onvs">${avaHTML('big')}<b>🤝</b>${fAva(f).replace('class="ava','class="ava big')}</div><h3>Warte auf ${nameHTML(f.name,f.nameFx)}…</h3><p class="muted">Die Einladung ist 60 Sekunden gültig.</p>
+    <div class="acts"><button class="btn ghost" id="cwx">Abbrechen</button></div></div>`);
+  let id;try{id=await window.fbOnline.create(f.uid,{mode:'coop',text,lang:isEN()?'en':'de',turn:0,names:{[me]:userName(),[f.uid]:f.name},avatars:{[me]:S.avatar||'🙂',[f.uid]:f.avatar||'🙂'}})}
+  catch(e){console.warn('Koop:',e);dlg.remove();toast('⚠️','Einladung fehlgeschlagen','Bitte prüfe deine Verbindung.');return}
+  $('#cwx',dlg).onclick=()=>{window.fbOnline.set(id,{status:'cancelled'}).catch(()=>{});dlg.remove();coopLeave(true)};
+  const to=setTimeout(()=>{if(Coop.id===id&&Coop.m&&Coop.m.status==='invited'){window.fbOnline.set(id,{status:'expired'}).catch(()=>{});dlg.remove();coopLeave(true);toast('⌛','Keine Antwort',`${f.name} hat die Einladung nicht angenommen.`)}},60000);
+  coopAttach(id,'host',f,()=>{clearTimeout(to);dlg.remove()})}
+async function coopJoin(m){
+  const me=window.fbOnline.me();coopLeave(true);
+  const f=Social.friends.find(x=>x.uid===m.host)||{uid:m.host,name:(m.names||{})[m.host]||'Freund',avatar:(m.avatars||{})[m.host]||'🙂'};
+  coopAttach(m.id,'guest',f);try{await window.fbOnline.set(m.id,{status:'start',['names.'+me]:userName(),['avatars.'+me]:Store.data.settings.avatar||'🙂'})}catch(e){coopLeave(true);toast('⚠️','Beitreten fehlgeschlagen','Die Einladung ist vielleicht abgelaufen.')}}
+function coopAttach(id,role,partner,onStart){
+  Object.assign(Coop,{id,role,partner,m:null,t0:0,ok:0,err:0,buf:'',done:false});
+  Coop.unsub=window.fbOnline.watch(id,m=>{const prev=Coop.m;Coop.m=m;
+    if(['declined','cancelled','expired'].includes(m.status)&&(!prev||prev.status==='invited')){if(onStart)onStart();if(role==='host'&&m.status==='declined')toast('🤝',`${partner.name} hat abgelehnt`,'');coopLeave(true);return}
+    if(m.status==='left'&&!Coop.done){toast('🤝',`${partner.name} hat das Spiel verlassen`,'');coopLeave(true);go('games');return}
+    if(m.status==='start'&&(!prev||prev.status!=='start')){if(onStart)onStart();Coop.t0=performance.now();coopPlay();return}
+    if(m.status==='done'&&!Coop.done){coopEnd();return}
+    if(Coop.m.status==='start')coopRender()})}
+function coopLeave(silent){if(Coop.unsub){try{Coop.unsub()}catch(e){}}if(!silent&&Coop.id&&Coop.m&&Coop.m.status==='start')window.fbOnline.set(Coop.id,{status:'left'}).catch(()=>{});Object.assign(Coop,{id:null,unsub:null,m:null})}
+const coopWords=()=>(Coop.m&&Coop.m.text||'').split(' ');
+const coopGoal=()=>{const w=coopWords();return Math.round(w.join(' ').length/5/22*60)+w.length};   // gemeinsames Tempo ~22 WPM plus Übergabezeit
+function coopPlay(){
+  show(()=>{
+    activity=true;setTab('games');
+    const body=gameShell('🤝 Koop-Modus',`Ihr tippt abwechselnd je ein Wort. Deine Wörter sind blau, die von ${esc(Coop.partner.name)} orange. Schafft den Text gemeinsam in ${fmtTime(coopGoal())}!`,
+      `<span>Zeit <b id="cpt">0:00</b></span><span>Ziel <b>${fmtTime(coopGoal())}</b></span><span>Wort <b id="cpw">1</b>/${coopWords().length}</span>`);
+    body.innerHTML=`<div class="bigstage coop" id="cpst"><div class="coop-who" id="cpwho"></div><div class="coop-text" id="cptx"></div><div class="membuf" id="cpb"><span>…</span></div><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    $('#back').onclick=()=>{coopLeave(false);go('games')};
+    const iv=setInterval(()=>{if(Coop.t0&&!Coop.done)$('#cpt').textContent=fmtTime((performance.now()-Coop.t0)/1000)},250);cleanup=()=>clearInterval(iv);
+    coopRender();focusCap();
+    setHandler({char:ch=>{if(!coopMine()||Coop.done||ch===' ')return;const w=coopWords()[Coop.m.turn],nb=Coop.buf+ch;
+        if(w.startsWith(nb)){Coop.buf=nb;Coop.ok++;recKey(ch,true);Sound.key();
+          if(nb===w){Coop.buf='';const next=Coop.m.turn+1,fin=next>=coopWords().length;Coop.m={...Coop.m,turn:next};
+            window.fbOnline.set(Coop.id,fin?{turn:next,status:'done',secs:Math.round((performance.now()-Coop.t0)/1000)}:{turn:next}).catch(()=>{});if(fin){Coop.m.status='done';Coop.m.secs=Math.round((performance.now()-Coop.t0)/1000);coopEnd();return}}
+          coopRender()}
+        else{Coop.err++;recKey(w[Coop.buf.length]||ch,false);Sound.err();bump($('#cpb'),'shake')}},
+      back:()=>{Coop.buf=Coop.buf.slice(0,-1);coopRender()},esc:()=>{coopLeave(false);go('games')}});
+  })}
+const coopMine=()=>Coop.m&&((Coop.m.turn%2===0)===(Coop.role==='host'));
+function coopRender(){
+  const tx=$('#cptx');if(!tx||!Coop.m)return;const t=Coop.m.turn,mineEven=Coop.role==='host';
+  tx.innerHTML=coopWords().map((w,i)=>{const mine=(i%2===0)===mineEven;return `<span class="cw ${mine?'me':'pa'}${i<t?' ok':''}${i===t?' now':''}">${i===t&&mine?`<i>${esc(Coop.buf)}</i>${esc(w.slice(Coop.buf.length))}`:esc(w)}</span>`}).join(' ');
+  $('#cpw').textContent=Math.min(t+1,coopWords().length);$('#cpb').innerHTML=coopMine()?(Coop.buf?esc(Coop.buf):'<span>…</span>'):'<span>⏳</span>';
+  $('#cpwho').innerHTML=coopMine()?'<b class="coop-you">Du bist dran!</b>':`${fAva(Coop.partner)} <b>${esc(Coop.partner.name)}</b> tippt …`;
+  if(coopMine())Sound.ok&&0}
+function coopEnd(){
+  if(Coop.done)return;Coop.done=true;const d=Store.data,goal=coopGoal(),secs=Coop.m.secs||Math.round((performance.now()-Coop.t0)/1000),won=secs<=goal;
+  if(won)d.high.coop=(d.high.coop||0)+1;
+  const info=recordSession('coop','Koop-Modus',{wpm:Coop.ok/5/(Math.max(secs,1)/60)*2,acc:Coop.ok+Coop.err?Coop.ok/(Coop.ok+Coop.err)*100:100,secs,ok:Coop.ok,err:Coop.err,typed:Coop.ok+Coop.err},{chars:Coop.ok,bonus:won?40:10});
+  if(won){Sound.win();confetti(140)}else Sound.hurt();
+  const p=Coop.partner.name;coopLeave(true);
+  gameOverModal(won?'Gemeinsam geschafft! 🤝':'Knapp daneben',[`Ihr habt ${fmtTime(secs)} gebraucht – Ziel waren ${fmtTime(goal)}.`,won?`Starkes Teamwork mit ${esc(p)}!`:'Beim nächsten Mal klappt es bestimmt.'],info.xp,()=>coopSetup())}
+
+/* ---------- Fun Facts aller Spieler (aus der Community-Zusammenfassung) ---------- */
+async function viewFacts(){
+  main.innerHTML=`${lgHead('📊 Fun Facts','Spannende Zahlen aus der ganzen Zehnfinger-Community. Wird stündlich aktualisiert.')}<div id="ffx"><p class="muted">Wird geladen…</p></div>`;
+  let c;try{c=await getComm()}catch(e){$('#ffx').innerHTML='<p class="muted">Die Zahlen konnten nicht geladen werden.</p>';return}
+  const f=c.facts;if(!$('#ffx'))return;if(!f){$('#ffx').innerHTML='<p class="muted">Die Zahlen werden gerade gesammelt. Schau in einer Stunde wieder vorbei!</p>';return}
+  const h=f.hours||[],hMax=Math.max(1,...h),hTop=h.indexOf(Math.max(...h));
+  const g=f.topGame&&GAMES.find(x=>x.id===f.topGame);
+  const card=(i,v,t)=>`<div class="ff-card"><span class="ff-i">${i}</span><b>${v}</b><span>${t}</span></div>`;
+  $('#ffx').innerHTML=`<div class="ff-grid">
+      ${card('⌨️',fmtN(f.chars),'Zeichen haben alle zusammen getippt')}
+      ${card('⏱️',fmtN(Math.round(f.secs/3600)),'Stunden wurde insgesamt geübt')}
+      ${card('🎮',fmtN(f.rounds),'Runden wurden gespielt')}
+      ${card('👥',fmtN(f.players),'Spieler sind dabei')}
+      ${card('⚡',`${f.fastest||0} WPM`,'ist der schnellste Wert aller Spieler')}
+      ${card('📈',`${f.avgWpm||0} WPM`,'tippen Spieler im Durchschnitt')}
+      ${card('🔥',`${f.streak||0} Tage`,'ist die längste Streak')}
+      ${card('🎯',f.errKey?`„${esc(f.errKey==='Space'?'Leertaste':f.errKey.toUpperCase())}“`:'–','ist die Taste mit den meisten Tippfehlern')}
+      ${g?card(g.i,esc(g.n),'ist das beliebteste Spiel'):''}
+    </div>
+    <div class="panel ff-hours"><h3>🕐 Wann wird getippt?</h3><div class="ff-bars">${h.map((v,i)=>`<i style="height:${Math.max(3,v/hMax*100)}%" class="${i===hTop?'top':''}" title="${i} Uhr: ${fmtN(v)} Runden"></i>`).join('')}</div>
+      <div class="ff-ax"><span>0 Uhr</span><span>6</span><span>12</span><span>18</span><span>23</span></div>
+      <p class="muted small" style="margin:8px 0 0">Beliebteste Uhrzeit: <b>${hTop} Uhr</b></p></div>`}
+
+/* ---------- Gastmodus: Hinweis, wenn eine Funktion ein Konto braucht ---------- */
+function needAccount(what){
+  const m=modal(`<div class="lg-result"><div class="lg-badge big">👤</div><h3>Dafür brauchst du ein Konto</h3>
+    <p class="muted">${esc(what)} gibt es nur mit einem kostenlosen Konto. Alles, was du als Gast gespielt hast, wird übernommen.</p>
+    <div class="acts"><button class="btn primary" id="nar">Konto erstellen</button><button class="btn ghost" id="nax">Später</button></div></div>`);
+  $('#nax',m).onclick=()=>m.remove();$('#nar',m).onclick=()=>{Store.save();location.href='./?register=1'}}
+
 /* ---------- Geheime Erfolge: Auslöser außerhalb normaler Runden ---------- */
 function grantAch(id){
   const d=Store.data,a=ACH.find(x=>x.id===id);if(!a||d.ach[id])return;
@@ -6612,7 +6906,7 @@ function giftOpen(id){
     <div class="acts"><button class="btn primary" id="gok">Danke!</button></div></div>`);
   setTimeout(()=>{const b=$('.gift-open',m);if(b)b.textContent='✨';$('#gres',m).textContent=text;Sound.win();confetti(100)},reduced()?50:900);
   const close=()=>{m.remove();if(!activity)setHandler(null)};$('#gok',m).onclick=close;setHandler({char(){},enter:close,esc:close})}
-function giftNotify(){const d=Store.data;d.giftSeen=d.giftSeen||[];let n=0;giftIncoming().forEach(g=>{if(!d.giftSeen.includes(g.id)){d.giftSeen.push(g.id);n++;if(!activity)toast('🎁',`${g.from.name} hat dir ein Geschenk geschickt`,'Öffne es oben rechts!')}});if(n){d.giftSeen=d.giftSeen.slice(-40);Store.save();Sound.ok()}}
+function giftNotify(){const d=Store.data;d.giftSeen=d.giftSeen||[];let n=0;giftIncoming().forEach(g=>{if(!d.giftSeen.includes(g.id)){d.giftSeen.push(g.id);n++;if(!activity)toast('🎁',`${g.from.name} hat dir ein Geschenk geschickt`,'Öffne es im Posteingang 📬')}});if(n){d.giftSeen=d.giftSeen.slice(-40);Store.save();Sound.ok()}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-gopen]');if(b)giftOpen(b.dataset.gopen)});
 
 /* ---------- Lern-Weltkarte: die vier Kursabschnitte als Inseln mit Boss ---------- */
@@ -6700,6 +6994,7 @@ function showLeaguePending(){
 }
 function viewLeague(){
   if(lgTab==="world")return viewWorld();
+  if(lgTab==="facts")return viewFacts();
   leagueRollover();
   const d=Store.data,L=d.league,[n,icon,color]=LEAGUES[L.idx],rows=standings(false),rank=rows.findIndex(r=>r.me)+1;
   const leftMs=Math.max(0,periodStart()+PERIOD_MS-Date.now()),lh=Math.floor(leftMs/36e5),lm=Math.ceil((leftMs%36e5)/6e4);
@@ -6730,8 +7025,8 @@ function viewLeague(){
 /* ---------- Weltrangliste (Reiter auf der Liga-Seite) ---------- */
 let lgTab='league',worldCat='wpm';
 function lgHead(title,sub){return `<div class="page-head fr-head"><div><h1 class="ph">${title}</h1><p class="muted">${sub}</p></div>
-  <div class="seg" id="lgtab">${[['league','🥇 Liga'],['world','🌍 Weltrangliste']].map(([k,v])=>`<button data-lgt="${k}" aria-pressed="${k===lgTab}">${v}</button>`).join('')}</div></div>`}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-lgt]');if(!b)return;lgTab=b.dataset.lgt;go('league')});
+  <div class="seg" id="lgtab">${[['league','🥇 Liga'],['world','🌍 Weltrangliste'],['facts','📊 Fun Facts']].map(([k,v])=>`<button data-lgt="${k}" aria-pressed="${k===lgTab}">${v}</button>`).join('')}</div></div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-lgt]');if(!b)return;if(window.zfGuest&&b.dataset.lgt!=='league'){needAccount('die Weltrangliste');return}lgTab=b.dataset.lgt;go('league')});
 /* Drei Bestenlisten über ALLE registrierten Spieler (auch wer noch keinen Wert hat, steht mit 0 in der Liste) */
 const WORLD_CATS=[
   {k:'wpm',i:'⚡',n:'Schnellste WPM',v:p=>{const x=+((p.stats||{}).bestWpm)||0;return x<=250?x:0},fmt:v=>`${v} WPM`,mine:()=>{const x=bestWpm();return x<=250?x:0}},
@@ -6790,7 +7085,7 @@ function onSocial(s){
   Object.assign(Social,s,{ready:true});chNotify();rxNotify();tinvNotify();giftNotify();renderInvites();updateFriendBadge();
   if(currentTab==='friends'&&!activity&&!$('.modal'))renderFriendsLive();
 }
-function updateFriendBadge(){const b=$('#frb');if(!b)return;const n=Social.incoming.length+chIncoming().length+giftIncoming().length;b.hidden=!n;b.textContent=n}
+function updateFriendBadge(){updInbox();const b=$('#frb');if(!b)return;const n=Social.incoming.length;b.hidden=!n;b.textContent=n}
 
 /* Öffentliche Zusammenfassung des eigenen Spielstands – das sehen Freunde */
 function publicSummary(){
@@ -6806,7 +7101,8 @@ function publicSummary(){
       count:d.count||d.history.length,totalSecs:Math.round(d.totalSecs||0),strokes:d.strokes||0,ach:Object.keys(d.ach).length,
       lessons:d.lessons||{},high:d.high||{},ghosts:flag(d.ghosts),story:flag(d.story),daily,
       league:{week:String(L.week),lp:L.lp||0,idx:L.idx||0,prevWeek:h0?String(h0.week):'',prevLp:h0?(h0.lp||0):0},
-      wk:wkXp(),wkPrev:Store.data.wkPrev||null,plays:d.plays||{},wkc:wkcNow(),wkcPrev:d.wkcPrev||null},
+      wk:wkXp(),wkPrev:Store.data.wkPrev||null,plays:d.plays||{},wkc:wkcNow(),wkcPrev:d.wkcPrev||null,
+      hours:d.hours||[],errKeys:Object.fromEntries(Object.entries(d.keys||{}).filter(([,v])=>v[1]>0).sort((a,b)=>b[1][1]-a[1][1]).slice(0,6).map(([k2,v])=>[k2,v[1]]))},
     prestige:d.prestige||0,rankLv:(d.prestige||0)*100+li.level,xpAll:(d.xp||0)+(d.prestigeXp||0),
     team:(d.team&&d.team.id)||'',teamName:(d.team&&d.team.name)||'',
     tourKey:(d.tour&&d.tour.k)||'',tour:d.tour?{wpm:d.tour.wpm,acc:d.tour.acc}:{},
@@ -6818,6 +7114,7 @@ function publicSummary(){
 const isOnline=f=>!!f.lastActive&&Date.now()-f.lastActive<5*6e4;
 /* Zähler oben in der Leiste: alle Spieler, die in den letzten 5 Minuten aktiv waren (du selbst eingeschlossen) */
 function updOnline(){
+  if(window.zfGuest)return;
   if(!window.fbOnlineCount)return;
   window.fbOnlineCount().then(n=>{const e=$('#onl');if(!e)return;n=Math.max(1,n|0);e.hidden=false;$('b',e).textContent=n.toLocaleString('de-DE');
     e.title=`${n} ${n===1?'Spieler ist':'Spieler sind'} gerade online`;e.setAttribute('aria-label',e.title)}).catch(err=>console.warn('Online-Zähler:',err));
@@ -7125,13 +7422,14 @@ function renderInvites(){
   Online.invites=Online.invites.filter(m=>Date.now()-m.createdAt<70000);
   box.innerHTML=Online.invites.map(m=>{const nm=(m.names||{})[m.host]||'Ein Freund',av=(m.avatars||{})[m.host]||'🙂';
     return `<div class="invite" role="alertdialog" aria-label="Einladung von ${esc(nm)}"><span class="ava">${esc(av)}</span>
-      <div class="iv-t"><b>${esc(nm)}</b><span>fordert dich zum Online-Duell heraus</span></div>
-      <div class="acts"><button class="btn primary small" data-iva="${m.id}">Annehmen</button><button class="btn ghost small" data-ivd="${m.id}" aria-label="Ablehnen" title="Ablehnen">✕</button></div></div>`}).join('')+tinvCards()+giftCards();
+      <div class="iv-t"><b>${esc(nm)}</b><span>${m.mode==='coop'?'lädt dich zum Koop-Modus ein 🤝':'fordert dich zum Online-Duell heraus'}</span></div>
+      <div class="acts"><button class="btn primary small" data-iva="${m.id}">Annehmen</button><button class="btn ghost small" data-ivd="${m.id}" aria-label="Ablehnen" title="Ablehnen">✕</button></div></div>`}).join('');updInbox();
 }
 setInterval(()=>{if(Online.invites.length)renderInvites()},5000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&/Duell-Einladung/.test(document.title))document.title='Zehnfinger – Tipptrainer'});
 async function acceptInvite(id){
   const m=Online.invites.find(x=>x.id===id);if(!m)return;
+  if(m.mode==='coop'){Online.invites=Online.invites.filter(x=>x.id!==id);renderInvites();coopJoin(m);return}
   Online.invites=Online.invites.filter(x=>x.id!==id);renderInvites();
   if(Online.id)Online.leave();
   const me=window.fbOnline.me(),S=Store.data.settings;
@@ -7238,11 +7536,20 @@ window.startApp=async function(user,regName){
     // Freunde vor der Liga-Abrechnung laden, damit sie in der Wertung mitzählen
     try{if(window.fbFriends)await window.fbFriends.start(onSocial)}catch(e){console.warn('Freunde:',e)}
     try{if(window.fbOnline)window.fbOnline.invites(onInvites)}catch(e){console.warn('Einladungen:',e)}
+    // Aus dem Gastmodus registriert: Gast-Fortschritt ins neue Konto übernehmen
+    if(window.zfFromGuest){try{const raw=localStorage.getItem(LS_KEY+':guest');if(raw&&!(Store.data.count>0)){const acc=Store.data.account;Store.data=Store.merge(JSON.parse(raw));Store.data.account=acc;localStorage.removeItem(LS_KEY+':guest');localStorage.removeItem('zf-guest');Store.data.notice={i:'🎉',t:'Fortschritt übernommen',s:'Alles, was du als Gast gespielt hast, ist jetzt in deinem Konto gespeichert.'}}}catch(e){console.warn('Gast-Übernahme:',e)}}
+  }else if(window.zfGuest){
+    // Gastmodus: eigener Spielstand nur auf diesem Gerät, keine Cloud
+    Store.sync=false;Store.key=LS_KEY+':guest';Store.data=DEFAULT();Store.load();
+    Store.data.account={uid:'',name:'Gast',email:'',guest:true};try{localStorage.setItem('zf-guest','1')}catch(e){}
+    applySettings();document.body.classList.add('is-guest');
+    const hd=$('header.top');if(hd)hd.insertAdjacentHTML('afterend','<div class="guestbar" id="gbar"><span>👤 Du spielst als <b>Gast</b> – dein Fortschritt wird nur auf diesem Gerät gespeichert.</span><button class="btn primary small" id="gbreg">Kostenloses Konto erstellen</button></div>');
+    const gr=$('#gbreg');if(gr)gr.onclick=()=>{Store.save();location.href='./?register=1'};
   }
   leagueRollover();
   applySettings();applyDonate();
   checkAch(null);
-  wqEnsure();useFreeze();
+  wqEnsure();useFreeze();postureMaybe();
   adminInit();setTimeout(teamLeagueClaim,4000);
   // Über einen Einladungslink registriert: Startbonus
   if(window.zfRefUsed&&!Store.data.refBonus){Store.data.refBonus=1;Store.data.coins+=INV_NEW;Store.data.notice={i:'🎉',t:'Willkommensbonus',s:`Du wurdest eingeladen: +${INV_NEW} 🪙`}}
@@ -7262,6 +7569,7 @@ window.startApp=async function(user,regName){
   Store.save();   // öffentliche Zusammenfassung sofort aktualisieren
   // Online-Status für Freunde: alle 2 Minuten ein kurzes Lebenszeichen, solange die Seite sichtbar ist
   // Sparsam mit der Datenbank: Lebenszeichen alle 4 Minuten, Zähler jede Minute (Verlassen/Zurückkommen wird sofort gemeldet)
+  if(window.zfGuest)return;   // Gäste senden keine Lebenszeichen
   if(window.fbPing){window.fbPing().catch(()=>{}).then(updOnline);setInterval(()=>{if(document.visibilityState==='visible')window.fbPing().catch(()=>{})},24e4)}
   setInterval(()=>{if(document.visibilityState==='visible')updOnline()},6e4);
   // Tab weg: sofort als abwesend melden. Tab wieder da: sofort anmelden und Zahl neu holen.
@@ -7275,6 +7583,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 /* Abmelden ueber den Button im Kopfbereich */
 function logout(){
+  if(window.zfGuest){Store.save();location.href='./';return}
   const m=modal(`<div class="secret"><div class="sk">👋</div><h3>Abmelden?</h3>
     <p class="muted">Dein Fortschritt bleibt gespeichert. Du kannst dich jederzeit wieder anmelden.</p>
     <div class="acts"><button class="btn primary" id="lyes">Abmelden</button><button class="btn ghost" id="lno">Abbrechen</button></div></div>`);

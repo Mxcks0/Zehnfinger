@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipp-Test: Wie schnell tippst du? Kostenloser 1-Minuten-Test | Zehnfinger</title>
+<meta name="description" content="Kostenloser Tipp-Test ohne Anmeldung: Finde in 60 Sekunden heraus, wie viele Wörter pro Minute (WPM) du tippst und wie genau. Mit Einordnung und Tipps zum Zehnfinger-Schreiben.">
+<link rel="canonical" href="https://www.zehnfingernulllangeweile.de/tipptest.html">
+<meta property="og:title" content="Wie schnell tippst du? Kostenloser Tipp-Test">
+<meta property="og:description" content="60 Sekunden, ohne Anmeldung: Miss deine Tippgeschwindigkeit in WPM und vergleiche dich mit anderen.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.zehnfingernulllangeweile.de/tipptest.html">
+<meta name="theme-color" content="#17151F">
+<link href="fonts/fonts.css" rel="stylesheet">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5747466582898616" crossorigin="anonymous"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+ {"@type":"Question","name":"Was bedeutet WPM?","acceptedAnswer":{"@type":"Answer","text":"WPM steht für „words per minute“, also Wörter pro Minute. Gezählt werden dabei fünf Zeichen als ein Wort, damit kurze und lange Wörter fair verglichen werden."}},
+ {"@type":"Question","name":"Wie schnell tippt ein durchschnittlicher Mensch?","acceptedAnswer":{"@type":"Answer","text":"Die meisten Menschen tippen zwischen 30 und 40 WPM. Wer mit zehn Fingern blind schreibt, schafft oft 50 bis 70 WPM, Profis über 90 WPM."}},
+ {"@type":"Question","name":"Wie werde ich beim Tippen schneller?","acceptedAnswer":{"@type":"Answer","text":"Lerne das Zehnfinger-System: Jeder Finger hat feste Tasten, die Finger ruhen auf der Grundreihe (ASDF und JKLÖ). Übe regelmäßig ein paar Minuten, achte zuerst auf Genauigkeit und erst dann auf Tempo."}}]}
+</script>
+<style>
+:root{--bg:#17151F;--surface:#211E2C;--surface2:#2B2739;--line:#3A3549;--text:#EEEAF6;--muted:#A39DB8;--caret:#FFC857;--good:#8BE0C0;--bad:#FF6F7D;--f1:#A7B4FF;--f2:#86DBA6;--f3:#EDD86F;--f4:#F6AE6B;--f5:#F28DB2;color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#F4F2F9;--surface:#fff;--surface2:#ECE8F5;--line:#D6D0E4;--text:#1F1B2B;--muted:#655E79;--caret:#B87B00;--good:#1C9A6F;--bad:#D63447;color-scheme:light}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Bricolage Grotesque",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:860px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--caret)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:26px}
+.logo{font-weight:800;font-size:22px;text-decoration:none;letter-spacing:-.02em}
+.logo span:nth-child(5n+1){color:var(--f5)}.logo span:nth-child(5n+2){color:var(--f4)}.logo span:nth-child(5n+3){color:var(--f3)}.logo span:nth-child(5n+4){color:var(--f2)}.logo span:nth-child(5n){color:var(--f1)}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:10px 18px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.primary{background:var(--caret);color:#241a02}.btn.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--line)}
+h1{font-size:clamp(30px,6vw,46px);line-height:1.1;margin:0 0 8px;letter-spacing:-.03em}
+.lead{color:var(--muted);margin:0 0 20px;font-size:17px}
+.test{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px}
+.opts{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.seg{display:inline-flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px}
+.seg button{font:inherit;font-weight:600;border:0;background:none;color:var(--muted);padding:6px 12px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--text)}
+.live{display:flex;gap:18px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.live b{color:var(--text);font-size:20px}
+.words{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:clamp(18px,2.6vw,23px);line-height:1.9;height:calc(1.9em*3);overflow:hidden;padding:4px 2px;user-select:none}
+.words .inner{transition:transform .15s}
+.w{margin-right:.55em;border-radius:5px;padding:0 2px}
+.w.cur{background:var(--surface2)}
+.w.ok{color:var(--good)}.w.bad{color:var(--bad);text-decoration:line-through}
+.w.cur.typo{background:color-mix(in srgb,var(--bad) 25%,transparent)}
+.inp{width:100%;margin-top:12px;font:inherit;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:20px;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--text);outline:none}
+.inp:focus{border-color:var(--caret)}
+.hint{color:var(--muted);font-size:13px;margin:8px 0 0}
+.res{display:none;text-align:center;padding:10px 0 4px}
+.res.on{display:block}
+.big{font-size:clamp(56px,12vw,88px);font-weight:800;line-height:1;color:var(--caret)}
+.res .unit{font-size:20px;font-weight:700}
+.stats{display:flex;justify-content:center;gap:26px;margin:14px 0;flex-wrap:wrap;color:var(--muted)}
+.stats b{display:block;color:var(--text);font-size:22px}
+.lvl{display:inline-block;margin:6px 0 16px;padding:6px 14px;border-radius:999px;background:var(--surface2);font-weight:700}
+.cta{margin:18px 0 0;padding:18px;border-radius:16px;border:1px solid var(--caret);background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--caret) 16%,transparent),transparent 60%),var(--surface)}
+.cta h2{margin:0 0 6px;font-size:22px}
+.cta p{margin:0 0 12px;color:var(--muted)}
+.acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:18px 0 0;font-size:12px;text-align:center}
+.scale div{padding:8px 4px;border-radius:10px;background:var(--surface2)}
+.scale div.me{outline:2px solid var(--caret)}
+.scale b{display:block;font-size:14px}
+article{margin-top:36px}
+article h2{font-size:22px;margin:28px 0 8px}
+article p,article li{color:var(--muted)}
+article li{margin:4px 0}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+footer a{color:var(--muted)}
+@media (max-width:560px){.scale{grid-template-columns:repeat(3,1fr)}.live{gap:12px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><a class="logo" href="./" aria-label="Zehnfinger – zum Spiel"><span>Z</span><span>e</span><span>h</span><span>n</span><span>f</span><span>i</span><span>n</span><span>g</span><span>e</span><span>r</span></a><a class="btn ghost" href="./">Zum Spiel</a></div>
+  <h1>Wie schnell tippst du?</h1>
+  <p class="lead">Der kostenlose Tipp-Test – ohne Anmeldung. Tippe die Wörter ab und finde heraus, wie viele Wörter pro Minute (WPM) du schaffst.</p>
+
+  <section class="test" aria-label="Tipp-Test">
+    <div class="opts">
+      <div class="seg" id="dur" role="group" aria-label="Dauer"><button data-s="30" aria-pressed="false">30 s</button><button data-s="60" aria-pressed="true">1 Minute</button><button data-s="120" aria-pressed="false">2 Minuten</button></div>
+      <div class="live"><span>⏱️ <b id="tl">1:00</b></span><span>⚡ <b id="wpm">0</b> WPM</span><span>🎯 <b id="acc">100</b> %</span></div>
+    </div>
+    <div id="play">
+      <div class="words" id="words"><div class="inner" id="inner"></div></div>
+      <input class="inp" id="inp" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Hier tippen – die Zeit startet mit dem ersten Buchstaben" aria-label="Tippfeld">
+      <p class="hint">Tippe das markierte Wort und drück die <b>Leertaste</b>. Mit <b>Esc</b> startest du neu.</p>
+    </div>
+    <div class="res" id="res" aria-live="polite">
+      <div class="big" id="rw">0</div><div class="unit">Wörter pro Minute</div>
+      <div class="stats"><div><b id="ra">0 %</b>Genauigkeit</div><div><b id="rc">0</b>Anschläge/Min</div><div><b id="rk">0</b>richtige Wörter</div></div>
+      <div class="lvl" id="rl"></div>
+      <div class="scale" id="scale"></div>
+      <div class="cta"><h2>Werde schneller – mit Spaß</h2><p>Zehnfinger bringt dir das Blindschreiben mit Lektionen, über 40 Minispielen, Ligen und Duellen gegen Freunde bei. Komplett kostenlos, im Browser.</p>
+        <div class="acts"><a class="btn primary" href="./">🎮 Jetzt kostenlos loslegen</a><button class="btn ghost" id="again">🔁 Nochmal testen</button><button class="btn ghost" id="share">📤 Ergebnis teilen</button></div></div>
+    </div>
+  </section>
+
+  <article>
+    <h2>Was bedeutet WPM?</h2>
+    <p>WPM steht für <em>words per minute</em>, also Wörter pro Minute. Damit kurze und lange Wörter fair verglichen werden, zählen jeweils fünf Zeichen als ein Wort. Bei diesem Test zählen nur richtig getippte Wörter.</p>
+    <h2>Wie schnell tippt ein durchschnittlicher Mensch?</h2>
+    <p>Die meisten Menschen tippen zwischen <b>30 und 40 WPM</b>. Wer mit zehn Fingern blind schreibt, schafft oft 50 bis 70 WPM, Profis kommen auf über 90 WPM. Wichtiger als das reine Tempo ist aber die Genauigkeit: Jeder Fehler kostet beim Korrigieren Zeit.</p>
+    <h2>So wirst du schneller</h2>
+    <ul>
+      <li><b>Lerne das Zehnfinger-System:</b> Jeder Finger hat feste Tasten. Die Finger ruhen auf der Grundreihe – links A S D F, rechts J K L Ö. Die kleinen Rillen auf F und J helfen dir, die Position blind zu finden.</li>
+      <li><b>Nicht auf die Tastatur schauen:</b> Am Anfang wirst du langsamer, aber schon nach wenigen Tagen überholst du dein altes Tempo.</li>
+      <li><b>Erst genau, dann schnell:</b> Übe zuerst fehlerfrei. Das Tempo kommt von allein.</li>
+      <li><b>Kurz, aber regelmäßig:</b> Zehn Minuten am Tag bringen mehr als eine Stunde am Wochenende.</li>
+      <li><b>Gesund sitzen:</b> Rücken an die Lehne, Handgelenke locker, Bildschirm etwa eine Armlänge entfernt.</li>
+    </ul>
+    <p>Mit <a href="./">Zehnfinger</a> lernst du das alles spielerisch – mit Lektionen von der Grundreihe bis zum Profi, Minispielen wie Zombie-Angriff oder Tippdle und einer Liga gegen andere Spieler.</p>
+  </article>
+  <footer><a href="./">Zehnfinger</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></footer>
+</main>
+<script>
+/* Tipp-Test ohne Anmeldung: Wort für Wort, Leertaste schickt ab (funktioniert auch am Handy) */
+const WORDS=('der die das und ist nicht sie ich es ein eine zu mit sich auf dem den auch als an er so dass kann was wie noch bei nach aus wenn nur vor oder aber hat sind war wird man mehr schon sehr hier jetzt immer '+
+ 'heute morgen haus zeit jahr tag welt leben hand kind frau mann auge weg sache stadt schule freund arbeit wasser licht spiel buch musik essen garten sonne regen wind baum blume straße auto zug bild farbe '+
+ 'gut neu groß klein lang schnell langsam hell dunkel warm kalt leicht schwer schön laut leise früh spät richtig wichtig einfach gerne bald oft nie viel wenig ganz fast wieder zusammen '+
+ 'machen gehen kommen sehen geben sagen finden denken stehen liegen spielen lernen lesen schreiben tippen hören sprechen fahren laufen bleiben bringen nehmen halten lassen zeigen suchen öffnen '+
+ 'tastatur finger taste satz wort text übung ziel punkt runde liga freunde team rekord tempo fehler zeile anfang ende frage antwort idee grund beispiel ergebnis').split(' ');
+const $=s=>document.querySelector(s);
+let dur=60,list=[],idx=0,res=[],t0=0,timer=0,done=false,okChars=0,allChars=0,errKeys=0;
+function newWords(){list=[];for(let i=0;i<400;i++)list.push(WORDS[Math.floor(Math.random()*WORDS.length)]);idx=0;res=[];
+  $('#inner').innerHTML=list.map((w,i)=>`<span class="w${i===0?' cur':''}" data-i="${i}">${w}</span>`).join(' ');$('#inner').style.transform=''}
+function reset(){clearInterval(timer);t0=0;done=false;okChars=0;allChars=0;errKeys=0;newWords();$('#inp').value='';$('#inp').disabled=false;$('#tl').textContent=fmt(dur);$('#wpm').textContent='0';$('#acc').textContent='100';
+  $('#res').classList.remove('on');$('#play').style.display='';setTimeout(()=>$('#inp').focus(),50)}
+const fmt=s=>`${Math.floor(s/60)}:${String(Math.max(0,Math.ceil(s%60))).padStart(2,'0')}`.replace(/:60$/,':59');
+function secs(){return t0?(performance.now()-t0)/1000:0}
+function wpmNow(){const m=Math.max(secs(),1)/60;return Math.round(okChars/5/m)}
+function accNow(){return allChars?Math.round(okChars/allChars*100):100}
+function scroll(){const el=$(`.w[data-i="${idx}"]`);if(!el)return;const lh=parseFloat(getComputedStyle($('#words')).lineHeight)||40,line=Math.floor(el.offsetTop/lh);$('#inner').style.transform=`translateY(${-Math.max(0,line-1)*lh}px)`}
+function submitWord(v){const w=list[idx],el=$(`.w[data-i="${idx}"]`),ok=v===w;res.push(ok);allChars+=Math.max(v.length,w.length)+1;if(ok)okChars+=w.length+1;
+  el.classList.remove('cur','typo');el.classList.add(ok?'ok':'bad');idx++;const nx=$(`.w[data-i="${idx}"]`);if(nx)nx.classList.add('cur');scroll();
+  $('#wpm').textContent=wpmNow();$('#acc').textContent=accNow()}
+$('#inp').addEventListener('input',e=>{
+  if(done)return;const v=e.target.value;
+  if(!t0&&v.trim()){t0=performance.now();timer=setInterval(()=>{const left=dur-secs();$('#tl').textContent=fmt(left);if(left<=0)finish()},100)}
+  if(v.endsWith(' ')){const t=v.trim();if(t)submitWord(t);e.target.value='';return}
+  const cur=$(`.w[data-i="${idx}"]`);if(cur)cur.classList.toggle('typo',!list[idx].startsWith(v))});
+$('#inp').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();reset()}});
+function level(w){return w<20?['🐣 Einsteiger',0]:w<35?['🙂 Durchschnitt',1]:w<50?['👍 Geübt',2]:w<70?['⚡ Schnell',3]:['🏆 Profi',4]}
+function finish(){if(done)return;done=true;clearInterval(timer);const v=$('#inp').value.trim();if(v)submitWord(v);$('#inp').disabled=true;
+  const w=Math.round(okChars/5/(dur/60)),a=accNow(),[lv,li]=level(w),better=Math.max(1,Math.min(99,Math.round(100/(1+Math.exp(-(w-37)/9)))));
+  $('#rw').textContent=w;$('#ra').textContent=a+' %';$('#rc').textContent=Math.round(okChars/(dur/60));$('#rk').textContent=res.filter(Boolean).length;
+  $('#rl').textContent=`${lv} · schneller als etwa ${better} % der Menschen`;
+  $('#scale').innerHTML=[['🐣','unter 20'],['🙂','20–34'],['👍','35–49'],['⚡','50–69'],['🏆','70+']].map((x,i)=>`<div class="${i===li?'me':''}"><b>${x[0]}</b>${x[1]} WPM</div>`).join('');
+  $('#play').style.display='none';$('#res').classList.add('on');window.lastResult={w,a}}
+$('#again').onclick=reset;
+$('#share').onclick=async()=>{const r=window.lastResult||{w:0,a:0},t=`Ich tippe ${r.w} Wörter pro Minute (${r.a} % genau)! ⌨️ Wie schnell bist du? https://www.zehnfingernulllangeweile.de/tipptest.html`;
+  try{if(navigator.share){await navigator.share({text:t});return}await navigator.clipboard.writeText(t);$('#share').textContent='✅ Kopiert!'}catch(e){}};
+document.querySelectorAll('#dur button').forEach(b=>b.onclick=()=>{dur=+b.dataset.s;document.querySelectorAll('#dur button').forEach(x=>x.setAttribute('aria-pressed',x===b));reset()});
+reset();
+</script>
+</body>
+</html>
