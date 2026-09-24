@@ -80,7 +80,8 @@
                title: d.title || '', level: d.level || 1, stats: d.stats || {}, lastActive: la,
                nameFx: d.nameFx || 'none', car: d.car || '🚗', prestige: d.prestige || 0,
                team: d.team || '', teamName: d.teamName || '', ch: Array.isArray(d.ch) ? d.ch : [], chr: d.chr || {},
-               rx: Array.isArray(d.rx) ? d.rx : [], news: Array.isArray(d.news) ? d.news : [], abc: d.abc || 0 };
+               rx: Array.isArray(d.rx) ? d.rx : [], news: Array.isArray(d.news) ? d.news : [], abc: d.abc || 0,
+               tinv: Array.isArray(d.tinv) ? d.tinv : [] };
     };
     const ms = v => v && typeof v.toMillis === 'function' ? v.toMillis() : 0;
     const meRef = () => doc(db, 'players', auth.currentUser.uid);
@@ -2115,8 +2116,8 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .team-top .tt{flex:1;min-width:0}
 .team-top h2{margin:0;font-size:22px}
 .team-top p{margin:2px 0 0}
-.team-goal{grid-column:1}
-.team #tmem{grid-column:2;grid-row:1/span 2}
+
+.team #tmem{grid-column:auto;grid-row:auto}
 .team #tmem h3{margin:0 0 6px}
 .tcode{font-family:var(--mono);letter-spacing:.12em;color:var(--text)}
 .tcode-in{text-transform:uppercase;font-family:var(--mono);letter-spacing:.12em}
@@ -2130,7 +2131,7 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .ch-panel{border-color:color-mix(in srgb,var(--f5) 45%,var(--line))}
 .ch-panel h3{margin-top:0}
 .ch-panel .fr-u .nm b{white-space:normal;overflow:visible}
-@media (max-width:760px){.team-empty,.inv-grid,.team{grid-template-columns:1fr}.team #tmem,.team-goal{grid-column:auto;grid-row:auto}.fr-head .seg{width:100%;flex-wrap:nowrap}.fr-head .seg button{flex:1;padding:8px 4px;font-size:14px;white-space:nowrap}}
+@media (max-width:760px){.team-empty,.inv-grid,.team{grid-template-columns:1fr}.team #tmem,.team #tinvp,.team-goal{grid-column:auto;grid-row:auto}.fr-head .seg{width:100%;flex-wrap:nowrap}.fr-head .seg button{flex:1;padding:8px 4px;font-size:14px;white-space:nowrap}}
 /* ---- Was ist neu, Feedback, Konto, Blindflug, Wortkette, Fehlerjagd ---- */
 .wn{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0;background:var(--surface2)}
 .wn-d{font-size:12px;font-weight:700;color:var(--muted)}
@@ -2167,7 +2168,11 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .rx-panel .rxb{width:30px;height:28px;font-size:15px}
 .rxe{font-size:18px}
 .fd-rx{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-4px 0 12px}
-.team #tmem{grid-row:1/span 3}
+.team-col{display:grid;gap:14px;align-content:start;min-width:0}
+
+.team #tinvp h3{margin:0 0 4px}
+.invite.team-inv{border-color:var(--f1)}
+.invite.team-inv .ava{font-size:24px}
 .team-league h3{margin:0}
 .adm-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
 .cards.compact.adm-cards{margin-bottom:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -2337,6 +2342,71 @@ button.comm-card{cursor:pointer}
 .pm-med span{font-size:13px;padding:4px 10px;border-radius:999px;background:var(--surface2)}
 @media (max-width:760px){.comm{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){#season{display:none}.wheel{transition:none}}
+/* ---- Spiele (neues Design) ---- */
+.gh{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.gh .ph{margin:0}.gh p{margin:2px 0 0}
+.gh-r{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}
+.gh-r .gsearch{min-width:0;flex:0 1 260px;width:260px}
+.seg.small{flex-wrap:nowrap;flex:none}
+.seg.small button{padding:6px 10px;font-size:13px}
+.hl-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.hl{font:inherit;color:var(--text);text-align:left;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i t" "i g";gap:2px 10px;align-items:center;padding:10px 12px;border-radius:14px;border:1px solid var(--hc,var(--line));
+  background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--hc,var(--line)) 14%,transparent),transparent 60%),var(--surface);cursor:pointer;transition:transform .12s}
+.hl:hover{transform:translateY(-2px)}
+.hl.done{--hc:var(--line)}
+.hl-daily{--hc:var(--caret)}.hl-td{--hc:#3FA66B}.hl-tour{--hc:var(--f4)}.hl-on{--hc:var(--f1)}
+.hl-i{grid-area:i;font-size:24px;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--surface2)}
+.hl-t{grid-area:t;display:grid;min-width:0}
+.hl-t b{font-size:15px}
+.hl-t span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hl-go{grid-area:g;justify-self:start;font-size:12px;font-weight:700;color:var(--hc,var(--text))}
+.hl.done .hl-go{color:var(--muted)}
+.gcats{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 4px;padding-top:14px;border-top:1px solid var(--line)}
+.gcats button{font:inherit;font-size:14px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 14px;cursor:pointer}
+.gcats button em{font-style:normal;font-size:12px;opacity:.6;margin-left:2px}
+.gcats button[aria-pressed="true"]{color:var(--text);border-color:var(--caret);background:var(--surface2)}
+.gs2{margin-top:18px}
+.gs2-h{display:flex;align-items:baseline;gap:8px;margin:0 0 8px;flex-wrap:wrap}
+.gs2-h b{font-size:17px}
+.gs2-i{font-size:16px}
+.gt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.gt{font:inherit;color:var(--text);text-align:left;display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-left:3px solid color-mix(in srgb,var(--gc) 75%,transparent);border-radius:12px;background:var(--surface);cursor:pointer;transition:border-color .12s,transform .12s;min-width:0}
+.gt:hover{border-color:var(--gc);transform:translateY(-1px)}
+.gt-i{width:36px;height:36px;flex:none;border-radius:10px;display:grid;place-items:center;font-size:19px;background:color-mix(in srgb,var(--gc) 16%,var(--surface2))}
+.gt-t{display:grid;min-width:0;flex:1}
+.gt-t b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gt-t span{font-size:12px;color:var(--gc);font-variant-numeric:tabular-nums}
+.gt-new{font-style:normal;font-size:10px;font-weight:800;margin-left:6px;padding:1px 5px;border-radius:5px;background:var(--f2);color:#10261a;vertical-align:2px}
+.gt-m{font-size:16px;flex:none}
+@media (max-width:980px){.hl-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.hl-row{grid-template-columns:1fr 1fr;gap:8px}.hl{grid-template-columns:1fr;grid-template-areas:"i" "t" "g";padding:10px}.hl-i{width:34px;height:34px;font-size:19px}.gt-grid{grid-template-columns:1fr 1fr}.gt{padding:8px}.gt-i{width:30px;height:30px;font-size:16px}.gh-r{width:100%}.gh-r .gsearch{flex:1 1 auto;width:auto}}
+/* ---- Üben (neues Design) ---- */
+.px-hero{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:8px}
+.px-card{font:inherit;color:var(--text);text-align:left;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:16px 18px;border-radius:16px;border:1px solid var(--pc);cursor:pointer;
+  background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--pc) 16%,transparent),transparent 60%),var(--surface);transition:transform .12s}
+.px-card:hover{transform:translateY(-2px)}
+.px-card.mix{--pc:var(--caret)}.px-card.prob{--pc:var(--bad)}
+.px-i{font-size:28px;width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:var(--surface2)}
+.px-t{display:grid;gap:3px;min-width:0}
+.px-t em{font-style:normal;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--pc)}
+.px-t b{font-size:18px}
+.px-t>span{font-size:13px;color:var(--muted);line-height:1.4}
+.px-keys{display:inline-flex;gap:4px;vertical-align:middle}
+.px-keys kbd{font-family:var(--mono);font-size:12px;padding:1px 7px;border-radius:6px;background:var(--surface2);border:1px solid var(--line);border-bottom-width:2px;color:var(--text)}
+.px-go{font-size:13px;font-weight:700;padding:7px 14px;border-radius:9px;background:var(--pc);color:#241a02}
+.px-card.prob .px-go{color:#fff}
+.px-sec{margin-top:22px}
+.px-sec h2{font-size:17px;margin:0 0 10px}
+.pt2-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+.pt2{font:inherit;color:var(--text);text-align:left;position:relative;display:grid;gap:4px;align-content:start;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:border-color .12s,transform .12s}
+.pt2:hover{border-color:var(--pc);transform:translateY(-2px)}
+.pt2-i{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:20px;background:color-mix(in srgb,var(--pc) 18%,var(--surface2));margin-bottom:4px}
+.pt2 b{font-size:15px}
+.pt2-d{font-size:13px;color:var(--muted);line-height:1.4}
+.pt2 em{position:absolute;top:10px;right:10px;font-style:normal;font-size:11px;font-weight:700;color:var(--pc)}
+.px-time{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.px-tb{display:flex;gap:6px;flex-wrap:wrap}
+@media (max-width:760px){.px-hero{grid-template-columns:1fr}.px-card{grid-template-columns:auto minmax(0,1fr)}.px-go{grid-column:2;justify-self:start}}
 </style>
 </head>
 <body class="locked">
@@ -3522,27 +3592,31 @@ function freeLenModal(title,icon,gens){
   $('#mc',m).onclick=()=>m.remove();
 }
 function viewFree(){
-  const d=Store.data,S=d.settings,pk=problemKeys();
-  const card=(id,icon,title,desc,tag='',color='var(--f2)')=>`<button class="pcard" data-p2="${id}" style="--pc:${color}"><span class="pi">${icon}</span><span class="pt"><b>${title}</b><span>${desc}</span></span>${tag?`<em>${tag}</em>`:''}</button>`;
-  main.innerHTML=`<div class="page-head"><h1 class="ph">Üben</h1><p class="muted">Frei trainieren ohne Druck: echte Texte, gezielt für Finger und Tasten oder auf Ausdauer.</p></div>
-    <button class="quick" data-p2="mix"><span class="qi">⚡</span><span class="qt"><b>Tagesmix</b><span>${pk.length?'Deine Problemtasten, dann Alltagssätze und ein Zitat.':'Alltagssätze, Wörter und ein Zitat – ideal zum Aufwärmen.'} Etwa 3 Minuten.</span></span><span class="go">Starten</span></button>
-    <div class="pcols"><section class="psec"><h2>Texte</h2><div class="pgrid">
-      ${card('sent','💬','Alltagssätze','Sätze wie aus dem echten Leben','','var(--f2)')}
-      ${card('quote','📜','Zitate und Fakten','Klassiker und Wissenswertes','','var(--f3)')}
-      ${card('mail','✉️','Mails','Sätze aus dem Arbeitsalltag','','var(--f1)')}
-      ${card('twist','👅','Zungenbrecher','Fischers Fritz und Freunde','','var(--f5)')}
-      ${card('en','🇬🇧','English','Englische Sätze und Zitate','','var(--f1)')}
-      ${card('own','📝','Eigener Text','Füge irgendeinen Text ein',S.own?'gespeichert':'','var(--f4)')}
+  /* Üben (neues Design): zwei große Empfehlungen, darunter einheitliche Kacheln mit vollem Text,
+     Ausdauer als eine kompakte Zeile mit Zeit-Knöpfen */
+  const d=Store.data,S=d.settings,pk=problemKeys(),keys=pk.slice(0,5).map(p=>p.id==='Space'?'␣':p.id);
+  const tile=(id,icon,title,desc,col,tag='')=>`<button class="pt2" data-p2="${id}" style="--pc:${col}"><span class="pt2-i">${icon}</span><b>${title}</b><span class="pt2-d">${desc}</span>${tag?`<em>${tag}</em>`:''}</button>`;
+  main.innerHTML=`<div class="page-head"><h1 class="ph">Üben</h1><p class="muted">Frei trainieren ohne Druck – such dir aus, worauf du heute Lust hast.</p></div>
+    <div class="px-hero">
+      <button class="px-card mix" data-p2="mix"><span class="px-i">⚡</span><span class="px-t"><em>Empfohlen</em><b>Tagesmix</b><span>${pk.length?'Erst deine Problemtasten, dann Alltagssätze und ein Zitat.':'Wörter, Alltagssätze und ein Zitat – ideal zum Aufwärmen.'} Etwa 3 Minuten.</span></span><span class="px-go">Starten</span></button>
+      <button class="px-card prob" data-p2="prob"><span class="px-i">🎯</span><span class="px-t"><em>Nur für dich</em><b>Problemtasten</b>
+        <span>${keys.length?`Deine Schwachstellen: <span class="px-keys">${keys.map(k=>`<kbd>${esc(k)}</kbd>`).join('')}</span>`:'Nach ein paar Übungen erkennt das Spiel deine Schwachstellen.'}</span></span><span class="px-go">${keys.length?'Trainieren':'Noch offen'}</span></button>
+    </div>
+    <section class="px-sec"><h2>📖 Texte abtippen</h2><div class="pt2-grid">
+      ${tile('sent','💬','Alltagssätze','Sätze wie aus dem echten Leben','var(--f2)')}
+      ${tile('quote','📜','Zitate und Fakten','Klassiker und Wissenswertes','var(--f3)')}
+      ${tile('mail','✉️','Mails','Sätze aus dem Arbeitsalltag','var(--f1)')}
+      ${tile('twist','👅','Zungenbrecher','Fischers Fritz und Freunde','var(--f5)')}
+      ${tile('en','🇬🇧','English','Englische Sätze und Zitate','var(--f1)')}
+      ${tile('own','📝','Eigener Text','Füge irgendeinen Text ein','var(--f4)',S.own?'gespeichert':'')}
     </div></section>
-    <section class="psec"><h2>Gezielt trainieren</h2><div class="pgrid">
-      ${card('prob','🎯','Problemtasten',pk.length?`Deine Schwachstellen: ${pk.slice(0,3).map(p=>p.id==='Space'?'␣':p.id).join(' ')}`:'Sammelt erst Daten beim Tippen',pk.length?'empfohlen':'','var(--bad)')}
-      ${card('finger','🖐️','Finger-Training','Nur die Tasten eines Fingers','','var(--f5)')}
-      ${card('keys','⌨️','Tasten wählen','Stell dir deine eigenen Tasten zusammen','','var(--f2)')}
-      ${card('lists','📚','Wortlisten','Häufige Wörter, Umlaute, Zahlen …','','var(--f3)')}
+    <section class="px-sec"><h2>🖐️ Gezielt trainieren</h2><div class="pt2-grid">
+      ${tile('finger','🖐️','Finger-Training','Nur die Tasten eines Fingers','var(--f5)')}
+      ${tile('keys','⌨️','Tasten wählen','Stell dir deine eigenen Tasten zusammen','var(--f2)')}
+      ${tile('lists','📚','Wortlisten','Häufige Wörter, Umlaute, Zahlen und mehr','var(--f3)')}
     </div></section>
-    <section class="psec"><h2>Ausdauer</h2><div class="pgrid">
-      ${[1,2,5,10].map(m=>card('time'+m,'⏳',`${m} ${m===1?'Minute':'Minuten'}`,m<=2?'Kurzer Dauerlauf':'Konzentration halten',m===5?'beliebt':'','var(--f4)')).join('')}
-    </div></section></div>`;
+    <section class="px-sec"><h2>⏳ Ausdauer</h2><div class="px-time"><span class="muted">Tippe ohne Pause, bis die Zeit um ist:</span>
+      <div class="px-tb">${[1,2,5,10].map(m=>`<button class="btn${m===5?' primary':''}" data-p2="time${m}">${m} Min</button>`).join('')}</div></div></section>`;
   $$('[data-p2]').forEach(b=>b.onclick=()=>openPractice(b.dataset.p2));
 }
 function openPractice(id){
@@ -3760,40 +3834,46 @@ const GAMES=[
 const NEW_GAMES=new Set(['tippdle','dungeon','abc','emoji','detective','piano']);
 const MODE2GAME={tippdle:'tippdle',dungeon:'dungeon',abc:'abc',emoji:'emoji',detective:'detective',piano:'piano',blind:'blind',chain:'chain',typo:'typo',bomb:'bomb',mole:'mole',hangman:'hangman',online:'online',sixty:'timed',timed:'timed',race:'race',ghost:'ghost',sudden:'sudden',ladder:'ladder',duel:'duel',rain:'rain',blaster:'blaster',zombie:'zombie',runner:'runner',tower:'tower',balloon:'balloon',boss:'boss',rhythm:'rhythm',blitz:'blitz',memory:'memory',story:'story',anagram:'anagram',gaps:'gaps',kitchen:'kitchen',puzzle:'puzzle',math:'math'};
 let gameFilter='all',gameQuery='';
-/* Spiele-Übersicht: alle Spiele auf einer Seite, nach Kategorie gruppiert. Online-Duell und
-   Tägliche Challenge stehen oben als große Karten und nicht noch einmal im Raster. */
+/* Spiele-Übersicht (neues Design):
+   oben eine kompakte „Heute“-Leiste mit den täglichen/wöchentlichen Highlights,
+   darunter kompakte Kacheln (Symbol, Name, Rekord, Medaille) nach Kategorie. Beschreibung als Tooltip. */
+const GAMES_TOP=new Set(['daily','online','tippdle']);   // stehen oben in „Heute“, nicht noch einmal im Raster
 function viewGames(){
-  const d=Store.data,D=GAMES[0],done=!!d.daily[(isEN()?'en-':'')+dayKey()];
+  const d=Store.data,D=GAMES[0],done=!!d.daily[(isEN()?'en-':'')+dayKey()],tdT=d.td&&d.td.k===(isEN()?'en-':'')+dayKey()?d.td:null,tm=tourMine();
   const codeMap={Python:'code:py',JavaScript:'code:js','HTML & CSS':'code:web',SQL:'code:sql'};
-  const pool=GAMES.filter(g=>g.cat!=='today'&&g.id!=='online');
+  const pool=GAMES.filter(g=>g.cat!=='today'&&!GAMES_TOP.has(g.id));
   const recent=[...new Set(d.history.slice().reverse().map(h=>h.mode==='code'?codeMap[(h.label||'').replace('Code: ','')]:MODE2GAME[h.mode]).filter(Boolean))].map(id=>pool.find(g=>g.id===id)).filter(Boolean).slice(0,6);
   if(!['all',...GAME_SECS.map(s=>s[0])].includes(gameFilter))gameFilter='all';
-  const secOf=k=>GAME_SECS.find(s=>s[0]===k)||[];
-  const tile=g=>{const t=masteryTier(g,d),nx=masteryNext(g,d),tip=(t?`${MASTERY[t-1][0]}-Medaille`:'Noch keine Medaille')+(nx?` · Nächste Stufe: ${nx}`:' · Höchste Stufe erreicht');
-    return `<button class="gtile" data-g="${g.id}" title="${esc(tip)}">${NEW_GAMES.has(g.id)?'<span class="newb">Neu</span>':''}<span class="gi">${g.i}</span><b>${g.n}</b><span class="gs">${g.s}</span><em>${safeRec(g,d)}${t?`<span class="gmed" aria-label="${MASTERY[t-1][0]}">${MASTERY[t-1][1]}</span>`:''}</em></button>`};
-  const tm=tourMine();
-  main.innerHTML=`<div class="games-head"><div class="page-head"><h1 class="ph">Spiele</h1><p class="muted">${pool.length+1} Spiele für Tempo, Treffsicherheit und Reaktion · <span title="Medaillen aus der Meisterschaft: Bronze, Silber, Gold und Diamant pro Spiel">🏅 ${medalCount()} Medaillen</span></p></div>
-    <div class="langsw"><div class="seg" id="glang"><button data-l="de" aria-pressed="${!isEN()}">🇩🇪 Deutsch</button><button data-l="en" aria-pressed="${isEN()}">🇬🇧 English</button></div></div></div>
-    <div class="today-row"><button class="today${done?' done':''}" data-g="daily"><span class="gi">${D.i}</span><span class="tt"><b>${D.n}</b><span class="muted small">${new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})}</span></span><em>${D.rec(d)}</em><span class="go">${done?'Nochmal':'Spielen'}</span></button>
-    <button class="today tour-hero" id="tourhero"><span class="gi">🏆</span><span class="tt"><b>Wochen-Turnier</b><span class="muted small">Ein Text für alle Spieler · ${weekLeftText()}</span></span><em>${tm?`Bestwert ${tm.wpm} WPM`:'Noch nicht dabei'}</em><span class="go">${tm?'Rangliste':'Mitmachen'}</span></button>
-    <button class="today online-hero" id="onhero"><span class="gi">🌐</span><span class="tt"><b>Online-Duell</b><span class="muted small">${(()=>{const n=Social.friends.filter(isOnline).length;return n?`${n} ${n===1?'Freund ist':'Freunde sind'} gerade online`:'Fordere deine Freunde live heraus'})()}</span></span><em>${d.high.online||0} ${(d.high.online||0)===1?'Sieg':'Siege'}</em><span class="go">Herausfordern</span></button></div>
-    ${recent.length?`<div class="grecent"><span class="grecent-l">Weiterspielen</span>${recent.map(g=>`<button class="gchip" data-g="${g.id}"><span>${g.i}</span>${g.n}</button>`).join('')}</div>`:''}
-    <div class="gtools"><div class="gfilter" role="tablist"><button data-gf="all" aria-pressed="${gameFilter==='all'}">Alle <em>${pool.length}</em></button>${GAME_SECS.map(([k,t,,ic])=>`<button data-gf="${k}" aria-pressed="${k===gameFilter}">${ic} ${t} <em>${pool.filter(g=>g.cat===k).length}</em></button>`).join('')}</div>
-      <label class="gsearch"><span aria-hidden="true">🔍</span><input id="gq" type="search" placeholder="Spiel suchen …" autocomplete="off" value="${esc(gameQuery)}"></label></div>
+  const onN=Social.friends.filter(isOnline).length;
+  const hi=(id,cls,icon,title,sub,btn,state='')=>`<button class="hl ${cls}${state}" id="${id}"><span class="hl-i">${icon}</span><span class="hl-t"><b>${title}</b><span>${sub}</span></span><span class="hl-go">${btn}</span></button>`;
+  const tile=g=>{const t=masteryTier(g,d),nx=masteryNext(g,d),tip=`${g.s}. `+(t?`${MASTERY[t-1][0]}-Medaille`:'Noch keine Medaille')+(nx?` · Nächste Stufe: ${nx}`:'');
+    return `<button class="gt" data-g="${g.id}" title="${esc(tip)}"><span class="gt-i">${g.i}</span><span class="gt-t"><b>${g.n}${NEW_GAMES.has(g.id)?'<i class="gt-new">Neu</i>':''}</b><span>${safeRec(g,d)}</span></span>${t?`<span class="gt-m" aria-label="${MASTERY[t-1][0]}">${MASTERY[t-1][1]}</span>`:''}</button>`};
+  main.innerHTML=`<div class="gh">
+      <div><h1 class="ph">Spiele</h1><p class="muted small">${pool.length+GAMES_TOP.size-1} Spiele · 🏅 ${medalCount()} Medaillen</p></div>
+      <div class="gh-r"><label class="gsearch"><span aria-hidden="true">🔍</span><input id="gq" type="search" placeholder="Spiel suchen …" autocomplete="off" value="${esc(gameQuery)}"></label>
+        <div class="seg small" id="glang"><button data-l="de" aria-pressed="${!isEN()}" title="Deutsche Spieltexte">DE</button><button data-l="en" aria-pressed="${isEN()}" title="Englische Spieltexte">EN</button></div></div></div>
+    <div class="hl-row">
+      ${hi('hdaily','hl-daily','📅','Tägliche Challenge',done?`Heute: ${D.rec(d).replace('Heute ','')}`:'Neuer Text wartet',done?'Nochmal':'Spielen',done?' done':'')}
+      ${hi('htd','hl-td','🟩','Tippdle',tdT&&tdT.done?(tdT.won?`Gelöst in ${tdT.g.length}/6`:'Heute nicht geschafft'):'Wort des Tages',tdT&&tdT.done?'Ansehen':'Raten',tdT&&tdT.done?' done':'')}
+      ${hi('htour','hl-tour','🏆','Wochen-Turnier',tm?`Bestwert ${tm.wpm} WPM`:weekLeftText(),tm?'Rangliste':'Mitmachen')}
+      ${hi('hon','hl-on','🌐','Online-Duell',onN?`${onN} ${onN===1?'Freund':'Freunde'} online`:'Live gegen Freunde','Duell')}
+    </div>
+    ${recent.length?`<div class="grecent"><span class="grecent-l">Zuletzt</span>${recent.map(g=>`<button class="gchip" data-g="${g.id}"><span>${g.i}</span>${g.n}</button>`).join('')}</div>`:''}
+    <div class="gcats" role="tablist"><button data-gf="all" aria-pressed="${gameFilter==='all'}">Alle <em>${pool.length}</em></button>${GAME_SECS.map(([k,t,,ic])=>`<button data-gf="${k}" aria-pressed="${k===gameFilter}">${ic} ${t} <em>${pool.filter(g=>g.cat===k).length}</em></button>`).join('')}</div>
     <div id="gsecs"></div>`;
   const draw=()=>{
     const q=gameQuery.trim().toLowerCase(),hit=g=>!q||(g.n+' '+g.s).toLowerCase().includes(q);
     const secs=GAME_SECS.filter(s=>gameFilter==='all'||s[0]===gameFilter).map(s=>[s,pool.filter(g=>g.cat===s[0]&&hit(g))]).filter(([,l])=>l.length);
-    $('#gsecs').innerHTML=secs.map(([[k,t,desc,ic,col],l])=>`<section class="gsec" style="--gc:var(${col})"><div class="gsec-h"><span class="gsec-i">${ic}</span><div><h2>${t} <em>${l.length}</em></h2><p class="muted small">${desc}</p></div></div>
-      <div class="gtiles">${l.map(tile).join('')}</div></section>`).join('')||`<p class="muted gnone">Kein Spiel gefunden für „${esc(gameQuery)}“.</p>`;
+    $('#gsecs').innerHTML=secs.map(([[k,t,desc,ic,col],l])=>`<section class="gs2" style="--gc:var(${col})"><div class="gs2-h"><span class="gs2-i">${ic}</span><b>${t}</b><span class="muted small">${desc}</span></div>
+      <div class="gt-grid">${l.map(tile).join('')}</div></section>`).join('')||`<p class="muted gnone">Kein Spiel gefunden für „${esc(gameQuery)}“.</p>`;
     $$('#gsecs [data-g]').forEach(b=>b.onclick=()=>startGame(b.dataset.g))};
   draw();
-  $('.today[data-g=daily]').onclick=()=>startGame('daily');$('#onhero').onclick=()=>go('online');$('#tourhero').onclick=()=>tourBoard();
-  setTimeout(tourClaim,400);
+  $('#hdaily').onclick=()=>startGame('daily');$('#htd').onclick=()=>startGame('tippdle');$('#htour').onclick=()=>tourBoard();$('#hon').onclick=()=>go('online');
   $$('.gchip').forEach(b=>b.onclick=()=>startGame(b.dataset.g));
   $$('[data-gf]').forEach(b=>b.onclick=()=>{gameFilter=b.dataset.gf;$$('[data-gf]').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
   $('#gq').oninput=e=>{gameQuery=e.target.value;draw()};
   $$('#glang button').forEach(b=>b.onclick=()=>{Store.data.settings.gameLang=b.dataset.l;Store.save();viewGames()});
+  setTimeout(tourClaim,400);
 }
 function startGame(k){
   const S=Store.data.settings;
@@ -5766,11 +5846,12 @@ async function viewTeam(){
       d.team={id:c,name:others[0].teamName||'Team',since:Date.now()};teamCache.id=null;Store.save();Store.push();toast('🛡️','Team beigetreten',d.team.name);viewTeam()};
     $('#tname').onkeydown=e=>{if(e.key==='Enter')$('#tnew').click()};$('#tcode').onkeydown=e=>{if(e.key==='Enter')$('#tjoin').click()};
     return}
-  box.innerHTML=`<div class="team">
+  box.innerHTML=`<div class="team"><div class="team-col">
     <div class="panel team-top"><div class="lg-badge">🛡️</div><div class="tt"><h2>${esc(d.team.name)}</h2><p class="muted small">Team-Code <b class="tcode">${esc(d.team.id)}</b> <button class="linkbtn" id="tcopy">kopieren</button></p></div><button class="btn ghost small" id="tleave">Verlassen</button></div>
     <div class="panel team-goal" id="tgoal"><p class="muted small">Wird geladen…</p></div>
-    <div class="panel lg-table team-league" id="tleague"><h3>🏆 Team-Liga</h3><p class="muted small">Wird geladen…</p></div>
-    <div class="panel lg-table" id="tmem"></div></div>`;
+    <div class="panel lg-table team-league" id="tleague"><h3>🏆 Team-Liga</h3><p class="muted small">Wird geladen…</p></div></div><div class="team-col">
+    <div class="panel lg-table" id="tmem"></div>
+    <div class="panel" id="tinvp"></div></div></div>`;
   $('#tcopy').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(d.team.id).then(()=>toast('📋','Code kopiert',d.team.id),()=>{})};
   $('#tleave').onclick=()=>{const m=modal(`<h3>Team verlassen?</h3><p class="muted">Du kannst jederzeit wieder beitreten, solange du den Code ${esc(d.team.id)} kennst.</p><div class="acts"><button class="btn primary" id="lvy">Verlassen</button><button class="btn ghost" id="lvn">Abbrechen</button></div>`);
     $('#lvn',m).onclick=()=>m.remove();$('#lvy',m).onclick=()=>{m.remove();d.team=null;teamCache.id=null;Store.save();Store.push();viewTeam()}};
@@ -5781,7 +5862,54 @@ async function viewTeam(){
     <span class="tg-bar${done?' ok':''}"><i style="width:${Math.min(100,sum/goal*100)}%"></i></span>
     <p class="muted small" style="margin:6px 0 0">${fmtN(sum)} von ${fmtN(goal)} XP${done?` – geschafft! Jedes Mitglied bekommt ${TEAM_COINS} 🪙.`:`. Das Ziel wächst mit jedem Mitglied (${fmtN(TEAM_GOAL)} XP pro Person).`}</p>`;
   $('#tmem').innerHTML=`<h3>Mitglieder <span class="muted small">${rows.length}/${TEAM_MAX}</span></h3>`+rows.map((r,i)=>`<div class="lg-row${r.me?' me':''}"><span class="pos">${i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()}`:`${fAva(r)} ${nameHTML(r.name,r.nameFx)}`}</span><span class="lp">${fmtN(r.xp)} XP</span></div>`).join('');
-  teamCheck();renderTeamLeague()}
+  teamCheck();renderTeamLeague();renderTeamInvites()}
+
+/* ---------- Team-Einladungen an Freunde ----------
+   Einladender speichert {id,to,tm,tn,t} in seinem Profil (tinv); der Freund sieht eine Karte mit „Beitreten“ / „Ablehnen“. */
+const TINV_DAYS=7;
+function tinvOut(){const now=Date.now();return (Store.data.tinvOut||[]).filter(x=>now-x.t<TINV_DAYS*864e5).slice(-10)}
+function tinvIncoming(){const me=myUid(),now=Date.now(),d=Store.data,ans=d.tinvAns||{};if(!me)return [];
+  return Social.friends.flatMap(f=>(f.tinv||[]).filter(x=>x&&x.to===me&&x.tm&&now-x.t<TINV_DAYS*864e5&&!ans[x.id]&&!(d.team&&d.team.id===x.tm)).map(x=>({...x,from:f})))}
+const tinvPending=uid=>tinvOut().some(x=>x.to===uid&&Store.data.team&&x.tm===Store.data.team.id);
+function teamInvite(f){
+  const d=Store.data;if(!d.team)return;
+  if(f.team===d.team.id){toast('🛡️',`${f.name} ist schon in deinem Team`,'');return}
+  d.tinvOut=(d.tinvOut||[]).filter(x=>x.to!==f.uid).concat({id:Date.now().toString(36)+rnd(10,99),to:f.uid,tm:d.team.id,tn:d.team.name,t:Date.now()}).slice(-10);
+  Store.save();Store.push();toast('🛡️','Einladung gesendet',`${f.name} bekommt eine Nachricht und kann „${d.team.name}“ beitreten`);Sound.ok();
+  if(currentTab==='friends'&&frTab==='team')renderTeamInvites()}
+function tinvCards(){return tinvIncoming().map(x=>`<div class="invite team-inv" role="alertdialog" aria-label="Team-Einladung von ${esc(x.from.name)}">${fAva(x.from)}
+  <div class="iv-t"><b>${esc(x.from.name)}</b><span>lädt dich ins Team „${esc(x.tn||'Team')}“ ein 🛡️</span></div>
+  <div class="acts"><button class="btn primary small" data-tia="${esc(x.id)}">Beitreten</button><button class="btn ghost small" data-tid="${esc(x.id)}">Ablehnen</button></div></div>`).join('')}
+function tinvNotify(){const d=Store.data;d.tinvSeen=d.tinvSeen||[];let n=0;tinvIncoming().forEach(x=>{if(!d.tinvSeen.includes(x.id)){d.tinvSeen.push(x.id);n++}});
+  if(n){d.tinvSeen=d.tinvSeen.slice(-40);Store.save();Sound.ok();if(document.hidden)try{document.title='🛡️ Team-Einladung – Zehnfinger'}catch(e){}}}
+async function tinvAnswer(id,yes){
+  const d=Store.data,x=tinvIncoming().find(y=>y.id===id);d.tinvAns=d.tinvAns||{};
+  const done=()=>{d.tinvAns[id]={y:yes?1:0,t:Date.now()};Store.save();renderInvites();updateFriendBadge()};
+  if(!yes||!x){done();return}
+  const join=async()=>{
+    try{const ms=await window.fbTeam.members(x.tm),others=ms.filter(m=>m.uid!==myUid());
+      if(!others.length){toast('🛡️','Das Team gibt es nicht mehr','');done();return}
+      if(others.length>=TEAM_MAX){toast('🛡️','Das Team ist leider voll','');done();return}}catch(e){}
+    d.team={id:x.tm,name:x.tn||'Team',since:Date.now()};teamCache.id=null;tlCache={t:0,rows:null};done();Store.push();
+    toast('🛡️',`Willkommen bei ${d.team.name}!`,'Ihr sammelt jetzt gemeinsam XP.');Sound.win();confetti(90);
+    if(currentTab==='friends'&&frTab==='team')viewFriends()};
+  if(d.team&&d.team.id!==x.tm){
+    const m=modal(`<h3>Team wechseln?</h3><p class="muted">Du bist gerade in „${esc(d.team.name)}“. Wenn du „${esc(x.tn)}“ beitrittst, verlässt du dein altes Team.</p>
+      <div class="acts"><button class="btn primary" id="tsw">Wechseln</button><button class="btn ghost" id="tsn">Doch nicht</button></div>`);
+    $('#tsn',m).onclick=()=>m.remove();$('#tsw',m).onclick=()=>{m.remove();join()};return}
+  join()}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-tia]');if(a){a.disabled=true;tinvAnswer(a.dataset.tia,true);return}
+  const r=e.target.closest('[data-tid]');if(r)tinvAnswer(r.dataset.tid,false)});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&/Einladung/.test(document.title))document.title='Zehnfinger – Tipptrainer'});
+/* Liste „Freunde einladen“ auf der Team-Seite */
+function renderTeamInvites(){
+  const el=$('#tinvp'),d=Store.data;if(!el||!d.team)return;
+  const fr=Social.friends;
+  el.innerHTML=`<h3>✉️ Freunde ins Team einladen</h3>`+(fr.length?fr.map(f=>{const inTeam=f.team===d.team.id,pend=tinvPending(f.uid);
+    return `<div class="fr-u">${fAva(f)}<div class="nm"><b>${nameHTML(f.name,f.nameFx)}</b><span>${inTeam?'ist in deinem Team':f.teamName?`in „${esc(f.teamName)}“`:'noch in keinem Team'}</span></div>
+      ${inTeam?'<span class="tag">✓ dabei</span>':pend?'<span class="tag">Eingeladen ✓</span>':`<button class="btn small" data-tinv="${esc(f.uid)}">Einladen</button>`}</div>`}).join('')
+    :'<p class="muted small">Du hast noch keine Freunde. Füge unter „Freunde“ welche hinzu oder teile den Team-Code.</p>');
+  $$('[data-tinv]',el).forEach(b=>b.onclick=()=>{const f=Social.friends.find(x=>x.uid===b.dataset.tinv);if(f)teamInvite(f)})}
 
 /* ---------- Freunde einladen ---------- */
 const INV_NEW=300,INV_COINS=500,INV_LV=3;
@@ -5852,6 +5980,11 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-24.2',d:'24.09.2026',items:[
+    '🎮 Neues Design für „Spiele“: alle Tages-Highlights oben, kompakte Kacheln – viel übersichtlicher',
+    '✍️ Neues Design für „Üben“: Tagesmix und Problemtasten ganz oben, klare Kacheln',
+    '🛡️ Freunde direkt ins Team einladen – sie bekommen eine Nachricht mit „Beitreten“ oder „Ablehnen“',
+    '🥇 Liga: Die KI-Gegner werden mit jeder Stufe stärker. Ab Amethyst steigen nur noch die besten 2 auf, ab Großmeister nur der Erste']},
   {v:'2026-09-24.1',d:'24.09.2026',items:[
     '⚡ Schneller: Weltrangliste, Wochen-Boss, Team-Liga und Weltbeste laden jetzt deutlich flotter',
     '🕐 Diese Übersichten werden stündlich aktualisiert – deine eigenen Werte siehst du immer sofort']},
@@ -6318,6 +6451,8 @@ const LEAGUES=[['Bronze','🥉','#C98B5A',60],['Silber','🥈','#B8C2CC',90],['G
   ['Rubin','♦️','#FF5A6E',315],['Amethyst','🔮','#B36BFF',360],['Diamant','💎','#7CC8FF',410],['Meister','🏆','#B79CFF',470],['Großmeister','🎖️','#FF9F43',540],['Champion','⚔️','#FF6B6B',620],['Legende','👑','#FF8FB8',720]];
 /* Alte 7er-Stufen auf die neuen 14 abbilden: Diamant, Meister und Legende behalten ihren Namen */
 const LG_OLD2NEW=[0,1,2,3,9,10,13];
+/* Aufstieg wird oben schwerer: bis Smaragd die besten 3, ab Amethyst die besten 2, ab Großmeister nur Platz 1 */
+const promoSlots=idx=>idx>=11?1:idx>=8?2:3;
 const BOT_NAMES=['TippTiger','FlinkeFinger','KeyKönigin','Tastenfee','QWERTZ-Queen','Blindflieger','ShiftHappens','Leertaste99','Fingerakrobat','Umlaut-Ulli','CapsLockCarl','TurboTina','Semikolon-Sam','Enter-Emma','Backspace-Ben','Klick-Klara','Taktgefühl','Zeilenzauber'];
 /* Eine Liga-Runde dauert 12 Stunden (0–12 und 12–24 Uhr) */
 const PERIOD_MS=12*36e5,WEEK_MS=PERIOD_MS;
@@ -6326,8 +6461,9 @@ function weekStart(){return new Date(periodStart())}
 const weekKey=()=>String(periodStart());
 function rivals(week,idx,frac){
   const r=seededRandom('lg-'+week+'-'+idx),names=[...BOT_NAMES];for(let i=names.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[names[i],names[j]]=[names[j],names[i]]}
-  const scale=LEAGUES[idx][3];
-  return names.slice(0,9).map((n,i)=>{const a=r(),b=r();const fin=Math.round(scale*(.3+a*1.3));return{n,bot:true,lp:Math.round(fin*Math.pow(Math.min(1,frac),.8+b*.5)),fin}});
+  // Je höher die Liga, desto stärker die KI: der Grundwert wächst immer schneller, und oben sind alle Gegner stark
+  const scale=LEAGUES[idx][3]*(1+idx*.1+idx*idx*.012),floor=.35+idx/(LEAGUES.length-1)*.3;
+  return names.slice(0,9).map((n,i)=>{const a=r(),b=r();const fin=Math.round(scale*(floor+a*1.25));return{n,bot:true,lp:Math.round(fin*Math.pow(Math.min(1,frac),.8+b*.5)),fin}});
 }
 /* In welcher Liga steht ein Freund? Wer noch nie gespielt hat, steht in Bronze. */
 const leagueIdxOf=st=>{const i=((st||{}).league||{}).idx;return Math.min(LEAGUES.length-1,Math.max(0,i|0))};
@@ -6361,7 +6497,7 @@ function leagueRollover(){
   // Nicht beigetreten (keine XP in der Runde): keine Wertung, kein Abstieg, Liga bleibt
   if(!(L.lp>0)){L.week=now;L.lp=0;Store.save();return}
   const fin=standings(true),size=fin.length,rank=fin.findIndex(r=>r.me)+1,old=L.idx;let idx=old;
-  if(rank<=3&&idx<LEAGUES.length-1)idx++;else if(rank>=size-1&&idx>0)idx--;
+  if(rank<=promoSlots(old)&&idx<LEAGUES.length-1)idx++;else if(rank>=size-1&&idx>0)idx--;
   const coins=L.lp>0?Math.round(([30,20,12][rank-1]||4)*(1+old*.3)):0;
   d.coins+=coins;L.hist.unshift({week:L.week,idx:old,rank,lp:L.lp,size});L.hist=L.hist.slice(0,12);
   L.pending={old,idx,rank,coins,lp:L.lp,size};L.idx=idx;L.best=Math.max(L.best||0,idx);L.lp=0;L.week=now;Store.save();
@@ -6381,7 +6517,7 @@ function viewLeague(){
   leagueRollover();
   const d=Store.data,L=d.league,[n,icon,color]=LEAGUES[L.idx],rows=standings(false),rank=rows.findIndex(r=>r.me)+1;
   const leftMs=Math.max(0,periodStart()+PERIOD_MS-Date.now()),lh=Math.floor(leftMs/36e5),lm=Math.ceil((leftMs%36e5)/6e4);
-  const N=rows.length,zone=i=>i<3&&L.idx<LEAGUES.length-1?'up':i>=N-2&&L.idx>0?'down':'';
+  const N=rows.length,zone=i=>i<promoSlots(L.idx)&&L.idx<LEAGUES.length-1?'up':i>=N-2&&L.idx>0?'down':'';
   const here=Social.friends.filter(f=>leagueIdxOf(f.stats)===L.idx).length,other=Social.friends.length-here;
   /* Freunde in anderen Ligen: nach Stufe gruppiert, damit man sieht, wen man einholen oder abwehren muss */
   const byLg=new Map();Social.friends.forEach(f=>{const i=leagueIdxOf(f.stats);if(i!==L.idx)byLg.set(i,[...(byLg.get(i)||[]),f])});
@@ -6396,13 +6532,13 @@ function viewLeague(){
       </div>
       <div class="panel lg-clock"><span class="lg-cd">⏱️ ${lh?`${lh} Std. `:''}${lm} Min.</span><span class="muted small">bis zur Abrechnung dieser Runde</span></div>
       ${rank?'':`<div class="panel lg-join"><b>🎯 Sammle XP, um mitzumachen</b><span class="muted small">Du trittst dieser Runde automatisch bei, sobald du eine Lektion oder ein Spiel abschließt. Wer in einer Runde nicht spielt, wird auch nicht abgestuft.</span></div>`}
-      <p class="muted small lg-info">Jede Runde dauert 12 Stunden (0–12 und 12–24 Uhr). Du trittst ihr bei, sobald du darin XP sammelst. Deine Liga-Punkte sind die XP aus dieser Runde. Die besten 3 steigen auf${L.idx>0?', die letzten 2 ab':''}, dazu gibt es Münzen für die Top 3. Gegen dich treten Freunde aus derselben Liga an, die in dieser Runde ebenfalls spielen, freie Plätze füllen Computer-Gegner. Wer nicht spielt, behält seine Liga.</p>
+      <p class="muted small lg-info">Jede Runde dauert 12 Stunden (0–12 und 12–24 Uhr). Du trittst ihr bei, sobald du darin XP sammelst. Deine Liga-Punkte sind die XP aus dieser Runde. ${promoSlots(L.idx)===1?'Nur der Erste steigt auf':`Die besten ${promoSlots(L.idx)} steigen auf`}${L.idx>0?', die letzten 2 ab':''}, dazu gibt es Münzen für die Top 3. Gegen dich treten Freunde aus derselben Liga an, die in dieser Runde ebenfalls spielen, freie Plätze füllen Computer-Gegner. Wer nicht spielt, behält seine Liga.</p>
       ${elsewhere.length?`<div class="panel lg-else"><h3>Freunde in anderen Ligen <span class="muted small">${other}</span></h3>
         ${elsewhere.map(([i,fs])=>`<div class="lg-og"><div class="lg-og-h"><span class="lg-chip" style="--lc:${LEAGUES[i][2]}">${LEAGUES[i][1]} ${LEAGUES[i][0]}</span><span class="lp">${i>L.idx?`▲ ${i-L.idx} über dir`:`▼ ${L.idx-i} unter dir`}</span></div><div class="lg-og-f">${fs.map(f=>`<span class="lg-f">${fAva(f)}<b>${nameHTML(f.name,f.nameFx)}</b></span>`).join('')}</div></div>`).join('')}
         <p class="fr-note">Ihr trefft euch, sobald ihr in derselben Liga steht.</p></div>`:''}
       ${L.hist.length?`<div class="panel lg-hist"><h3>Letzte Runden</h3>${L.hist.slice(0,4).map(h=>`<div class="lg-row"><span class="nm">${LEAGUES[h.idx][1]} ${LEAGUES[h.idx][0]}</span><span class="muted small">${histLabel(h.week)}</span><span class="lp">Platz ${h.rank}${h.size?` / ${h.size}`:''}</span></div>`).join('')}</div>`:''}
     </div>
-    <div class="panel lg-table">${rows.map((r,i)=>`<div class="lg-row ${zone(i)}${r.me?' me':''}"><span class="pos">${i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()} <small class="ttl">${esc(myTitle())}</small>`:r.friend?`<span class="ava fr-${esc(r.frame||'none')}">${esc(r.ava)}</span> ${nameHTML(r.n,r.fx)} <small class="ttl">Freund</small>`:`🤖 ${esc(r.n)}`}</span><span class="lp">${r.lp.toLocaleString('de-DE')} XP</span></div>`+(i===2&&L.idx<LEAGUES.length-1?'<div class="lg-cut up">Aufstiegszone</div>':'')+(i===N-3&&L.idx>0?'<div class="lg-cut down">Abstiegszone</div>':'')).join('')}</div>
+    <div class="panel lg-table">${rows.map((r,i)=>`<div class="lg-row ${zone(i)}${r.me?' me':''}"><span class="pos">${i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()} <small class="ttl">${esc(myTitle())}</small>`:r.friend?`<span class="ava fr-${esc(r.frame||'none')}">${esc(r.ava)}</span> ${nameHTML(r.n,r.fx)} <small class="ttl">Freund</small>`:`🤖 ${esc(r.n)}`}</span><span class="lp">${r.lp.toLocaleString('de-DE')} XP</span></div>`+(i===promoSlots(L.idx)-1&&L.idx<LEAGUES.length-1?'<div class="lg-cut up">Aufstiegszone</div>':'')+(i===N-3&&L.idx>0?'<div class="lg-cut down">Abstiegszone</div>':'')).join('')}</div>
   </div>`);
 }
 /* ---------- Weltrangliste (Reiter auf der Liga-Seite) ---------- */
@@ -6465,7 +6601,7 @@ let friendSel=null,friendSub='overview',friendSort='level',frSearchT=0,frLastQ='
 
 /* Wird vom Firebase-Modul aufgerufen, sobald sich Freunde oder Anfragen ändern */
 function onSocial(s){
-  Object.assign(Social,s,{ready:true});chNotify();rxNotify();updateFriendBadge();
+  Object.assign(Social,s,{ready:true});chNotify();rxNotify();tinvNotify();renderInvites();updateFriendBadge();
   if(currentTab==='friends'&&!activity&&!$('.modal'))renderFriendsLive();
 }
 function updateFriendBadge(){const b=$('#frb');if(!b)return;const n=Social.incoming.length+chIncoming().length;b.hidden=!n;b.textContent=n}
@@ -6489,7 +6625,7 @@ function publicSummary(){
     team:(d.team&&d.team.id)||'',teamName:(d.team&&d.team.name)||'',
     tourKey:(d.tour&&d.tour.k)||'',tour:d.tour?{wpm:d.tour.wpm,acc:d.tour.acc}:{},
     tourPrevKey:(d.tourPrev&&d.tourPrev.k)||'',tourPrev:d.tourPrev?{wpm:d.tourPrev.wpm,acc:d.tourPrev.acc}:{},
-    ch:chOutgoing(),chr:chAnswers(),rx:rxOutgoing(),news:newsList(),abc:(d.high&&d.high.abc&&d.high.abc>=1500)?d.high.abc:0
+    ch:chOutgoing(),chr:chAnswers(),rx:rxOutgoing(),tinv:tinvOut(),news:newsList(),abc:(d.high&&d.high.abc&&d.high.abc>=1500)?d.high.abc:0
   };
 }
 
@@ -6635,13 +6771,14 @@ function viewFriend(f){
         <div class="${W>Lz?'win':''}"><b>${W}</b><span>Du</span></div><i>:</i><div class="${Lz>W?'win':''}"><b>${Lz}</b><span>${esc(f.name)}</span></div></div>
       <button class="btn primary small" data-ch="${f.uid}">🌐 Live-Duell</button>
       <button class="btn small" id="fdchs">⚔️ Rekord-Challenge</button>
+      ${Store.data.team&&f.team!==Store.data.team.id?`<button class="btn small" id="fdtinv">🛡️ Ins Team einladen</button>`:''}
       <button class="btn ghost small" id="fdrm">Entfernen</button>
     </div>
     <div class="fd-rx"><span class="muted small">Schick ${esc(f.name)} eine Reaktion:</span>${rxBar(f.uid)}</div>
     <div id="fdbody"></div></div>`;
   $('#fdback').onclick=()=>{friendSel=null;go('friends')};
   $$('#fdsub button').forEach(b=>b.onclick=()=>{friendSub=b.dataset.fsub;viewFriend(f)});
-  $('#fdrm').onclick=()=>removeFriend(f);$('#fdchs').onclick=()=>chSend(f);
+  $('#fdrm').onclick=()=>removeFriend(f);$('#fdchs').onclick=()=>chSend(f);if($('#fdtinv'))$('#fdtinv').onclick=()=>{teamInvite(f);$('#fdtinv').outerHTML='<span class="tag">Eingeladen ✓</span>'};
   const body=$('#fdbody'),hdr=`<div class="cmp-row hdr"><span></span><span class="v">Du</span><span class="v">${esc(f.name)}</span></div>`;
   const cls=w=>['v'+(w>0?' win':''),'v'+(w<0?' win':'')];
   if(friendSub==='lessons'){
@@ -6802,7 +6939,7 @@ function renderInvites(){
   box.innerHTML=Online.invites.map(m=>{const nm=(m.names||{})[m.host]||'Ein Freund',av=(m.avatars||{})[m.host]||'🙂';
     return `<div class="invite" role="alertdialog" aria-label="Einladung von ${esc(nm)}"><span class="ava">${esc(av)}</span>
       <div class="iv-t"><b>${esc(nm)}</b><span>fordert dich zum Online-Duell heraus</span></div>
-      <div class="acts"><button class="btn primary small" data-iva="${m.id}">Annehmen</button><button class="btn ghost small" data-ivd="${m.id}" aria-label="Ablehnen" title="Ablehnen">✕</button></div></div>`}).join('');
+      <div class="acts"><button class="btn primary small" data-iva="${m.id}">Annehmen</button><button class="btn ghost small" data-ivd="${m.id}" aria-label="Ablehnen" title="Ablehnen">✕</button></div></div>`}).join('')+tinvCards();
 }
 setInterval(()=>{if(Online.invites.length)renderInvites()},5000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&/Duell-Einladung/.test(document.title))document.title='Zehnfinger – Tipptrainer'});
