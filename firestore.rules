@@ -15,22 +15,67 @@ service cloud.firestore {
       allow read: if isMe(uid);
     }
 
+    // ---------- Schutz gegen Schummeln ----------
+    // Gesperrte Spieler (Eintrag in banned/<uid>, nur vom Entwickler anlegbar) können nichts mehr speichern.
+    function notBanned(uid) { return !exists(/databases/$(database)/documents/banned/$(uid)); }
+    // So viele XP braucht man für ein Level (wie im Spiel: 120, 180, 240 … pro Stufe)
+    function xpFor(lv) { return 120 * (lv - 1) + 30 * (lv - 1) * (lv - 2); }
+    // Passen Level, XP und Prestige zusammen, und steigen die XP nicht unmöglich schnell?
+    // Erlaubt sind höchstens 3 XP pro Sekunde seit der letzten XP-Steigerung (xpAt) und maximal 20.000 auf einmal.
+    // Zum Vergleich: Beim echten Spielen gibt es etwa 0,5 bis 1 XP pro Sekunde.
+    function plausible(n, o) {
+      let s = n.get('stats', {});
+      let lv = n.get('level', 1);
+      let xp = s.get('xp', 0);
+      let all = n.get('xpAll', xp);
+      let pr = n.get('prestige', 0);
+      let inc = all - o.get('xpAll', o.get('stats', {}).get('xp', 0));
+      let since = o.get('xpAt', o.get('createdAt', null));
+      return lv is number && lv >= 1 && lv <= 300
+        && xp is number && xp >= xpFor(lv)
+        && all is number && all >= xp
+        && pr is number && pr >= 0 && all >= pr * 27840
+        && n.get('rankLv', pr * 100 + lv) == pr * 100 + lv
+        && (inc <= 0 || o.get('xpAll', null) == null   // alte Profile ohne Gesamt-XP: einmalig ohne Tempo-Grenze
+            || (n.get('xpAt', null) == request.time && inc <= 20000
+                && (since == null || inc * 1000 <= (request.time.toMillis() - since.toMillis()) * 3)));
+    }
+
+    // Wer gesperrt ist, darf das nur selbst lesen (damit das Spiel es anzeigen kann).
+    match /banned/{uid} {
+      allow read: if isMe(uid) || isAdmin();
+      allow write: if isAdmin();
+    }
+
     // Öffentliches Profil: Name, Level, Statistiken, Freundesliste, Liga, Team, Turnier, Herausforderungen.
     // Lesen dürfen alle angemeldeten Spieler (Freundessuche, Liga, Rangliste, Online-Zähler),
-    // schreiben und löschen nur der Spieler selbst.
+    // schreiben nur der Spieler selbst – und nur mit glaubwürdigen Werten.
+    // Der Entwickler darf nur die Markierung „banned“ setzen oder entfernen.
     match /players/{uid} {
       allow read: if signedIn();
-      allow create, update, delete: if isMe(uid);
+      allow create: if isMe(uid) && notBanned(uid)
+        && plausible(request.resource.data, {})
+        && request.resource.data.get('xpAll', request.resource.data.get('stats', {}).get('xp', 0)) <= 2000;
+      allow update: if (isMe(uid) && notBanned(uid) && !resource.data.get('banned', false)
+          && plausible(request.resource.data, resource.data))
+        || (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['banned']));
+      allow delete: if isMe(uid) && notBanned(uid);
     }
 
     // Community-Zusammenfassung (Weltrangliste, Wochen-Boss, Team-Liga …): ein einziges Dokument,
-    // das angemeldete Spieler lesen und höchstens stündlich neu berechnen.
+    // das angemeldete Spieler lesen und höchstens stündlich neu berechnen (bei Wochenwechsel sofort).
+    // Der Entwickler darf es jederzeit neu berechnen, z. B. direkt nach dem Sperren eines Schummlers.
     match /stats/community {
       allow read: if signedIn();
       allow write: if signedIn()
         && request.resource.data.players is list
         && request.resource.data.best is map
-        && request.resource.data.t is number;
+        && request.resource.data.t is number
+        && request.resource.data.t <= request.time.toMillis() + 120000
+        && (isAdmin() || resource == null
+            || resource.data.get('t', 0) < request.time.toMillis() - 3000000
+            || resource.data.get('k', '') != request.resource.data.get('k', '')
+            || resource.data.get('v', 0) != request.resource.data.get('v', 0));
     }
 
     // Anonyme Gast-Statistik: jeder Gast darf nur sein eigenes Dokument anlegen und ändern,

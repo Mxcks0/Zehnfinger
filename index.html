@@ -57,16 +57,26 @@
       const snap = await getDoc(doc(db, 'progress', u.uid));
       return snap.exists() ? snap.data() : null;
     };
+    /* Jede XP-Steigerung bekommt einen Server-Zeitstempel (xpAt). Die Datenbank-Regeln prüfen damit,
+       ob jemand unmöglich schnell aufsteigt. Wird ein Speichern abgelehnt, klappt es später automatisch. */
+    let lastXpAll = null, retryT = 0;
     window.fbSaveProgress = async (json, updatedAt, summary) => {
       const u = auth.currentUser; if(!u) return;
+      const xpChanged = summary.xpAll !== lastXpAll;
       await Promise.all([
         setDoc(doc(db, 'progress', u.uid), { data: json, updatedAt }),
         setDoc(doc(db, 'players', u.uid), {
           ...summary,
           nameLower: (summary.name || '').toLowerCase(),
           email: deleteField(),           // E-Mail nicht öffentlich sichtbar machen
-          lastActive: serverTimestamp()
-        }, { mergeFields: [...Object.keys(summary), 'nameLower', 'email', 'lastActive'] })   // friends/declined bleiben unberührt
+          lastActive: serverTimestamp(),
+          ...(xpChanged ? { xpAt: serverTimestamp() } : {})
+        }, { mergeFields: [...Object.keys(summary), 'nameLower', 'email', 'lastActive', ...(xpChanged ? ['xpAt'] : [])] })   // friends/declined bleiben unberührt
+          .then(() => { lastXpAll = summary.xpAll })
+          .catch(e => {
+            if(e && e.code === 'permission-denied' && !retryT) retryT = setTimeout(() => { retryT = 0; try{ Store.push() }catch(x){} }, 120000);
+            throw e;
+          })
       ]);
     };
 
@@ -130,7 +140,8 @@
 
     /* ---------- Teams, Wochen-Turnier, Einladungen ----------
        Alles steht in den öffentlichen players/<uid>-Dokumenten, abgefragt über einfache Gleichheits-Filter. */
-    const pl = col => getDocs(query(collection(db, 'players'), ...col));
+    // Gesperrte Spieler (Schummler) tauchen in keiner Liste und Rangliste auf
+    const pl = async col => { const s = await getDocs(query(collection(db, 'players'), ...col)); return { docs: s.docs.filter(x => !x.data().banned) } };
     window.fbTeam = {
       members: async id => (await pl([where('team', '==', id), limit(20)])).docs.map(plain)
     };
@@ -238,7 +249,7 @@
       },
       async recent(n = 300){
         const res = await getDocs(query(players(), orderBy('lastActive', 'desc'), limit(n)));
-        return res.docs.map(s => { const d = s.data(); return { ...plain(s), createdAt: ms(d.createdAt), seen: ms(d.seen) } });
+        return res.docs.map(s => { const d = s.data(); return { ...plain(s), createdAt: ms(d.createdAt), seen: ms(d.seen), banned: !!d.banned, xpAll: d.xpAll || 0 } });
       },
       async newest(n = 10){
         const res = await getDocs(query(players(), orderBy('createdAt', 'desc'), limit(n)));
@@ -248,9 +259,24 @@
         const res = await getDocs(query(collection(db, 'feedback'), orderBy('createdAt', 'desc'), limit(150)));
         return res.docs.map(s => { const d = s.data(); return { id: s.id, ...d, createdAt: ms(d.createdAt) } });
       },
+      // Schummler sperren: Eintrag in banned/<uid> (blockiert jedes weitere Speichern) und Markierung im Profil (versteckt ihn überall)
+      async ban(uid, name, reason){
+        await setDoc(doc(db, 'banned', uid), { name: name || '', reason: reason || '', at: serverTimestamp(), by: auth.currentUser.uid });
+        await updateDoc(doc(db, 'players', uid), { banned: true });
+      },
+      async unban(uid){
+        await updateDoc(doc(db, 'players', uid), { banned: deleteField() });
+        await deleteDoc(doc(db, 'banned', uid));
+      },
+      async bannedList(){
+        const res = await getDocs(query(collection(db, 'banned'), limit(200)));
+        return res.docs.map(s => { const d = s.data(); return { uid: s.id, name: d.name || '?', reason: d.reason || '', at: ms(d.at) } });
+      },
       newFeedback: since => getCountFromServer(query(collection(db, 'feedback'), where('createdAt', '>', Timestamp.fromMillis(since || 0)))).then(s => s.data().count),
       delFeedback: id => deleteDoc(doc(db, 'feedback', id))
     };
+
+    window.fbAmBanned = async () => { const u = auth.currentUser; if(!u || u.isAnonymous) return false; return (await getDoc(doc(db, 'banned', u.uid))).exists() };
 
     window.fbInvites = async () => (await pl([where('refBy', '==', auth.currentUser.uid), limit(100)])).docs.map(plain);
 
@@ -258,7 +284,7 @@
       async search(q){
         const t = q.trim().toLowerCase(); if(t.length < 2) return [];
         const res = await getDocs(query(collection(db, 'players'), orderBy('nameLower'), startAt(t), endAt(t + '\uf8ff'), limit(10)));
-        return res.docs.filter(x => x.id !== auth.currentUser.uid).map(plain);
+        return res.docs.filter(x => x.id !== auth.currentUser.uid && !x.data().banned).map(plain);
       },
       add:     uid => setDoc(meRef(), { friends: arrayUnion(uid), declined: arrayRemove(uid) }, { merge: true }),
       cancel:  uid => setDoc(meRef(), { friends: arrayRemove(uid) }, { merge: true }),
@@ -2743,6 +2769,16 @@ button.comm-card{cursor:pointer}
 .adm-guests h3{margin:0 0 8px}
 .adm-guests .cards{margin-bottom:0}
 .adm-guests small{font-size:12px;color:var(--muted);font-weight:600}
+/* Entwickler: Schummler */
+#admbody>.panel+.panel{margin-top:14px}
+#admbody>.panel h3{margin:0 0 8px}
+.cheat-info p{margin:0}
+.adm-row.cheat-row{grid-template-columns:minmax(0,auto) minmax(0,1fr) auto;row-gap:2px}
+.cheat-row:has(.cheat-why){grid-template-columns:minmax(0,auto) minmax(0,1fr) auto}
+.cheat-why{grid-column:1/-2;grid-row:2;color:var(--bad);font-size:13px;font-weight:600}
+.cheat-row .btn{grid-column:-2;grid-row:1/span 2}
+.cheat-q{font:inherit;width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin:0 0 6px}
+.cheat-q:focus{outline:2px solid var(--caret);outline-offset:1px}
 </style>
 </head>
 <body class="locked">
@@ -6779,10 +6815,11 @@ const FB_KIND={bug:['🐞','Fehler'],idea:['💡','Idee'],other:['💬','Sonstig
 const dtText=t=>t?new Date(t).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'–';
 async function viewAdmin(){
   if(!isAdm){profSub='ach';go('ach');return}
-  main.innerHTML=`${profileTop('admin')}<div class="adm-head"><div class="seg" id="admsub">${[['stats','📊 Statistik'],['fb','💬 Feedback']].map(([k,v])=>`<button data-as="${k}" aria-pressed="${k===admSub}">${v}</button>`).join('')}</div>
+  main.innerHTML=`${profileTop('admin')}<div class="adm-head"><div class="seg" id="admsub">${[['stats','📊 Statistik'],['fb','💬 Feedback'],['cheat','🚩 Schummler']].map(([k,v])=>`<button data-as="${k}" aria-pressed="${k===admSub}">${v}</button>`).join('')}</div>
     <button class="btn ghost small" id="admre">↻ Aktualisieren</button></div><div id="admbody"><p class="muted">Wird geladen…</p></div>`;
   $$('#admsub button').forEach(b=>b.onclick=()=>{admSub=b.dataset.as;viewAdmin()});$('#admre').onclick=viewAdmin;
   const box=$('#admbody');
+  if(admSub==='cheat')return viewCheat(box);
   if(admSub==='fb'){
     let list;try{list=await window.fbAdmin.feedback()}catch(e){box.innerHTML='<p class="muted">Feedback konnte nicht geladen werden. Sind die Datenbank-Regeln aktuell?</p>';return}
     const seen=Store.data.fbSeenAt||0;Store.data.fbSeenAt=Date.now();Store.save();adminBadge();
@@ -6819,6 +6856,41 @@ async function viewAdmin(){
       <div class="card"><b>${fmtN(g.total)}</b><span>Gäste insgesamt</span></div><div class="card"><b>${fmtN(g.conv)} <small>(${rate} %)</small></b><span>haben sich registriert</span></div></div>
       <p class="muted small" style="margin:6px 0 0">Ø ${(g.avg||0).toFixed(1).replace('.',',')} Runden pro Gast. Je höher der Anteil der Registrierten, desto besser überzeugt das Spiel neue Besucher.</p>`}
   catch(e){console.warn('Gäste:',e);const el=$('#admg');if(el)el.innerHTML='<h3>👤 Gäste (ohne Konto)</h3><p class="muted small">Noch keine Daten – ist die anonyme Anmeldung in Firebase aktiviert und sind die Regeln aktuell?</p>'}}
+
+/* ---------- Entwickler: Schummler finden und sperren ----------
+   Legal gibt es etwa 20–70 XP pro gespielter Minute. Wer weit darüber liegt oder mit wenigen Runden ein hohes Level hat, wird markiert. */
+function cheatReasons(p){
+  const s=p.stats||{},xp=+s.xp||0,all=Math.max(xp,+p.xpAll||0),mins=(+s.totalSecs||0)/60,n=+s.count||0,r=[];
+  if(all>=1500&&all/Math.max(mins,1)>150)r.push(`${fmtN(Math.round(all/Math.max(mins,1)))} XP pro Spielminute`);
+  if((p.level||1)+(p.prestige||0)*30>=10&&n<15)r.push(`Level ${p.level||1}${p.prestige?` (★${p.prestige})`:''} nach nur ${n} Runden`);
+  if(all>=1500&&all/Math.max(n,1)>400)r.push(`${fmtN(Math.round(all/Math.max(n,1)))} XP pro Runde`);
+  if((+s.bestWpm||0)>220)r.push(`${s.bestWpm} WPM Bestwert`);
+  return r}
+// Nach dem Sperren die Ranglisten sofort neu berechnen (Entwickler dürfen das jederzeit, alle anderen höchstens stündlich)
+async function rebuildComm(){try{const d=commBuild(await window.fbWorld.all());await window.fbComm.save(d);commData=d;commT=Date.now()}catch(e){console.warn('Ranglisten neu berechnen:',e)}}
+async function viewCheat(box){
+  let rec,banned;
+  try{[rec,banned]=await Promise.all([window.fbAdmin.recent(300),window.fbAdmin.bannedList()])}catch(e){console.warn('Schummler:',e);box.innerHTML='<p class="muted">Konnte nicht geladen werden. Sind die neuen Datenbank-Regeln veröffentlicht?</p>';return}
+  if(!$('#admbody'))return;
+  const me=myUid(),sus=rec.filter(p=>!p.banned&&p.uid!==me).map(p=>({p,r:cheatReasons(p)})).filter(x=>x.r.length);
+  const who=p=>`<span class="adm-who">${fAva(p)} <b>${nameHTML(p.name,p.nameFx)}</b></span>`;
+  const row=(p,extra)=>`<div class="adm-row cheat-row">${who(p)}<span class="muted small">Lv ${p.level||1}${p.prestige?` ★${p.prestige}`:''} · ${fmtN(+(p.stats||{}).count||0)} Runden · ${Math.round((+(p.stats||{}).totalSecs||0)/60)} Min.</span>${extra}</div>`;
+  box.innerHTML=`<div class="panel cheat-info"><h3>🛡️ So bist du geschützt</h3><p class="muted small">Die Datenbank lehnt unmögliche Werte ab: Level und XP müssen zusammenpassen, und XP dürfen nur so schnell steigen, wie man wirklich spielen kann. Wer trotzdem auffällt, erscheint hier. <b>Sperren</b> versteckt den Spieler in allen Ranglisten und verhindert, dass er noch etwas speichert.</p></div>
+    <div class="panel"><h3>🚩 Verdächtig <span class="muted small">${sus.length}</span></h3>${sus.map(({p,r})=>row(p,`<span class="cheat-why">${r.map(esc).join(' · ')}</span><button class="btn danger small" data-ban="${esc(p.uid)}" data-bn="${esc(p.name)}" data-br="${esc(r.join(', '))}">Sperren</button>`)).join('')||'<p class="muted small">Niemand auffällig unter den 300 zuletzt aktiven Spielern. 👍</p>'}</div>
+    <div class="panel"><h3>🔎 Spieler suchen</h3><input class="cheat-q" id="chq" type="search" placeholder="Name eingeben …" autocomplete="off"><div id="chres"><p class="muted small">Tippe einen Namen, um einen Spieler manuell zu sperren.</p></div></div>
+    <div class="panel"><h3>⛔ Gesperrt <span class="muted small">${banned.length}</span></h3>${banned.map(b=>`<div class="adm-row cheat-row"><b>${esc(b.name)}</b><span class="muted small">${esc(b.reason||'')}${b.at?` · ${dtText(b.at)}`:''}</span><button class="btn ghost small" data-unban="${esc(b.uid)}">Entsperren</button></div>`).join('')||'<p class="muted small">Noch niemand gesperrt.</p>'}</div>`;
+  const wire=()=>{
+    $$('[data-ban]',box).forEach(b=>b.onclick=()=>{const m=modal(`<h3>⛔ ${esc(b.dataset.bn)} sperren?</h3><p class="muted">Der Spieler verschwindet aus allen Ranglisten und kann nichts mehr speichern. Du kannst die Sperre hier jederzeit aufheben.</p>
+      <div class="acts"><button class="btn danger" id="bnyes">Sperren</button><button class="btn ghost" id="bnno">Abbrechen</button></div>`);
+      $('#bnno',m).onclick=()=>m.remove();
+      $('#bnyes',m).onclick=async()=>{$('#bnyes',m).disabled=true;try{await window.fbAdmin.ban(b.dataset.ban,b.dataset.bn,b.dataset.br||'manuell gesperrt');m.remove();toast('⛔','Gesperrt',`${b.dataset.bn} ist gesperrt.`);rebuildComm();viewCheat(box)}
+        catch(e){console.warn('Sperren:',e);m.remove();toast('⚠️','Sperren fehlgeschlagen','Sind die neuen Datenbank-Regeln veröffentlicht?')}}});
+    $$('[data-unban]',box).forEach(b=>b.onclick=async()=>{b.disabled=true;try{await window.fbAdmin.unban(b.dataset.unban);toast('✅','Entsperrt','Der Spieler kann wieder normal spielen.');rebuildComm();viewCheat(box)}catch(e){b.disabled=false;toast('⚠️','Entsperren fehlgeschlagen','Sind die neuen Datenbank-Regeln veröffentlicht?')}})};
+  wire();
+  $('#chq',box).oninput=e=>{const q=e.target.value.trim().toLowerCase(),res=$('#chres',box);if(q.length<2){res.innerHTML='<p class="muted small">Tippe einen Namen, um einen Spieler manuell zu sperren.</p>';return}
+    const l=rec.filter(p=>(p.name||'').toLowerCase().includes(q)&&p.uid!==me).slice(0,8);
+    res.innerHTML=l.map(p=>row(p,p.banned?'<span class="muted small">gesperrt</span>':`<button class="btn danger small" data-ban="${esc(p.uid)}" data-bn="${esc(p.name)}" data-br="manuell gesperrt">Sperren</button>`)).join('')||'<p class="muted small">Kein Treffer unter den 300 zuletzt aktiven Spielern.</p>';wire()};
+}
 
 /* ---------- Getippte Zeichen dieser Woche (für den Wochen-Boss) ---------- */
 function wkcNow(){const w=Store.data.wkc;return w&&w.k===weekId()?{k:w.k,c:w.c||0}:{k:weekId(),c:0}}
@@ -7959,6 +8031,10 @@ window.startApp=async function(user,regName){
     // Freunde vor der Liga-Abrechnung laden, damit sie in der Wertung mitzählen
     try{if(window.fbFriends)await window.fbFriends.start(onSocial)}catch(e){console.warn('Freunde:',e)}
     try{if(window.fbOnline)window.fbOnline.invites(onInvites)}catch(e){console.warn('Einladungen:',e)}
+    // Wegen Schummelns gesperrt? Dann ehrlich Bescheid geben, statt dass einfach nichts mehr gespeichert wird
+    if(window.fbAmBanned)window.fbAmBanned().then(b=>{if(b)setTimeout(()=>{const m=modal(`<div class="secret"><div class="sk">⛔</div><h3>Konto gesperrt</h3>
+      <p class="muted">Bei deinem Spielstand wurden unmögliche Werte festgestellt, zum Beispiel ein Level, das man in der Spielzeit nicht erreichen kann. Deshalb erscheinst du nicht mehr in Ranglisten und dein Fortschritt wird nicht mehr gespeichert.</p>
+      <p class="muted small">Ein Fehler? Schreib uns über ⚙️ Einstellungen → Feedback geben.</p><div class="acts"><button class="btn primary" id="bnok">Verstanden</button></div></div>`);$('#bnok',m).onclick=()=>m.remove()},1800)}).catch(()=>{});
     // Aus dem Gastmodus registriert: Gast-Fortschritt ins neue Konto übernehmen
     if(window.zfFromGuest){try{const raw=localStorage.getItem(LS_KEY+':guest');if(raw&&!(Store.data.count>0)){const acc=Store.data.account;Store.data=Store.merge(JSON.parse(raw));Store.data.account=acc;localStorage.removeItem(LS_KEY+':guest');localStorage.removeItem('zf-guest');Store.data.notice={i:'🎉',t:'Fortschritt übernommen',s:'Alles, was du als Gast gespielt hast, ist jetzt in deinem Konto gespeichert.'}}}catch(e){console.warn('Gast-Übernahme:',e)}}
   }else if(window.zfGuest){
