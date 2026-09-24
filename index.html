@@ -15,10 +15,10 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
              onAuthStateChanged, signOut, updateProfile, deleteUser, EmailAuthProvider,
-             reauthenticateWithCredential, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+             reauthenticateWithCredential, updatePassword, signInAnonymously, linkWithCredential } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, getDocs, serverTimestamp, collection, query, where,
              orderBy, startAt, endAt, limit, onSnapshot, arrayUnion, arrayRemove, deleteField,
-             addDoc, updateDoc, deleteDoc, getCountFromServer, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+             addDoc, updateDoc, deleteDoc, getCountFromServer, getAggregateFromServer, average, increment, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Firebase-Konfiguration aus der Firebase-Konsole
     const firebaseConfig = {
@@ -169,6 +169,33 @@
     /* ---------- Weltrangliste: Bestenlisten über alle Spieler ----------
        f = Feldpfad im Spielerprofil (z. B. 'stats.bestWpm'), asc = kleiner ist besser (Zeiten) */
     const getPath = (o, f) => f.split('.').reduce((x, k) => x == null ? x : x[k], o);
+    /* ---------- Gäste zählen (anonym) ----------
+       guests/<uid>: nur erster/letzter Besuch, Anzahl Runden und ob später ein Konto erstellt wurde. Keine Namen, keine E-Mail. */
+    window.fbGuest = {
+      async start(){
+        if(auth.authStateReady) await auth.authStateReady();   // wiederkehrende Gäste behalten ihre Kennung
+        if(!auth.currentUser) await signInAnonymously(auth);
+        const u = auth.currentUser; if(!u || !u.isAnonymous) return;
+        const ref = doc(db, 'guests', u.uid), s = await getDoc(ref);
+        await setDoc(ref, s.exists() ? { last: serverTimestamp() } : { first: serverTimestamp(), last: serverTimestamp(), rounds: 0 }, { merge: true });
+      },
+      round(){
+        const u = auth.currentUser; if(!u || !u.isAnonymous) return Promise.resolve();
+        return updateDoc(doc(db, 'guests', u.uid), { rounds: increment(1), last: serverTimestamp() });
+      }
+    };
+    window.fbAdminGuests = async () => {
+      const g = collection(db, 'guests'), day = new Date(); day.setHours(0, 0, 0, 0);
+      const c = q => getCountFromServer(q).then(s => s.data().count);
+      const [total, today, week, conv, avg] = await Promise.all([
+        c(g), c(query(g, where('last', '>=', Timestamp.fromMillis(day.getTime())))),
+        c(query(g, where('last', '>=', Timestamp.fromMillis(Date.now() - 7 * 864e5)))),
+        c(query(g, where('converted', '==', true))),
+        getAggregateFromServer(g, { r: average('rounds') }).then(s => s.data().r || 0)
+      ]);
+      return { total, today, week, conv, avg };
+    };
+
     /* ---------- Community-Zusammenfassung: EIN Dokument statt aller Profile ----------
        stats/community wird höchstens stündlich von einem Spieler neu berechnet; alle anderen lesen nur dieses Dokument. */
     window.fbComm = {
@@ -353,7 +380,10 @@
         if(mode === 'register'){
           pendingName = name;
           try{ if(localStorage.getItem('zf-guest')) window.zfFromGuest = true }catch(e){}
-          const cred = await createUserWithEmailAndPassword(auth, email, pass);
+          // War der Spieler als Gast (anonym) angemeldet, wird dieses Konto zum echten Konto – gleiche Kennung, nichts geht verloren
+          const anon = auth.currentUser && auth.currentUser.isAnonymous ? auth.currentUser : null;
+          const cred = anon ? await linkWithCredential(anon, EmailAuthProvider.credential(email, pass)) : await createUserWithEmailAndPassword(auth, email, pass);
+          if(anon){ window.zfFromGuest = true; setDoc(doc(db, 'guests', anon.uid), { converted: true, last: serverTimestamp() }, { merge: true }).catch(()=>{}) }
           await updateProfile(cred.user, { displayName: name });
           // Spielerprofil in Firestore anlegen. Kam der Spieler über einen Einladungslink, wird der
           // Einladende vermerkt und bekommt direkt eine Freundschaftsanfrage.
@@ -367,11 +397,13 @@
             friends: ref ? [ref] : [],
             declined: [],
             ...(ref ? { refBy: ref } : {}),
+            ...(anon ? { fromGuest: true } : {}),
             createdAt: serverTimestamp(),
             lastActive: serverTimestamp()
           }, { merge: true });
           if(ref){ window.zfRefUsed = ref; try{ localStorage.removeItem('zf-ref') }catch(e){} }
           say('Account erstellt – los geht\'s!','ok');
+          if(anon) enterApp(cred.user);   // Beim Übernehmen eines Gast-Kontos meldet Firebase keinen neuen Login
         } else {
           const cred = await signInWithEmailAndPassword(auth, email, pass);
           // Zeitstempel aktualisieren, Profil anlegen falls es noch fehlt
@@ -421,13 +453,15 @@
       try{ if(localStorage.getItem('zf-guest')) gb.textContent = '🎮 Als Gast weiterspielen' }catch(e){}
       gb.addEventListener('click', async () => {
         if(opened) return; opened = true; window.zfGuest = true;
+        window.fbGuest.start().catch(e => console.warn('Gast-Statistik:', e));   // anonym zählen, blockiert den Start nicht
         try{ await window.startApp(null) }catch(e){ console.warn('Gast:', e) }
         document.body.classList.remove('locked'); ui.screen.classList.add('out'); setTimeout(() => ui.screen.remove(), 300);
       });
 
       // Bereits angemeldet? Dann direkt in die App, ohne Startbildschirm.
       onAuthStateChanged(auth, user => {
-        if(user) enterApp(user);
+        // Anonyme Gast-Konten starten die App nicht automatisch – dafür gibt es den Gast-Knopf
+        if(user && !user.isAnonymous) enterApp(user);
       });
     });
 </script>
@@ -2533,6 +2567,10 @@ button.comm-card{cursor:pointer}
 .ff-bars i{display:block;border-radius:4px 4px 0 0;background:color-mix(in srgb,var(--f1) 60%,var(--surface2))}
 .ff-bars i.top{background:var(--caret)}
 .ff-ax{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px}
+.adm-guests{margin-bottom:14px}
+.adm-guests h3{margin:0 0 8px}
+.adm-guests .cards{margin-bottom:0}
+.adm-guests small{font-size:12px;color:var(--muted);font-weight:600}
 </style>
 </head>
 <body class="locked">
@@ -3166,6 +3204,7 @@ function recordSession(mode,label,st,extra={}){
   d.xp=(d.xp||0)+xp;const s=streak(d);d.bestStreak=Math.max(d.bestStreak||0,s);
   const newAch=checkAch(Object.assign({mode,label,st},extra));
   if(newAch.length){d.xp+=newAch.length*20;xp+=newAch.length*20}
+  if(window.zfGuest&&window.fbGuest)window.fbGuest.round().catch(()=>{});
   wkAdd(xp);wkcAdd(st.ok||0);d.hours=d.hours&&d.hours.length===24?d.hours:Array(24).fill(0);d.hours[new Date().getHours()]++;d.plays=d.plays||{};d.plays[mode]=(d.plays[mode]||0)+1;
   const mast=checkMastery(),wq=wqTrack({mode,st,xp,extra,goalMet:d.days[today]>=g}),chWon=chCheck(mode,extra);
   const levelUp=levelInfo(d.xp).level>beforeLv;
@@ -6422,13 +6461,20 @@ async function viewAdmin(){
   box.innerHTML=`<div class="cards compact adm-cards">
       <div class="card"><b>${fmtN(c.total)}</b><span>Spieler gesamt</span></div><div class="card"><b>${fmtN(c.today)}</b><span>heute aktiv</span></div>
       <div class="card"><b>${fmtN(c.week)}</b><span>in 7 Tagen aktiv</span></div><div class="card"><b>🟢 ${fmtN(online.length)}</b><span>gerade online</span></div></div>
+    <div class="panel adm-guests" id="admg"><h3>👤 Gäste (ohne Konto)</h3><p class="muted small">Wird geladen…</p></div>
     <div class="adm-grid">
       <div class="panel"><h3>Heute aktiv <span class="muted small">${today.length}</span></h3>${today.map(p=>`<div class="adm-row"><span class="dot${p.seen>now-5*6e4?' on':''}"></span>${who(p)}<span class="muted small">Lv ${p.level||1}</span><span class="muted small">${agoShort(p.lastActive)}</span></div>`).join('')||'<p class="muted small">Heute noch niemand.</p>'}</div>
       <div class="adm-col">
         <div class="panel"><h3>Beliebteste Spiele</h3>${top.map(([g,n])=>`<div class="adm-bar"><span>${label(g)}</span><i style="--w:${n/max*100}%"></i><b>${fmtN(n)}</b></div>`).join('')||'<p class="muted small">Spielzahlen werden ab jetzt gesammelt und erscheinen, sobald Spieler neue Runden spielen.</p>'}
           <p class="muted small" style="margin:8px 0 0">Gezählte Runden der ${rec.length} zuletzt aktiven Spieler.</p></div>
         <div class="panel"><h3>Neueste Spieler</h3>${newest.map(p=>`<div class="adm-row">${who(p)}<span class="muted small">Lv ${p.level||1}</span><span class="muted small">${dtText(p.createdAt)}</span></div>`).join('')||'<p class="muted small">Keine Daten.</p>'}</div>
-      </div></div>`}
+      </div></div>`;
+  // Gast-Statistik (anonym): wie viele probieren ohne Konto, und wie viele registrieren sich danach?
+  try{const g=await window.fbAdminGuests(),el=$('#admg');if(!el)return;const rate=g.total?Math.round(g.conv/g.total*100):0;
+    el.innerHTML=`<h3>👤 Gäste (ohne Konto)</h3><div class="cards compact adm-cards"><div class="card"><b>${fmtN(g.today)}</b><span>Gäste heute</span></div><div class="card"><b>${fmtN(g.week)}</b><span>Gäste in 7 Tagen</span></div>
+      <div class="card"><b>${fmtN(g.total)}</b><span>Gäste insgesamt</span></div><div class="card"><b>${fmtN(g.conv)} <small>(${rate} %)</small></b><span>haben sich registriert</span></div></div>
+      <p class="muted small" style="margin:6px 0 0">Ø ${(g.avg||0).toFixed(1).replace('.',',')} Runden pro Gast. Je höher der Anteil der Registrierten, desto besser überzeugt das Spiel neue Besucher.</p>`}
+  catch(e){console.warn('Gäste:',e);const el=$('#admg');if(el)el.innerHTML='<h3>👤 Gäste (ohne Konto)</h3><p class="muted small">Noch keine Daten – ist die anonyme Anmeldung in Firebase aktiviert und sind die Regeln aktuell?</p>'}}
 
 /* ---------- Getippte Zeichen dieser Woche (für den Wochen-Boss) ---------- */
 function wkcNow(){const w=Store.data.wkc;return w&&w.k===weekId()?{k:w.k,c:w.c||0}:{k:weekId(),c:0}}
