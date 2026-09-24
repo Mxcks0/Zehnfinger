@@ -2162,10 +2162,19 @@ body.opt-noanim::before,body.opt-noanim .bgpv::before,body.opt-noanim .nfx,body.
 .league2 .lg-top{grid-template-columns:auto 1fr;padding:14px}
 .league2 .lg-ladder{grid-column:1/-1}
 .lg-badge{width:60px;height:60px;font-size:32px;border-radius:18px}
-.lg-clock{display:flex;align-items:baseline;gap:10px;padding:12px 14px}
+.lg-clock{display:flex;align-items:baseline;gap:4px 10px;padding:12px 14px;flex-wrap:wrap}
+.lg-clock .lg-cd{white-space:nowrap}
 .lg-join{display:grid;gap:3px;padding:12px 14px;border-color:color-mix(in srgb,var(--caret) 55%,var(--line))}
 .lg-cd{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
 .lg-info{margin:0}
+.lg-rules{list-style:none;margin:0;padding:12px 14px;display:grid;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;font-size:14px;color:var(--muted)}
+.lg-rules li{display:flex;gap:10px;align-items:baseline}
+.lg-rules li span{flex:none;width:20px;text-align:center}
+.lg-gain{display:inline-block;color:var(--good);font-weight:700;margin-right:8px;animation:lgGain 2.4s ease-out both}
+.lg-row.gained{animation:lgRow 2.4s ease-out}
+@keyframes lgGain{0%{opacity:0;transform:translateY(6px)}15%{opacity:1;transform:none}80%{opacity:1}100%{opacity:.55}}
+@keyframes lgRow{0%{background:color-mix(in srgb,var(--good) 18%,transparent)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.lg-gain,.lg-row.gained{animation:none}}
 .lg-hist{padding:10px}
 .lg-hist h3{margin:0 0 6px;font-size:14px}
 .lg-hist .lg-row{padding:5px 8px}
@@ -2294,6 +2303,13 @@ body.kbz-l{--kh:clamp(26px,min(5.6vw,5.4vh),58px)}
 .chain i{font-style:normal;opacity:.6}
 .memword .need{color:var(--caret)}
 .typo-s{font-family:var(--mono);font-size:clamp(18px,2.6vw,26px);line-height:1.6;text-align:center;max-width:760px;margin:0}
+.cap-c{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:3px 12px}.cap-l{font-size:clamp(28px,5vw,44px);line-height:1.1;letter-spacing:-.02em;text-align:center}.cap-h{font-family:var(--mono);font-size:clamp(16px,2.4vw,20px);letter-spacing:.08em;color:var(--caret);min-height:1.4em}.rev-w{font-family:var(--mono);font-size:clamp(34px,7vw,58px);font-weight:700;letter-spacing:.14em;display:flex;gap:2px}.rev-w span{transition:opacity .15s,color .15s}.rev-w span.done{opacity:.22}.rev-w span.nx{color:var(--caret);text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:10px}
+.cap-l{font-size:clamp(28px,5vw,44px);line-height:1.1;letter-spacing:-.02em;text-align:center}
+.cap-h{font-family:var(--mono);font-size:clamp(16px,2.4vw,20px);letter-spacing:.08em;color:var(--caret);min-height:1.4em}
+.rev-w{font-family:var(--mono);font-size:clamp(34px,7vw,58px);font-weight:700;letter-spacing:.14em;display:flex;gap:2px}
+.rev-w span{transition:opacity .15s,color .15s}
+.rev-w span.done{opacity:.22}
+.rev-w span.nx{color:var(--caret);text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:10px}
 /* Teilen-Fenster und Entwickler-Hinweis */
 .shr{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:16px;align-items:start;margin-top:6px}
 .shr img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
@@ -2512,6 +2528,27 @@ button.comm-card{cursor:pointer}
 .gs2-h b{font-size:17px}
 .gs2-i{font-size:16px}
 .gt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+/* Spiele-Kategorien zum Aufklappen */
+.gacc{display:grid;gap:8px;margin-top:16px}
+.gacc-s{border:1px solid var(--line);border-left:4px solid var(--gc);border-radius:14px;background:var(--surface);overflow:hidden}
+.gacc-h{font:inherit;color:var(--text);width:100%;display:flex;align-items:center;gap:12px;padding:12px 16px;background:none;border:0;cursor:pointer;text-align:left}
+.gacc-h:hover{background:color-mix(in srgb,var(--gc) 7%,transparent)}
+.gacc-i{font-size:24px;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--gc) 16%,transparent);flex:none}
+.gacc-t{display:grid;min-width:0;flex:1}
+.gacc-t b{font-size:17px;display:flex;align-items:center;gap:6px}
+.gacc-t>span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gacc-m{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);white-space:nowrap}
+.gacc-m>b{color:var(--text);font-size:15px;margin-right:-6px}
+.gacc-med{background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-variant-numeric:tabular-nums}
+.gacc-c{font-size:16px;color:var(--muted);transition:transform .2s;flex:none}
+.gacc-s.open .gacc-c{transform:rotate(180deg)}
+.gacc-s.open .gacc-h{border-bottom:1px solid var(--line)}
+.gacc-b{padding:12px;animation:gaccIn .22s ease-out}
+@keyframes gaccIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.gacc-found{margin-top:16px}
+.gacc-found>p{margin:0 0 8px}
+@media (max-width:560px){.gacc-h{padding:10px 12px;gap:10px}.gacc-i{width:36px;height:36px;font-size:20px}.gacc-med{display:none}.gacc-t>span{white-space:normal;font-size:12px}}
+@media (prefers-reduced-motion:reduce){.gacc-b{animation:none}.gacc-c{transition:none}}
 .gt{font:inherit;color:var(--text);text-align:left;display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-left:3px solid color-mix(in srgb,var(--gc) 75%,transparent);border-radius:12px;background:var(--surface);cursor:pointer;transition:border-color .12s,transform .12s;min-width:0}
 .gt:hover{border-color:var(--gc);transform:translateY(-1px)}
 .gt-i{width:36px;height:36px;flex:none;border-radius:10px;display:grid;place-items:center;font-size:19px;background:color-mix(in srgb,var(--gc) 16%,var(--surface2))}
@@ -2625,6 +2662,36 @@ button.comm-card{cursor:pointer}
 .inbox-btn{position:relative}
 .inbox-btn .tbadge{position:absolute;top:-6px;right:-6px;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;font-weight:800;line-height:1}
 .inbox-btn .tbadge[hidden]{display:none}
+
+/* ---- Statuszeile unter den Reitern: links deine Werte als eine Leiste, rechts die Knöpfe ---- */
+.me{order:3;flex:1 0 100%;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0}
+.me-stats{display:flex;align-items:stretch;height:40px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.me-stats>button{height:auto;border:0;border-radius:0;background:none;padding:0 14px;gap:7px;transition:background .12s}
+.me-stats>button+button{border-left:1px solid var(--line)}
+.me-stats>button:hover{background:var(--surface)}
+.me-stats .coinchip b{color:var(--caret)}
+.me-stats .lvl .xpbar{width:80px;height:7px}
+.me-acts{display:flex;align-items:center;gap:4px}
+.me-acts .icon{background:none;border-color:transparent;width:38px;height:38px;font-size:17px}
+.me-acts .icon:hover{background:var(--surface2);border-color:var(--line)}
+.me-acts .onl{background:none;border:0;height:38px;padding:0 10px 0 4px}
+@media (max-width:760px){
+  /* Handy: Logo und Knöpfe oben, darunter die Reiter in einer wischbaren Zeile, darunter die Werte */
+  .me{display:contents}
+  .brand{order:0}
+  .me-acts{order:1;margin-left:auto}
+  nav.tabs{order:2;flex:1 0 100%;width:auto;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -4px}
+  nav.tabs::-webkit-scrollbar{display:none}
+  nav.tabs{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  nav.tabs.at-end{-webkit-mask-image:none;mask-image:none}
+  nav.tabs .tab{flex:none;padding:7px 12px}
+  .me-stats{order:3;flex:1 0 100%;height:38px}
+  .me-stats>button{flex:1;justify-content:center;padding:0 8px}
+  .me-stats .lvl{flex:1.4}
+  .me-stats .lvl .xpbar{width:auto;flex:1;max-width:90px}
+  .me-acts .icon{width:34px;height:34px;font-size:16px}
+  .me-acts .onl{height:34px;padding:0 6px 0 2px}
+}
 .ib{max-height:min(62vh,520px);overflow:auto}
 .ib-h{margin:12px 0 2px;font-size:13px;color:var(--muted)}
 .ib .fr-u .acts{display:flex;gap:6px}
@@ -2740,13 +2807,17 @@ button.comm-card{cursor:pointer}
     <button class="tab" data-tab="profile">Profil</button>
   </nav>
   <div class="me">
-    <button class="icon inbox-btn" id="inbox" aria-label="Posteingang" title="Posteingang">📬<span class="tbadge" id="inbc" hidden></span></button>
-    <span class="onl" id="onl" hidden role="status"><i aria-hidden="true"></i><b>0</b><span class="onl-t">online</span></span>
-    <button class="icon" id="gear" aria-label="Einstellungen" title="Einstellungen">⚙️</button>
-    <button class="icon" id="logout" aria-label="Abmelden" title="Abmelden">🚪</button>
-    <button class="coinchip" id="hc" aria-label="Münzen, zum Shop"><span>🪙</span><b>0</b></button>
-    <button class="streak" id="hsk"><span class="fl">🔥</span><span id="hs">0</span></button>
-    <button class="lvl" id="hl"><span id="hlv">Lv 1</span><span class="xpbar"><i id="hxp"></i></span></button>
+    <div class="me-stats">
+      <button class="coinchip" id="hc" aria-label="Münzen, zum Shop" title="Münzen – zum Shop"><span>🪙</span><b>0</b></button>
+      <button class="streak" id="hsk" title="Tage in Folge"><span class="fl">🔥</span><span id="hs">0</span></button>
+      <button class="lvl" id="hl" title="Level und Fortschritt"><span id="hlv">Lv 1</span><span class="xpbar"><i id="hxp"></i></span></button>
+    </div>
+    <div class="me-acts">
+      <span class="onl" id="onl" hidden role="status"><i aria-hidden="true"></i><b>0</b><span class="onl-t">online</span></span>
+      <button class="icon inbox-btn" id="inbox" aria-label="Posteingang" title="Posteingang">📬<span class="tbadge" id="inbc" hidden></span></button>
+      <button class="icon" id="gear" aria-label="Einstellungen" title="Einstellungen">⚙️</button>
+      <button class="icon" id="logout" aria-label="Abmelden" title="Abmelden">🚪</button>
+    </div>
   </div>
 </div></header>
 <main id="main"></main>
@@ -2899,29 +2970,37 @@ const LESSONS=[
  {id:'l2',sec:'g',t:'g und h',d:'Die Zeigefinger rutschen kurz nach innen und kehren sofort zurück.',add:'gh',target:18},
  {id:'l3',sec:'g',t:'e und i',d:'Die Mittelfinger greifen schräg nach oben.',add:'ei',target:20},
  {id:'l4',sec:'g',t:'r und u',d:'Die Zeigefinger gehen nach oben.',add:'ru',target:20},
+ {id:'g2',sec:'g',t:'Erste Wörter',d:'Mit der Grundreihe, e, i, r und u kannst du schon viele echte Wörter tippen. Kein neuer Buchstabe – nur Übung im Fluss.',add:'',target:20},
  {id:'l5',sec:'g',t:'t und z',d:'Zeigefinger nach oben innen. Das z liegt im deutschen Layout rechts.',add:'tz',target:21},
  {id:'l6',sec:'g',t:'w und o',d:'Die Ringfinger gehen nach oben.',add:'wo',target:22},
  {id:'l7',sec:'g',t:'q, p und ü',d:'Die kleinen Finger strecken sich nach oben.',add:'qpü',target:22},
  {id:'l8',sec:'g',t:'Untere Reihe links',d:'y x c v b – die linke Hand greift nach unten.',add:'yxcvb',target:22},
  {id:'l9',sec:'g',t:'Untere Reihe rechts',d:'n m , . und - mit der rechten Hand.',add:'nm,.-',target:23},
  {id:'l10',sec:'g',t:'ä und ß',d:'Der rechte kleine Finger geht nach außen und nach oben.',add:'äß',target:24},
+ {id:'g1',sec:'g',t:'Alle Buchstaben',d:'Die große Wiederholung: jetzt kennst du jeden Kleinbuchstaben. Achte darauf, nach jedem Anschlag zur Grundreihe zurückzukehren.',add:'',target:25},
  {id:'l11',sec:'a',t:'Großbuchstaben',d:'Shift drückst du immer mit dem kleinen Finger der anderen Hand.',kind:'caps',chips:['Shift','A–Z'],target:24},
  {id:'a1',sec:'a',t:'Shift-Wechsel',d:'Abwechselnd linke und rechte Shift-Taste – Wörter, die mit beiden Händen beginnen.',kind:'shift',chips:['⇧ links','⇧ rechts'],target:24},
  {id:'l12',sec:'a',t:'Zahlen',d:'Die Zahlenreihe blind treffen – jeder Finger bleibt in seiner Spalte.',kind:'nums',chips:[...'1234567890'],target:20},
  {id:'l13',sec:'a',t:'Satzzeichen',d:'! ? " : ; ( ) und Co. – fast alles mit Shift.',kind:'punct',chips:[...'!?":;()'],target:22},
  {id:'a2',sec:'a',t:'Sonderzeichen',d:'§ $ % & / = * + # und mehr – die seltenen Zeichen der oberen Reihen.',kind:'sym',chips:[...'§$%&/=*+#'],target:18},
  {id:'a3',sec:'a',t:'Buchstabenpaare',d:'sch, ch, ck, ei, ie, st – typische deutsche Kombinationen als flüssige Bewegung.',kind:'bigram',chips:['sch','ch','ck','ei','ie'],target:26},
+ {id:'a4',sec:'a',t:'Umlaute im Wort',d:'ä, ö, ü und ß mitten im Wort – und groß am Wortanfang mit der linken Shift-Taste.',kind:'umlaut',chips:['ä','ö','ü','ß','Ä Ö Ü'],target:24},
+ {id:'a5',sec:'a',t:'@ und €',d:'Die AltGr-Taste rechts neben der Leertaste: AltGr + Q ergibt @, AltGr + E ergibt €. Perfekt für E-Mail-Adressen und Preise.',kind:'altgr',chips:['AltGr','@','€'],target:18},
  {id:'l14',sec:'p',t:'Alltagssätze',d:'Echte Sätze im natürlichen Schreibfluss.',kind:'sent',target:28},
  {id:'p1',sec:'p',t:'Zungenbrecher',d:'Was schwer zu sprechen ist, ist auch schwer zu tippen.',kind:'twist',target:26},
  {id:'p2',sec:'p',t:'Lange Wörter',d:'Deutsche Komposita am Stück – ohne den Faden zu verlieren.',kind:'long',target:26},
  {id:'p3',sec:'p',t:'Mails schreiben',d:'Typische Sätze aus dem Arbeitsalltag.',kind:'mail',target:30},
  {id:'p4',sec:'p',t:'Dateinamen und Listen',d:'Unterstriche, Schrägstriche, Punkte und Zahlen im Mix.',kind:'files',target:22},
+ {id:'p5',sec:'p',t:'Chatnachrichten',d:'Kurz, locker, mit vielen Fragezeichen – so wie du Freunden schreibst.',kind:'chat',target:28},
+ {id:'p6',sec:'p',t:'Schule und Referate',d:'Sätze, wie sie in Hausaufgaben, Referaten und Präsentationen vorkommen.',kind:'school',target:28},
+ {id:'p7',sec:'p',t:'Adressen und Formulare',d:'Namen, Straßen, Postleitzahlen, Telefonnummern und E-Mail-Adressen – alles mit Zahlen und Satzzeichen.',kind:'form',target:22},
  {id:'l15',sec:'p',t:'Zitate und Fakten',d:'Längere Texte mit allem, was du bisher gelernt hast.',kind:'quote',target:30},
  {id:'l16',sec:'m',t:'Tempo-Training',d:'Die häufigsten Wörter – hier zählt Rhythmus.',kind:'speed',target:35},
  {id:'m1',sec:'m',t:'Sprint',d:'Kurze Wörter in hohem Tempo. Ziel: über 40 WPM.',kind:'sprint',target:40},
  {id:'m2',sec:'m',t:'Blindflug',d:'Keine Tastatur, keine Hände. Nur du und der Text.',kind:'sent',hideHelp:true,target:30},
  {id:'m3',sec:'m',t:'Präzision',d:'Sterne gibt es hier erst ab 98 % Genauigkeit.',kind:'quote2',minAcc:98,target:30},
  {id:'m4',sec:'m',t:'Ausdauer',d:'Ein langer Text. Halte Tempo und Genauigkeit bis zum Ende.',kind:'endure',target:32},
+ {id:'m5',sec:'m',t:'Die Abschlussprüfung',d:'Alles auf einmal: Großbuchstaben, Zahlen, Satzzeichen, Umlaute und Sonderzeichen. Wer das schafft, beherrscht die ganze Tastatur.',kind:'mix',target:32},
 ];
 
 /* ---------- English content (games) ---------- */
@@ -3031,6 +3110,30 @@ function genFiles(){const T=[
   ()=>`Liste: ${pick(NOUNS)}, ${pick(NOUNS)}, ${pick(NOUNS)}.`,()=>`${rnd(1,9)}. ${pick(NOUNS)}`,()=>`- ${pick(NOUNS)}`,()=>`${pick(LOWER)}-${pick(LOWER)}.html`,
   ()=>`Version ${rnd(1,9)}.${rnd(0,9)}.${rnd(0,20)}`];
   return fill(()=>pick(T)(),180)}
+/* Neue Lektionen: Umlaute, AltGr, Chat, Schule, Formulare, Abschlussprüfung */
+function genUmlaut(){const U=WORDS.filter(w=>/[äöüßÄÖÜ]/.test(w)),caps=['Äpfel','Öl','Übung','Ärger','Österreich','Überraschung','Ähnlichkeit','Ökologie','Übersicht','Ärztin'];
+  return fill(()=>Math.random()<.25?pick(caps):pick(U.length?U:caps),190)}
+function genAltgr(){const N=['max','lena','info','kontakt','team','hallo','post','anna','tim','schule'],D=['web.de','gmx.de','mail.de','firma.de','schule.de','beispiel.de'],T=[
+  ()=>`${pick(N)}@${pick(D)}`,()=>`${pick(N)}.${pick(N)}@${pick(D)}`,()=>`${rnd(2,99)},${rnd(10,99)} €`,()=>`${rnd(1,9)} € pro ${pick(['Stück','Monat','Person','Tag'])}`,
+  ()=>`@${pick(N)}${rnd(1,99)}`,()=>`Preis: ${rnd(5,500)} €`,()=>`Schreib an ${pick(N)}@${pick(D)}`];
+  return fill(()=>pick(T)(),170)}
+const CHATS=["Bin gleich da!","Hast du morgen Zeit?","Wo seid ihr gerade?","Haha, das ist so lustig!","Kannst du mir die Hausaufgaben schicken?","Alles klar, bis später!",
+  "Wann fängt das Training an?","Ich komme zehn Minuten später.","Schon gesehen? Das neue Video ist online.","Gute Nacht und bis morgen!","Wer kommt alles mit ins Kino?",
+  "Ich hab's vergessen, sorry!","Treffen wir uns um vier am Bahnhof?","Glückwunsch zum Geburtstag!","Hast du Lust auf Pizza?","Ok, ich frag mal meine Eltern.",
+  "Das Spiel gestern war der Wahnsinn!","Kannst du mich anrufen?","Ich bin so müde heute.","Wie war die Klassenarbeit bei dir?"].map(sanitize);
+const SCHOOL=["In meinem Referat geht es um die Entstehung der Erde.","Zuerst stelle ich die wichtigsten Begriffe vor.","Die Tabelle zeigt, wie sich die Temperatur verändert hat.",
+  "Zusammenfassend lässt sich sagen, dass der Versuch gelungen ist.","Die Hauptstadt von Frankreich ist Paris.","Photosynthese findet in den Blättern der Pflanzen statt.",
+  "Im Jahr 1989 fiel die Berliner Mauer.","Ein Dreieck hat drei Ecken und drei Seiten.","Die Hausaufgabe ist bis Montag abzugeben.","Vielen Dank für eure Aufmerksamkeit!",
+  "Als Quelle habe ich ein Sachbuch aus der Bibliothek genutzt.","Die Klasse 7b fährt im Mai auf Klassenfahrt.","Der Rhein ist einer der längsten Flüsse Europas.",
+  "Wasser siedet bei 100 Grad Celsius.","Meine These lautet: Bewegung macht schlau.","Auf der nächsten Folie seht ihr ein Beispiel."].map(sanitize);
+function genForm(){const V=['Lena','Max','Mia','Ben','Emma','Paul','Hannah','Leon'],Nn=['Müller','Schmidt','Schneider','Fischer','Weber','Becker','Wagner','Hoffmann'],
+  S=['Hauptstraße','Schulweg','Gartenstraße','Bahnhofstraße','Lindenallee','Am Markt','Kirchplatz'],O=['Köln','Berlin','Hamburg','München','Leipzig','Bonn','Kassel'],T=[
+  ()=>`${pick(V)} ${pick(Nn)}`,()=>`${pick(S)} ${rnd(1,120)}`,()=>`${rnd(10000,99999)} ${pick(O)}`,()=>`Tel. 0${rnd(151,179)} ${rnd(1000000,9999999)}`,
+  ()=>`${pick(V).toLowerCase()}.${pick(Nn).toLowerCase()}@${pick(['web.de','gmx.de','mail.de'])}`.replace(/ü/g,'ue'),()=>`geb. ${rnd(1,28)}.${rnd(1,12)}.${rnd(1960,2015)}`,
+  ()=>`Name: ${pick(V)} ${pick(Nn)},`,()=>`Klasse ${rnd(5,10)}${pick(['a','b','c'])}`];
+  return fill(()=>pick(T)(),190)}
+function genMix(){const T=[()=>pick(SENT),()=>genNums().split(' ').slice(0,3).join(' '),()=>genPunct().split(' ').slice(0,3).join(' '),()=>genSym().split(' ').slice(0,3).join(' '),()=>genUmlaut().split(' ').slice(0,3).join(' '),()=>genAltgr().split(' ').slice(0,2).join(' ')];
+  return fill(()=>pick(T)(),230)}
 const pickN=(a,n)=>shuffle([...a]).slice(0,n);
 const genSent=(n=4)=>pickN(SENT,n).join(' ');
 const genQuote=(n=3)=>pickN([...QUOTES,...FACTS],n).join(' ');
@@ -3044,7 +3147,8 @@ function lessonText0(idx){
   if(!k)return genLetters(idx);
   return ({caps:genCaps,shift:genShift,nums:genNums,punct:genPunct,sym:genSym,bigram:genBigram,sent:()=>genSent(4),twist:()=>pickN(TWISTERS,3).join(' '),
     long:()=>pickN(LONGW,12).join(' '),mail:()=>pickN(MAILS,4).join(' '),files:genFiles,quote:()=>genQuote(3),quote2:()=>genQuote(2),
-    speed:genSpeed,sprint:genSprint,endure:()=>genSent(10)})[k]();
+    speed:genSpeed,sprint:genSprint,endure:()=>genSent(10),umlaut:genUmlaut,altgr:genAltgr,chat:()=>pickN(CHATS,5).join(' '),school:()=>pickN(SCHOOL,4).join(' '),
+    form:genForm,mix:genMix})[k]();
 }
 function gameWords(caps,n){const src=gWordsBase(caps).filter(w=>w.length>=2&&w.length<=10);return n?Array.from({length:n},()=>pick(src)):src}
 function problemKeys(){
@@ -3598,7 +3702,10 @@ $$('.tab').forEach(b=>b.onclick=()=>go(b.dataset.tab));
 let profSub='ach';
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(b&&b.closest('.subtabs')){profSub=b.dataset.p;go(profSub)}});
 function profileHead(sub){profSub=sub;currentTab=sub;}
-function setTab(t){currentTab=t;const gb=$('#gear');if(gb)gb.classList.toggle('on',t==='settings');const nt=(t==='ach'||t==='stats'||t==='admin')?'profile':t==='online'?'games':t;$$('.tab').forEach(b=>{if(b.dataset.tab===nt)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')})}
+function setTab(t){currentTab=t;const gb=$('#gear');if(gb)gb.classList.toggle('on',t==='settings');const nt=(t==='ach'||t==='stats'||t==='admin')?'profile':t==='online'?'games':t;$$('.tab').forEach(b=>{if(b.dataset.tab===nt){b.setAttribute("aria-current","page");const n=b.parentNode;if(n.scrollWidth>n.clientWidth)n.scrollLeft+=b.getBoundingClientRect().left-n.getBoundingClientRect().left-n.clientWidth/2+b.offsetWidth/2;tabsEnd()}else b.removeAttribute('aria-current')})}
+/* Handy: Reiter wischbar; der Rand blendet aus, solange rechts noch weitere Reiter kommen */
+function tabsEnd(){const n=$('nav.tabs');if(n)n.classList.toggle('at-end',n.scrollLeft+n.clientWidth>=n.scrollWidth-4)}
+$('nav.tabs').addEventListener('scroll',tabsEnd,{passive:true});addEventListener('resize',tabsEnd);
 function show(fn){if(cleanup){cleanup();cleanup=null}$$('.modal').forEach(m=>m.remove());setHandler(null);activity=false;main.innerHTML='';fn();document.body.classList.toggle('busy',activity);window.scrollTo(0,0);if(!activity&&Store.data.league.pending&&Store.data.welcomed)setTimeout(showLeaguePending,300)}
 function go(tab){if(window.zfGuest&&(tab==='friends'||tab==='online')){needAccount(tab==='online'?'Online-Duelle':'Freunde, Teams und Geschenke');return}leagueRollover();show(()=>{setTab(tab);({lessons:viewLessons,free:viewFree,games:viewGames,ach:()=>{profileHead('ach');viewAch()},stats:()=>{profileHead('stats');viewStats()},league:()=>{main.innerHTML='';viewLeague()},admin:()=>{profileHead('admin');viewAdmin()},profile:()=>{profileHead(profSub);(profSub==='stats'?viewStats:profSub==='admin'?viewAdmin:viewAch)()},settings:viewSettings,shop:viewShop,friends:viewFriends,online:viewOnline})[tab]()})}
 function onRemoteLoaded(){applySettings();refreshMe();if(!activity)go(currentTab)}
@@ -3837,6 +3944,12 @@ function practice(cfg){
         title=!r.valid?'Nicht gewertet':r.first?'Du bist im Turnier!':r.better?'Neuer Turnier-Bestwert!':'Geschafft';
         note=!r.valid?'Gewertet wird ein vollständiger Durchgang mit mindestens 90 % Genauigkeit.':`Dein Turnier-Bestwert: ${d.tour.wpm} WPM. Abgerechnet wird Montag um 0 Uhr.`;
         btns=[['Nochmal',()=>practice(cfg)],['Rangliste',()=>{$$('.modal').forEach(x=>x.remove());go('games');setTimeout(tourBoard,60)}]];
+      }else if(cfg.mode==='tongue'){
+        const full=st.progress>=1,prev=d.high.tongue||0,rec=full&&st.acc>=90&&st.wpm>prev;if(rec)d.high.tongue=Math.round(st.wpm);
+        extra.bonus=full?Math.round(st.acc/10)+(rec&&prev>0?25:0):0;celebrate=rec&&prev>0;
+        title=celebrate?'Neuer Rekord!':st.acc>=95?'Kein Knoten in den Fingern!':st.acc>=85?'Fast ohne Verknoten':'Da haben sich die Finger verknotet';
+        note=`Dein Rekord: ${d.high.tongue||0} WPM${st.acc<90?' (Rekorde zählen ab 90 % Genauigkeit)':''}. Jetzt einmal laut vorlesen – schaffst du es ohne Versprecher?`;
+        btns=[['Nächster Zungenbrecher',()=>practice(tongueCfg())]];
       }else if(cfg.mode==='race'){
         const ghostSecs=text.length/(cfg.opp*5/60);const valid=st.acc>=85,won=valid&&st.secs<=ghostSecs&&st.progress>=1;
         title=!valid?'Rennen ungültig':won?'Gewonnen!':'Knapp verloren';note=!valid?`Unter 85 % Genauigkeit zählt ein Rennen nicht. Du hattest ${st.acc.toFixed(0)} %.`:won?`Du warst ${(ghostSecs-st.secs).toFixed(1)} Sekunden schneller.`:`Dein Gegner war ${(st.secs-ghostSecs).toFixed(1)} Sekunden vorn.`;
@@ -4115,6 +4228,7 @@ const GAMES=[
  {id:'bomb',cat:'tempo',i:'💣',n:'Bombe entschärfen',s:'Tippe den Code, bevor der Zünder abläuft',rec:d=>`${d.high.bomb||0} entschärft`},
  {id:'blind',cat:'tempo',i:'🙈',n:'Blindflug',s:'Tippen, ohne zu sehen, was du tippst',rec:d=>`${d.high.blind||0} WPM`},
  {id:'coop',cat:'tempo',i:'🤝',n:'Koop-Modus',s:'Mit einem Freund abwechselnd Wörter tippen und gemeinsam die Zielzeit schlagen',rec:d=>`${d.high.coop||0} Siege`},
+ {id:'tongue',cat:'tempo',i:'👅',n:'Zungenbrecher',s:'Fischers Fritz und Co. – so schnell tippen, wie andere stottern',rec:d=>`${d.high.tongue||0} WPM`},
  {id:'abc',cat:'tempo',i:'🔤',n:'Alphabet-Sprint',s:'A bis Z so schnell wie möglich – mit Weltrangliste',rec:d=>d.high.abc?`${(d.high.abc/1000).toFixed(2)} s`:'–'},
  {id:'rain',cat:'arcade',i:'🌧️',n:'Wortregen',s:'Wörter stapeln sich',rec:d=>`${d.high.rain||0} Punkte`},
  {id:'blaster',cat:'arcade',i:'🚀',n:'Wort-Blaster',s:'Schieß Wörter ab',rec:d=>`${d.high.blaster||0} Punkte`},
@@ -4141,11 +4255,13 @@ const GAMES=[
  {id:'tippdle',cat:'brain',i:'🟩',n:'Tippdle',s:'Das tägliche Worträtsel: 5 Buchstaben, 6 Versuche',rec:d=>`${d.high.tippdle||0} gelöst`},
  {id:'emoji',cat:'brain',i:'😀',n:'Emoji-Rätsel',s:'Errate das Wort hinter den Emojis',rec:d=>`${d.high.emoji||0} Punkte`},
  {id:'detective',cat:'brain',i:'🕵️',n:'Tipp-Detektiv',s:'Tippe die Hinweise ab und überführe den Täter',rec:d=>`${d.high.detective||0}/${DET_CASES.length} Fälle`},
+ {id:'capital',cat:'brain',i:'🌍',n:'Hauptstadt-Quiz',s:'Land lesen, Hauptstadt tippen – mit Tipps und Serien-Bonus',rec:d=>`${d.high.capital||0} Punkte`},
+ {id:'reverse',cat:'brain',i:'🔁',n:'Rückwärts',s:'Tippe jedes Wort von hinten nach vorn',rec:d=>`${d.high.reverse||0} Punkte`},
  {id:'story',cat:'brain',i:'📖',n:'Story-Modus',s:'Geschichte mit Entscheidungen',rec:d=>`${Object.keys(d.story).length}/3 Enden`},
  ...Object.entries(CODE_LANGS).map(([k,L])=>({id:'code:'+k,cat:'code',i:L.i,n:L.n,s:L.d,rec:d=>`${d.high['code_'+k]||0} WPM`}))
 ];
-const NEW_GAMES=new Set(['escape','coop']);
-const MODE2GAME={escape:'escape',coop:'coop',tippdle:'tippdle',dungeon:'dungeon',abc:'abc',emoji:'emoji',detective:'detective',piano:'piano',blind:'blind',chain:'chain',typo:'typo',bomb:'bomb',mole:'mole',hangman:'hangman',online:'online',sixty:'timed',timed:'timed',race:'race',ghost:'ghost',sudden:'sudden',ladder:'ladder',duel:'duel',rain:'rain',blaster:'blaster',zombie:'zombie',runner:'runner',tower:'tower',balloon:'balloon',boss:'boss',rhythm:'rhythm',blitz:'blitz',memory:'memory',story:'story',anagram:'anagram',gaps:'gaps',kitchen:'kitchen',puzzle:'puzzle',math:'math'};
+const NEW_GAMES=new Set(['tongue','capital','reverse']);
+const MODE2GAME={tongue:'tongue',capital:'capital',reverse:'reverse',escape:'escape',coop:'coop',tippdle:'tippdle',dungeon:'dungeon',abc:'abc',emoji:'emoji',detective:'detective',piano:'piano',blind:'blind',chain:'chain',typo:'typo',bomb:'bomb',mole:'mole',hangman:'hangman',online:'online',sixty:'timed',timed:'timed',race:'race',ghost:'ghost',sudden:'sudden',ladder:'ladder',duel:'duel',rain:'rain',blaster:'blaster',zombie:'zombie',runner:'runner',tower:'tower',balloon:'balloon',boss:'boss',rhythm:'rhythm',blitz:'blitz',memory:'memory',story:'story',anagram:'anagram',gaps:'gaps',kitchen:'kitchen',puzzle:'puzzle',math:'math'};
 let gameFilter='all',gameQuery='';
 /* Spiele-Übersicht (neues Design):
    oben eine kompakte „Heute“-Leiste mit den täglichen/wöchentlichen Highlights,
@@ -4156,7 +4272,8 @@ function viewGames(){
   const codeMap={Python:'code:py',JavaScript:'code:js','HTML & CSS':'code:web',SQL:'code:sql'};
   const pool=GAMES.filter(g=>g.cat!=='today'&&!GAMES_TOP.has(g.id));
   const recent=[...new Set(d.history.slice().reverse().map(h=>h.mode==='code'?codeMap[(h.label||'').replace('Code: ','')]:MODE2GAME[h.mode]).filter(Boolean))].map(id=>pool.find(g=>g.id===id)).filter(Boolean).slice(0,6);
-  if(!['all',...GAME_SECS.map(s=>s[0])].includes(gameFilter))gameFilter='all';
+  if(gameFilter==='all'){gameFilter='';try{gameFilter=localStorage.getItem('zf-gopen')||''}catch(e){}}   // zuletzt geöffnete Kategorie
+  if(gameFilter&&!GAME_SECS.some(s=>s[0]===gameFilter))gameFilter='';
   const onN=Social.friends.filter(isOnline).length;
   const hi=(id,cls,icon,title,sub,btn,state='')=>`<button class="hl ${cls}${state}" id="${id}"><span class="hl-i">${icon}</span><span class="hl-t"><b>${title}</b><span>${sub}</span></span><span class="hl-go">${btn}</span></button>`;
   const tile=g=>{const t=masteryTier(g,d),nx=masteryNext(g,d),tip=`${g.s}. `+(t?`${MASTERY[t-1][0]}-Medaille`:'Noch keine Medaille')+(nx?` · Nächste Stufe: ${nx}`:'');
@@ -4172,18 +4289,23 @@ function viewGames(){
       ${hi('hon','hl-on','🌐','Online-Duell',onN?`${onN} ${onN===1?'Freund':'Freunde'} online`:'Live gegen Freunde','Duell')}
     </div>
     ${recent.length?`<div class="grecent"><span class="grecent-l">Zuletzt</span>${recent.map(g=>`<button class="gchip" data-g="${g.id}"><span>${g.i}</span>${g.n}</button>`).join('')}</div>`:''}
-    <div class="gcats" role="tablist"><button data-gf="all" aria-pressed="${gameFilter==='all'}">Alle <em>${pool.length}</em></button>${GAME_SECS.map(([k,t,,ic])=>`<button data-gf="${k}" aria-pressed="${k===gameFilter}">${ic} ${t} <em>${pool.filter(g=>g.cat===k).length}</em></button>`).join('')}</div>
     <div id="gsecs"></div>`;
+  /* Kategorien als Aufklapp-Felder: immer nur eine offen, damit die Seite ohne Scrollen auskommt. Beim Suchen werden alle Treffer direkt gezeigt. */
   const draw=()=>{
-    const q=gameQuery.trim().toLowerCase(),hit=g=>!q||(g.n+' '+g.s).toLowerCase().includes(q);
-    const secs=GAME_SECS.filter(s=>gameFilter==='all'||s[0]===gameFilter).map(s=>[s,pool.filter(g=>g.cat===s[0]&&hit(g))]).filter(([,l])=>l.length);
-    $('#gsecs').innerHTML=secs.map(([[k,t,desc,ic,col],l])=>`<section class="gs2" style="--gc:var(${col})"><div class="gs2-h"><span class="gs2-i">${ic}</span><b>${t}</b><span class="muted small">${desc}</span></div>
-      <div class="gt-grid">${l.map(tile).join('')}</div></section>`).join('')||`<p class="muted gnone">Kein Spiel gefunden für „${esc(gameQuery)}“.</p>`;
-    $$('#gsecs [data-g]').forEach(b=>b.onclick=()=>startGame(b.dataset.g))};
+    const q=gameQuery.trim().toLowerCase(),hit=g=>(g.n+' '+g.s).toLowerCase().includes(q);
+    if(q){const l=pool.filter(hit);
+      $('#gsecs').innerHTML=l.length?`<div class="gacc-found"><p class="muted small">${l.length} ${l.length===1?'Treffer':'Treffer'} für „${esc(gameQuery)}“</p><div class="gt-grid">${l.map(tile).join('')}</div></div>`:`<p class="muted gnone">Kein Spiel gefunden für „${esc(gameQuery)}“.</p>`}
+    else $('#gsecs').innerHTML=`<div class="gacc">${GAME_SECS.map(([k,t,desc,ic,col])=>{const l=pool.filter(g=>g.cat===k),open=k===gameFilter,med=l.filter(g=>masteryTier(g,d)>0).length,nw=l.some(g=>NEW_GAMES.has(g.id));
+      return `<section class="gacc-s${open?' open':''}" style="--gc:var(${col})"><button class="gacc-h" data-gf="${k}" aria-expanded="${open}"><span class="gacc-i">${ic}</span><span class="gacc-t"><b>${t}${nw?'<i class="gt-new">Neu</i>':''}</b><span>${desc}</span></span>
+        <span class="gacc-m"><b>${l.length}</b> Spiele<span class="gacc-med" title="Spiele mit Medaille">🏅 ${med}/${l.length}</span></span><span class="gacc-c" aria-hidden="true">▾</span></button>
+        ${open?`<div class="gacc-b"><div class="gt-grid">${l.map(tile).join('')}</div></div>`:''}</section>`}).join('')}</div>`;
+    $$('#gsecs [data-g]').forEach(b=>b.onclick=()=>startGame(b.dataset.g));
+    $$('#gsecs [data-gf]').forEach(b=>b.onclick=()=>{gameFilter=gameFilter===b.dataset.gf?'':b.dataset.gf;try{localStorage.setItem('zf-gopen',gameFilter)}catch(e){}draw();
+      // Passt die geöffnete Kategorie nicht ganz auf den Bildschirm, sanft hinscrollen
+      const s=$('.gacc-s.open');if(s){const r=s.getBoundingClientRect(),hd=($('header.top')||{}).offsetHeight||0;if(r.bottom>innerHeight)window.scrollTo({top:Math.max(0,scrollY+r.top-hd-12),behavior:reduced()?'auto':'smooth'})}})};
   draw();
   $('#hdaily').onclick=()=>startGame('daily');$('#htd').onclick=()=>startGame('tippdle');$('#htour').onclick=()=>tourBoard();$('#hon').onclick=()=>go('online');
   $$('.gchip').forEach(b=>b.onclick=()=>startGame(b.dataset.g));
-  $$('[data-gf]').forEach(b=>b.onclick=()=>{gameFilter=b.dataset.gf;$$('[data-gf]').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
   $('#gq').oninput=e=>{gameQuery=e.target.value;draw()};
   $$('#glang button').forEach(b=>b.onclick=()=>{Store.data.settings.gameLang=b.dataset.l;Store.save();viewGames()});
   setTimeout(tourClaim,400);
@@ -4204,6 +4326,9 @@ function startGame(k){
   if(k==='piano')return pianoSetup();
   if(k==='chain')return chainGame();
   if(k==='typo')return typoGame();
+  if(k==='capital')return capitalGame();
+  if(k==='reverse')return reverseGame();
+  if(k==='tongue')return practice(tongueCfg());
   if(k==='blind')return practice({tab:'games',mode:'blind',blind:true,hideHelp:true,label:'Blindflug',title:'Blindflug',sub:'Du siehst nicht, ob du richtig tippst. Vertrau deinen Fingern! Erst am Ende zeigen wir, wo die Fehler waren.',text:()=>gSent(3),back:()=>go('games')});
   if(k.startsWith('code:'))return codeGame(k.slice(5));
   if(k==='ladder')return practice(ladderCfg(1));
@@ -5009,6 +5134,97 @@ function typoGame(){
   });
 }
 
+/* ---------- Hauptstadt-Quiz: Land lesen, Hauptstadt tippen ---------- */
+const CAPITALS=[['Europa','Deutschland','Berlin','Germany','Berlin'],['Europa','Frankreich','Paris','France','Paris'],['Europa','Italien','Rom','Italy','Rome'],['Europa','Spanien','Madrid','Spain','Madrid'],
+  ['Europa','Portugal','Lissabon','Portugal','Lisbon'],['Europa','Österreich','Wien','Austria','Vienna'],['Europa','Schweiz','Bern','Switzerland','Bern'],['Europa','Niederlande','Amsterdam','Netherlands','Amsterdam'],
+  ['Europa','Belgien','Brüssel','Belgium','Brussels'],['Europa','Dänemark','Kopenhagen','Denmark','Copenhagen'],['Europa','Schweden','Stockholm','Sweden','Stockholm'],['Europa','Norwegen','Oslo','Norway','Oslo'],
+  ['Europa','Finnland','Helsinki','Finland','Helsinki'],['Europa','Polen','Warschau','Poland','Warsaw'],['Europa','Tschechien','Prag','Czechia','Prague'],['Europa','Ungarn','Budapest','Hungary','Budapest'],
+  ['Europa','Griechenland','Athen','Greece','Athens'],['Europa','Irland','Dublin','Ireland','Dublin'],['Europa','Großbritannien','London','United Kingdom','London'],['Europa','Island','Reykjavik','Iceland','Reykjavik'],
+  ['Europa','Kroatien','Zagreb','Croatia','Zagreb'],['Europa','Rumänien','Bukarest','Romania','Bucharest'],['Europa','Bulgarien','Sofia','Bulgaria','Sofia'],['Europa','Ukraine','Kiew','Ukraine','Kyiv'],
+  ['Europa','Litauen','Vilnius','Lithuania','Vilnius'],['Europa','Lettland','Riga','Latvia','Riga'],['Europa','Estland','Tallinn','Estonia','Tallinn'],['Europa','Slowakei','Bratislava','Slovakia','Bratislava'],
+  ['Europa','Slowenien','Ljubljana','Slovenia','Ljubljana'],['Europa','Serbien','Belgrad','Serbia','Belgrade'],['Europa','Russland','Moskau','Russia','Moscow'],['Asien','Türkei','Ankara','Turkey','Ankara'],
+  ['Amerika','USA','Washington','USA','Washington'],['Amerika','Kanada','Ottawa','Canada','Ottawa'],['Amerika','Mexiko','Mexiko-Stadt','Mexico','Mexico City'],['Amerika','Argentinien','Buenos Aires','Argentina','Buenos Aires'],
+  ['Amerika','Chile','Santiago','Chile','Santiago'],['Amerika','Peru','Lima','Peru','Lima'],['Amerika','Kuba','Havanna','Cuba','Havana'],['Asien','Japan','Tokio','Japan','Tokyo'],['Asien','China','Peking','China','Beijing'],
+  ['Asien','Südkorea','Seoul','South Korea','Seoul'],['Asien','Indien','Neu-Delhi','India','New Delhi'],['Asien','Thailand','Bangkok','Thailand','Bangkok'],['Asien','Vietnam','Hanoi','Vietnam','Hanoi'],
+  ['Asien','Indonesien','Jakarta','Indonesia','Jakarta'],['Asien','Israel','Jerusalem','Israel','Jerusalem'],['Asien','Iran','Teheran','Iran','Tehran'],['Asien','Saudi-Arabien','Riad','Saudi Arabia','Riyadh'],
+  ['Ozeanien','Australien','Canberra','Australia','Canberra'],['Ozeanien','Neuseeland','Wellington','New Zealand','Wellington'],['Afrika','Ägypten','Kairo','Egypt','Cairo'],['Afrika','Marokko','Rabat','Morocco','Rabat'],
+  ['Afrika','Kenia','Nairobi','Kenya','Nairobi'],['Afrika','Nigeria','Abuja','Nigeria','Abuja'],['Afrika','Südafrika','Pretoria','South Africa','Pretoria'],['Afrika','Äthiopien','Addis Abeba','Ethiopia','Addis Ababa']];
+function capitalGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data,TIME=75,en=isEN();
+    const body=gameShell('Hauptstadt-Quiz','Tippe die Hauptstadt des Landes und drück Enter. Nach ein paar Sekunden gibt es einen Tipp. Weißt du es nicht, drück einfach Enter.',
+      `<span>Zeit <b id="qt">${TIME}</b></span><span>Richtig <b id="qn">0</b></span><span>Punkte <b id="qs">0</b></span><span class="rec">Rekord <b>${d.high.capital||0}</b></span>`);
+    body.innerHTML=`<div class="bigstage idle" id="qst"><span class="cap-c" id="qc">🌍</span><b class="cap-l" id="ql">Welche Hauptstadt?</b><span class="cap-h" id="qh"></span><div class="membuf" id="qb"><span>…</span></div>
+      <p class="muted small" id="qm">Groß- und Kleinschreibung ist egal, Umlaute zählen.</p><button class="btn primary" id="qgo">Spiel starten</button><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    let state='ready',left=TIME,deck=[],cur=null,buf='',n=0,score=0,ok=0,err=0,t0=0,iv=0,shown=0,streak=0;
+    const msg=t=>{$('#qm').textContent=t},ans=()=>cur[en?4:2];
+    function next(){if(!deck.length)deck=shuffle(CAPITALS.slice());cur=deck.pop();$('#qc').textContent=cur[0];$('#ql').textContent=cur[en?3:1];$('#qh').textContent='';buf='';shown=performance.now();state='play';render()}
+    function render(){$('#qb').innerHTML=buf?esc(buf):'<span>…</span>';$('#qn').textContent=n;$('#qs').textContent=fmtN(score)}
+    function hint(){if(state!=='play')return;const a=ans(),s=(performance.now()-shown)/1000;if(s<5)return;const k=s<10?1:2;
+      $('#qh').textContent=[...a].map((c,i)=>i<k||c===' '||c==='-'?c:'_').join(' ')}
+    function start(){left=TIME;n=0;score=0;ok=0;err=0;streak=0;deck=[];t0=performance.now();$('#qst').classList.remove('idle');$('#qgo').hidden=true;focusCap();msg('Groß- und Kleinschreibung ist egal, Umlaute zählen.');next();
+      clearInterval(iv);iv=setInterval(()=>{if(!focused||(state!=='play'&&state!=='wait'))return;left-=.1;$('#qt').textContent=Math.max(0,Math.ceil(left));hint();if(left<=0)end()},100)}
+    function reveal(t){state='wait';$('#qh').textContent=ans();msg(t);streak=0;setTimeout(()=>{if(state==='wait')next()},1500)}
+    function submit(){if(state!=='play')return;const b=buf.trim();
+      if(!b){reveal(`Die Hauptstadt ist ${ans()}.`);return}
+      if(b.toLowerCase()===ans().toLowerCase()){n++;streak++;const secs=(performance.now()-shown)/1000,pts=Math.round((20+Math.max(0,Math.round(12-secs))*2)*(streak>=3?1.5:1));score+=pts;ok+=b.length+1;[...b].forEach(c=>recKey(c,true));
+        Sound.ok();floatText($('#qst'),'+'+pts+(streak>=3?' 🔥':''));msg(streak>=3?`${streak} richtig in Folge – Bonus!`:`Richtig: ${ans()}`);next();return}
+      err++;Sound.err();Mash.err();bump($('#qb'),'shake');buf='';render();reveal(`Leider nicht – gesucht war ${ans()}.`)}
+    function end(){if(state==='done'||state==='ready')return;state='done';clearInterval(iv);const prev=d.high.capital||0,rec=score>prev;if(rec)d.high.capital=score;const secs=(performance.now()-t0)/1000;
+      const info=recordSession('capital','Hauptstadt-Quiz',{wpm:ok/5/(Math.max(secs,1)/60),acc:ok+err?ok/(ok+err*5)*100:100,secs,ok,err,typed:ok+err},{chars:ok*2,bonus:n*3});
+      if(rec&&prev){Sound.win();confetti(110)}
+      gameOverModal(rec&&prev?'Neuer Rekord!':'Zeit ist um',[`${n} Hauptstädte gewusst, ${fmtN(score)} Punkte.`],info.xp,()=>capitalGame())}
+    $('#qgo').onclick=start;cleanup=()=>{clearInterval(iv);state='done'};
+    setHandler({guard:true,char:ch=>{if(state==='ready'){if(ch===' ')start();return}if(state!=='play')return;if(buf.length<30){buf+=ch;Sound.key();render()}},
+      back:()=>{buf=buf.slice(0,-1);render()},enter:()=>{if(state==='ready')start();else submit()},esc:()=>go('games')});
+  });
+}
+
+/* ---------- Rückwärts: das Wort von hinten nach vorn tippen ---------- */
+function reverseGame(){
+  show(()=>{
+    activity=true;setTab('games');const d=Store.data,TIME=60;
+    const body=gameShell('Rückwärts','Tippe das Wort rückwärts – also vom letzten Buchstaben zum ersten. Falsche Buchstaben zählen nicht. Je länger du durchhältst, desto länger die Wörter.',
+      `<span>Zeit <b id="rt">${TIME}</b></span><span>Wörter <b id="rn">0</b></span><span>Punkte <b id="rs">0</b></span><span class="rec">Rekord <b>${d.high.reverse||0}</b></span>`);
+    body.innerHTML=`<div class="bigstage idle" id="rst"><div class="rev-w" id="rw">rückwärts</div><div class="membuf" id="rb"><span>…</span></div>
+      <p class="muted small" id="rm">Der nächste Buchstabe ist unterstrichen.</p><button class="btn primary" id="rgo">Spiel starten</button><div class="focus-hint">Klicke hier und tippe los</div></div>`;
+    const pool=(isEN()?(typeof EN_WORDS!=='undefined'?EN_WORDS:WORDS):WORDS).map(w=>w.toLowerCase()).filter(w=>/^[a-zäöüß]+$/.test(w));
+    let state='ready',left=TIME,word='',pos=0,n=0,score=0,ok=0,err=0,t0=0,iv=0,shown=0,last='';
+    function next(){const lo=Math.min(4+Math.floor(n/4),9),hi=lo+2,L=pool.filter(w=>w.length>=lo&&w.length<=hi);let w;do{w=pick(L.length?L:pool)}while(w===last&&pool.length>1);last=word=w;pos=0;shown=performance.now();state='play';render()}
+    function render(){const need=word.length-1-pos;$('#rw').innerHTML=[...word].map((c,i)=>`<span class="${i>need?'done':i===need?'nx':''}">${esc(c)}</span>`).join('');
+      $('#rb').innerHTML=pos?esc([...word].reverse().slice(0,pos).join('')):'<span>…</span>';$('#rn').textContent=n;$('#rs').textContent=fmtN(score)}
+    function start(){left=TIME;n=0;score=0;ok=0;err=0;t0=performance.now();$('#rst').classList.remove('idle');$('#rgo').hidden=true;focusCap();next();
+      clearInterval(iv);iv=setInterval(()=>{if(!focused||state!=='play')return;left-=.1;$('#rt').textContent=Math.max(0,Math.ceil(left));if(left<=0)end()},100)}
+    function type(ch){const want=word[word.length-1-pos];
+      if(ch===want){pos++;ok++;recKey(ch,true);Sound.key();
+        if(pos>=word.length){n++;const secs=(performance.now()-shown)/1000,pts=word.length*5+Math.max(0,Math.round(word.length*1.5-secs))*3;score+=pts;ok++;Sound.ok();floatText($('#rst'),'+'+pts);next();return}
+        render();return}
+      err++;recKey(want,false);Sound.err();Mash.err();bump($('#rw'),'shake')}
+    function end(){if(state==='done'||state==='ready')return;state='done';clearInterval(iv);const prev=d.high.reverse||0,rec=score>prev;if(rec)d.high.reverse=score;const secs=(performance.now()-t0)/1000;
+      const info=recordSession('reverse','Rückwärts',{wpm:ok/5/(Math.max(secs,1)/60),acc:ok+err?ok/(ok+err)*100:100,secs,ok,err,typed:ok+err},{chars:ok*2,bonus:n*2});
+      if(rec&&prev){Sound.win();confetti(110)}
+      gameOverModal(rec&&prev?'Neuer Rekord!':'Zeit ist um',[`${n} Wörter rückwärts getippt, ${fmtN(score)} Punkte.`],info.xp,()=>reverseGame())}
+    $('#rgo').onclick=start;cleanup=()=>{clearInterval(iv);state='done'};
+    setHandler({guard:true,char:ch=>{if(state==='ready'){if(ch===' ')start();return}if(state!=='play'||ch===' ')return;type(ch.toLowerCase())},
+      back:()=>{},enter:()=>{if(state==='ready')start()},esc:()=>go('games')});
+  });
+}
+
+/* ---------- Zungenbrecher: schnell tippen, was sich schwer sprechen lässt ---------- */
+const TONGUE={de:['Fischers Fritz fischt frische Fische, frische Fische fischt Fischers Fritz.','Blaukraut bleibt Blaukraut und Brautkleid bleibt Brautkleid.',
+  'Zwischen zwei Zwetschgenzweigen zwitschern zwei Schwalben.','Der Cottbuser Postkutscher putzt den Cottbuser Postkutschkasten.','Wenn Fliegen hinter Fliegen fliegen, fliegen Fliegen Fliegen nach.',
+  'Zehn zahme Ziegen zogen zehn Zentner Zucker zum Zoo.','Esel essen Nesseln nicht, Nesseln essen Esel nicht.','Kleine Kinder können keine kleinen Kirschkerne knacken.',
+  'Hinter Hermann Hansens Haus hängen hundert Hemden raus.','Schnecken erschrecken, wenn Schnecken an Schnecken schlecken.','Der Whiskymixer mixt den Whisky mit dem Whiskymixer.',
+  'Acht alte Ameisen aßen am Abend Ananas.','Bürsten mit weißen Borsten bürsten besser als Bürsten mit schwarzen Borsten.','Früh fressen freche Frösche Früchte.',
+  'Max wachst Wachsmasken. Was wachst Max? Wachsmasken wachst Max.','Wir Wiener Waschweiber würden weiße Wäsche waschen, wenn wir wüssten, wo warmes Wasser wär.',
+  'Der dicke Dachdecker deckt dir dein Dach, drum dank dem dicken Dachdecker, dass der dicke Dachdecker dir dein Dach deckte.','Messwechsel, Wachsmaske, Wachsmaske, Messwechsel.',
+  'Tschechisches Streichholzschächtelchen.','Brautkleid bleibt Brautkleid, Blaukraut bleibt Blaukraut, und Blaukraut bleibt immer Blaukraut.'],
+  en:['She sells seashells by the seashore.','Peter Piper picked a peck of pickled peppers.','How much wood would a woodchuck chuck if a woodchuck could chuck wood?',
+  'Red lorry, yellow lorry, red lorry, yellow lorry.','Six slippery snails slid slowly seaward.','Fred fed Ted bread and Ted fed Fred bread.',
+  'Unique New York, unique New York, you know you need unique New York.','A proper copper coffee pot.','Betty bought a bit of butter, but the butter was bitter.']};
+const tongueCfg=()=>{const L=isEN()?TONGUE.en:TONGUE.de;
+  return {tab:'games',mode:'tongue',label:'Zungenbrecher',title:'Zungenbrecher',sub:'Sprechen ist schwer – tippen auch? Tippe den Zungenbrecher so schnell und genau wie möglich.',text:()=>shuffle(L.slice()).slice(0,2).join(' '),back:()=>go('games')}};
+
 /* ---------- Tippdle: tägliches Worträtsel ---------- */
 const TD_WORDS={
   de:'apfel birne blume brief decke eimer engel ernte fabel farbe feder fisch frage geist glanz hafen honig hotel insel jacke kabel kamel karte katze kerze kette kiste kleid knopf kraft krone kugel lampe laune leder licht liebe linie liste mauer maske milch monat motor musik nacht nadel nebel onkel opfer paket party pferd pilot platz preis puppe radio regal regen reise rolle sache salat sonne spiel stadt stein stern stuhl sturm suppe tante tasse teich thema tiger torte traum truhe vogel waage wagen wange welle wolke wurst zange zebra zweig frost gabel gurke juwel kakao koala krimi nudel palme perle pizza pflug quark rinde sahne schaf seife socke sport stamm stift tulpe vater wiese wolle zunge zwerg biber dachs mixer bluse boden fluss klang sirup'.split(' '),
@@ -5337,7 +5553,7 @@ function hangmanGame(){
 
 /* ---------- Views: Achievements & Level ---------- */
 /* ---------- Views: Stats ---------- */
-const MODE_LABEL={escape:'Escape Room',coop:'Koop-Modus',isleboss:'Insel-Boss',tippdle:'Tippdle',dungeon:'Tipp-Dungeon',abc:'Alphabet-Sprint',emoji:'Emoji-Rätsel',detective:'Tipp-Detektiv',piano:'Tastatur-Klavier',blind:'Blindflug',chain:'Wortkette',typo:'Fehlerjagd',tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
+const MODE_LABEL={tongue:'Zungenbrecher',capital:'Hauptstadt-Quiz',reverse:'Rückwärts',escape:'Escape Room',coop:'Koop-Modus',isleboss:'Insel-Boss',tippdle:'Tippdle',dungeon:'Tipp-Dungeon',abc:'Alphabet-Sprint',emoji:'Emoji-Rätsel',detective:'Tipp-Detektiv',piano:'Tastatur-Klavier',blind:'Blindflug',chain:'Wortkette',typo:'Fehlerjagd',tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
 function chartSVG(h){
   const pts=h.slice(-40);if(pts.length<2)return '<p class="muted">Nach zwei Übungen erscheint hier dein Verlauf.</p>';
   const W=680,H=220,PL=34,PR=10,PT=12,PB=26;const max=Math.ceil(Math.max(20,...pts.map(p=>p.wpm))*1.15/10)*10;
@@ -6062,7 +6278,7 @@ const MASTERY=[['Bronze','🥉',25],['Silber','🥈',50],['Gold','🥇',100],['D
 const mBase=x=>[.2,.5,1,2].map(f=>Math.round(x*f/10)*10);
 const MASTERY_T={timed:[25,40,60,80],race:[25,40,60,80],ghost:[1,2,4,5],duel:[25,40,55,70],ladder:[25,40,55,70],sudden:[100,250,500,900],bomb:[3,8,14,20],online:[1,5,15,30],
   rain:mBase(1000),blaster:mBase(1000),zombie:mBase(1000),boss:[1,2,4,5],tower:mBase(1000),balloon:mBase(1000),runner:mBase(1000),rhythm:mBase(1000),mole:mBase(1500),
-  blitz:[900,750,600,480],memory:[5,7,10,13],anagram:mBase(500),gaps:mBase(500),kitchen:mBase(800),puzzle:mBase(500),math:mBase(300),hangman:[2,5,10,16],story:[1,2,3],code:[20,30,45,60],blind:[20,35,50,65],chain:mBase(600),typo:mBase(400),tippdle:[1,5,15,40],dungeon:[3,6,10,15],abc:[6000,4500,3500,2800],emoji:mBase(500),detective:[1,2,3,4],piano:mBase(600),escape:[600,360,240,150],coop:[1,5,15,30]};
+  blitz:[900,750,600,480],memory:[5,7,10,13],anagram:mBase(500),gaps:mBase(500),kitchen:mBase(800),puzzle:mBase(500),math:mBase(300),hangman:[2,5,10,16],story:[1,2,3],code:[20,30,45,60],blind:[20,35,50,65],chain:mBase(600),typo:mBase(400),tippdle:[1,5,15,40],dungeon:[3,6,10,15],abc:[6000,4500,3500,2800],emoji:mBase(500),detective:[1,2,3,4],piano:mBase(600),escape:[600,360,240,150],coop:[1,5,15,30],tongue:[25,40,55,70],capital:mBase(500),reverse:mBase(500)};
 const mtOf=g=>MASTERY_T[g.id.startsWith('code:')?'code':g.id];
 /* Blitztasten: weniger ms ist besser */
 function masteryTier(g,d){const t=mtOf(g);if(!t)return 0;const v=gameScore(g,d),low=LOWER_BETTER.has(g.id);return t.filter(x=>low?v>0&&v<=x:v>=x).length}
@@ -6301,6 +6517,13 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-24.6',d:'24.09.2026',items:[
+    '📚 8 neue Lektionen: Erste Wörter, Alle Buchstaben, Umlaute, @ und €, Chatnachrichten, Schule und Referate, Adressen und Formulare und die große Abschlussprüfung',
+    '🎮 3 neue Spiele: Hauptstadt-Quiz, Rückwärts und Zungenbrecher',
+    '🗂️ Spiele-Seite aufgeräumt: Kategorien zum Aufklappen – alles auf einen Blick, ohne Scrollen',
+    '🥇 Liga: Deine Gegner sammeln jetzt live XP, während die Runde läuft. Die Regeln sind kürzer erklärt',
+    '✨ Die Leiste mit Münzen, Serie und Level ist übersichtlicher – auf dem Handy lassen sich die Reiter jetzt wischen'
+  ]},
   {v:'2026-09-24.5',d:'24.09.2026',items:[
     '🔐 Neu: Mit Google anmelden – ein Klick, kein Passwort merken. Deinen Benutzernamen wählst du trotzdem selbst.'
   ]},
@@ -7100,7 +7323,14 @@ const LEAGUES=[['Bronze','🥉','#C98B5A',60],['Silber','🥈','#B8C2CC',90],['G
 const LG_OLD2NEW=[0,1,2,3,9,10,13];
 /* Aufstieg wird oben schwerer: bis Smaragd die besten 3, ab Amethyst die besten 2, ab Großmeister nur Platz 1 */
 const promoSlots=idx=>idx>=11?1:idx>=8?2:3;
-const BOT_NAMES=['TippTiger','FlinkeFinger','KeyKönigin','Tastenfee','QWERTZ-Queen','Blindflieger','ShiftHappens','Leertaste99','Fingerakrobat','Umlaut-Ulli','CapsLockCarl','TurboTina','Semikolon-Sam','Enter-Emma','Backspace-Ben','Klick-Klara','Taktgefühl','Zeilenzauber'];
+/* Computer-Gegner heißen wie echte Spieler und spielen wie sie: in einzelnen Runden, meist nachmittags und abends */
+const BOT_NAMES=['lena_07','Maxi2011','jonas.k','Mia_tippt','finn.x','LeonieB','tim_hdf','emily.s','Noah2010','paulchen','hannah_m','ben.tippt','Luca_R','sophie04','ella.m','janluca','marie_k','felix2009',
+  'nele_b','moritz.h','lara_09','tomm1','annalena','niklas_s','lina22','julian_k','emma.w','david_03','zoe.x','elias.m','Jule','Kaan_07','mehmet.k','Elif_b','Aylin04','Luis2008','Mila.s','Henri','Ida_09',
+  'Anton_k','paula.m','Jakob_s','Frieda','Oskar12','theo_h','Clara.b','Leni','Samu_el','Nina_t','ole.k','Greta_x','Leon_rs','johanna.w','Fynn_07','Selin_k','Milan.b','Merle','Jonte','carla_s','Vincent.h',
+  'FlinkeFinger','tastenheld','ShiftHappens','TippTiger','nachteule22','Kekskrümel','blitzfinger','Mathe_Ass'];
+const BOT_AVA=['🙂','🧑‍💻','🦊','🐼','🐸','🐱','🦉','🐙','🧙','🥷','🦸','🦖','🐲'],BOT_FRAME=['silver','gold','pulse','neon','orbit','rainbow','fire'];
+/* Wie aktiv wird zu welcher Uhrzeit gespielt: nachts kaum, nachmittags und abends am meisten */
+const botHourW=h=>h<7?.05:h<9?.45:h<13?.8:h<16?1.1:h<22?1.3:.5;
 /* Eine Liga-Runde dauert 12 Stunden (0–12 und 12–24 Uhr) */
 const PERIOD_MS=12*36e5,WEEK_MS=PERIOD_MS;
 function periodStart(t=Date.now()){const d=new Date(t);d.setMinutes(0,0,0);d.setHours(Math.floor(d.getHours()/12)*12);return d.getTime()}
@@ -7110,7 +7340,15 @@ function rivals(week,idx,frac){
   const r=seededRandom('lg-'+week+'-'+idx),names=[...BOT_NAMES];for(let i=names.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[names[i],names[j]]=[names[j],names[i]]}
   // Je höher die Liga, desto stärker die KI: der Grundwert wächst immer schneller, und oben sind alle Gegner stark
   const scale=LEAGUES[idx][3]*(1+idx*.1+idx*idx*.012),floor=.35+idx/(LEAGUES.length-1)*.3;
-  return names.slice(0,9).map((n,i)=>{const a=r(),b=r();const fin=Math.round(scale*(floor+a*1.25));return{n,bot:true,lp:Math.round(fin*Math.pow(Math.min(1,frac),.8+b*.5)),fin}});
+  // Jeder Gegner spielt einzelne Runden im 10- oder 30-Minuten-Takt; seine XP steigen erst, wenn eine Runde vorbei ist
+  const h0=new Date(+week>1e11?+week:periodStart()).getHours(),el=Math.max(0,Math.min(1,frac))*PERIOD_MS;
+  return names.slice(0,9).map(n=>{
+    const goal=Math.round(scale*(floor+r()*1.25)),step=r()<.5?6e5:18e5,slots=PERIOD_MS/step,k=3+Math.floor(r()*(step<1e6?9:5));
+    const ts=[];for(let j=0;j<k;j++){let t,tries=0;do{t=(Math.floor(r()*slots)+1)*step;tries++}while(r()>botHourW((h0+Math.floor((t-1)/36e5))%24)&&tries<12);ts.push(t)}
+    const w=ts.map(()=>.5+r()),sw=w.reduce((x,y)=>x+y,0);let fin=0,lp=0;
+    ts.forEach((t,j)=>{const x=Math.max(5,Math.round(goal*w[j]/sw));fin+=x;if(t<=el)lp+=x});
+    const ava=BOT_AVA[Math.floor(r()*Math.min(BOT_AVA.length,6+idx))],frame=r()<.12+idx*.05?BOT_FRAME[Math.floor(r()*Math.min(BOT_FRAME.length,2+Math.floor(idx/2)))]:'none';
+    return{n,bot:true,lp,fin,ava,frame}});
 }
 /* In welcher Liga steht ein Freund? Wer noch nie gespielt hat, steht in Bronze. */
 const leagueIdxOf=st=>{const i=((st||{}).league||{}).idx;return Math.min(LEAGUES.length-1,Math.max(0,i|0))};
@@ -7180,15 +7418,33 @@ function viewLeague(){
       </div>
       <div class="panel lg-clock"><span class="lg-cd">⏱️ ${lh?`${lh} Std. `:''}${lm} Min.</span><span class="muted small">bis zur Abrechnung dieser Runde</span></div>
       ${rank?'':`<div class="panel lg-join"><b>🎯 Sammle XP, um mitzumachen</b><span class="muted small">Du trittst dieser Runde automatisch bei, sobald du eine Lektion oder ein Spiel abschließt. Wer in einer Runde nicht spielt, wird auch nicht abgestuft.</span></div>`}
-      <p class="muted small lg-info">Jede Runde dauert 12 Stunden (0–12 und 12–24 Uhr). Du trittst ihr bei, sobald du darin XP sammelst. Deine Liga-Punkte sind die XP aus dieser Runde. ${promoSlots(L.idx)===1?'Nur der Erste steigt auf':`Die besten ${promoSlots(L.idx)} steigen auf`}${L.idx>0?', die letzten 2 ab':''}, dazu gibt es Münzen für die Top 3. Gegen dich treten Freunde aus derselben Liga an, die in dieser Runde ebenfalls spielen, freie Plätze füllen Computer-Gegner. Wer nicht spielt, behält seine Liga.</p>
+      <ul class="lg-rules">
+        <li><span>⏱️</span>Eine Runde dauert 12 Stunden (0–12 und 12–24 Uhr).</li>
+        <li><span>⭐</span>Jede XP aus der Runde zählt als Liga-Punkt.</li>
+        <li><span>⬆️</span>${promoSlots(L.idx)===1?'Nur Platz 1 steigt auf':`Die besten ${promoSlots(L.idx)} steigen auf`}${L.idx>0?', die letzten 2 ab':''}. Die Top 3 bekommen Münzen.</li>
+        <li><span>👥</span>Freunde aus deiner Liga sind dabei, freie Plätze werden aufgefüllt.</li>
+        <li><span>😴</span>Wer nicht spielt, bleibt einfach in seiner Liga.</li>
+      </ul>
       ${elsewhere.length?`<div class="panel lg-else"><h3>Freunde in anderen Ligen <span class="muted small">${other}</span></h3>
         ${elsewhere.map(([i,fs])=>`<div class="lg-og"><div class="lg-og-h"><span class="lg-chip" style="--lc:${LEAGUES[i][2]}">${LEAGUES[i][1]} ${LEAGUES[i][0]}</span><span class="lp">${i>L.idx?`▲ ${i-L.idx} über dir`:`▼ ${L.idx-i} unter dir`}</span></div><div class="lg-og-f">${fs.map(f=>`<span class="lg-f">${fAva(f)}<b>${nameHTML(f.name,f.nameFx)}</b></span>`).join('')}</div></div>`).join('')}
         <p class="fr-note">Ihr trefft euch, sobald ihr in derselben Liga steht.</p></div>`:''}
       ${L.hist.length?`<div class="panel lg-hist"><h3>Letzte Runden</h3>${L.hist.slice(0,4).map(h=>`<div class="lg-row"><span class="nm">${LEAGUES[h.idx][1]} ${LEAGUES[h.idx][0]}</span><span class="muted small">${histLabel(h.week)}</span><span class="lp">Platz ${h.rank}${h.size?` / ${h.size}`:''}</span></div>`).join('')}</div>`:''}
     </div>
-    <div class="panel lg-table">${rows.map((r,i)=>`<div class="lg-row ${zone(i)}${r.me?' me':''}"><span class="pos">${i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()} <small class="ttl">${esc(myTitle())}</small>`:r.friend?`<span class="ava fr-${esc(r.frame||'none')}">${esc(r.ava)}</span> ${nameHTML(r.n,r.fx)} <small class="ttl">Freund</small>`:`🤖 ${esc(r.n)}`}</span><span class="lp">${r.lp.toLocaleString('de-DE')} XP</span></div>`+(i===promoSlots(L.idx)-1&&L.idx<LEAGUES.length-1?'<div class="lg-cut up">Aufstiegszone</div>':'')+(i===N-3&&L.idx>0?'<div class="lg-cut down">Abstiegszone</div>':'')).join('')}</div>
+    <div class="panel lg-table" id="lgtable">${lgTableHTML(rows)}</div>
   </div>`);
 }
+/* Tabelle der Liga. Wer seit dem letzten Blick XP gesammelt hat, bekommt kurz ein „+XP“ angezeigt. */
+let lgSeen={};
+function lgTableHTML(rows){
+  const L=Store.data.league,N=rows.length,zone=i=>i<promoSlots(L.idx)&&L.idx<LEAGUES.length-1?'up':i>=N-2&&L.idx>0?'down':'';
+  if(lgSeen.w!==L.week+'-'+L.idx)lgSeen={w:L.week+'-'+L.idx,v:{}};
+  const html=rows.map((r,i)=>{const key=r.me?'#me':r.n,was=lgSeen.v[key],gain=was!==undefined&&r.lp>was?r.lp-was:0;lgSeen.v[key]=r.lp;
+    return `<div class="lg-row ${zone(i)}${r.me?' me':''}${gain?' gained':''}"><span class="pos">${i+1}</span><span class="nm">${r.me?`${avaHTML()} ${myNameHTML()} <small class="ttl">${esc(myTitle())}</small>`:r.friend?`<span class="ava fr-${esc(r.frame||'none')}">${esc(r.ava)}</span> ${nameHTML(r.n,r.fx)} <small class="ttl">Freund</small>`:`<span class="ava fr-${esc(r.frame||'none')}">${esc(r.ava||'🙂')}</span> ${esc(r.n)}`}</span><span class="lp">${gain?`<small class="lg-gain">+${gain}</small>`:''}${r.lp.toLocaleString('de-DE')} XP</span></div>`+(i===promoSlots(L.idx)-1&&L.idx<LEAGUES.length-1?'<div class="lg-cut up">Aufstiegszone</div>':'')+(i===N-3&&L.idx>0?'<div class="lg-cut down">Abstiegszone</div>':'')}).join('');
+  return html;
+}
+// Solange die Liga offen ist, jede Minute nachsehen, ob Gegner eine Runde beendet haben
+setInterval(()=>{const t=$('#lgtable');if(!t||activity||document.visibilityState!=='visible'||$('.modal'))return;
+  if(Store.data.league.week!==weekKey()){go('league');return}t.innerHTML=lgTableHTML(standings(false))},6e4);
 /* ---------- Weltrangliste (Reiter auf der Liga-Seite) ---------- */
 let lgTab='league',worldCat='wpm';
 function lgHead(title,sub){return `<div class="page-head fr-head"><div><h1 class="ph">${title}</h1><p class="muted">${sub}</p></div>
