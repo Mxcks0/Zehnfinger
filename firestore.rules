@@ -23,6 +23,16 @@ service cloud.firestore {
       allow create, update, delete: if isMe(uid);
     }
 
+    // Community-Zusammenfassung (Weltrangliste, Wochen-Boss, Team-Liga …): ein einziges Dokument,
+    // das angemeldete Spieler lesen und höchstens stündlich neu berechnen.
+    match /stats/community {
+      allow read: if signedIn();
+      allow write: if signedIn()
+        && request.resource.data.players is list
+        && request.resource.data.best is map
+        && request.resource.data.t is number;
+    }
+
     // Kompletter Spielstand: nur der Spieler selbst.
     match /progress/{uid} {
       allow read, write: if isMe(uid);
