@@ -2,6 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.zehnfingernulllangeweile.de/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://www.zehnfingernulllangeweile.de/tipptest.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.zehnfingernulllangeweile.de/zehnfinger-system.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zehnfingernulllangeweile.de/tastaturschreiben-kinder.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zehnfingernulllangeweile.de/tippen-ueben-schule.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zehnfingernulllangeweile.de/impressum.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
   <url><loc>https://www.zehnfingernulllangeweile.de/datenschutz.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
 </urlset>
