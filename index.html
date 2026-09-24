@@ -2769,6 +2769,107 @@ button.comm-card{cursor:pointer}
 .adm-guests h3{margin:0 0 8px}
 .adm-guests .cards{margin-bottom:0}
 .adm-guests small{font-size:12px;color:var(--muted);font-weight:600}
+/* ================= 🎃 Halloween-Event ================= */
+:root{--hwo:#ff8a1f;--hwp:#9b5cff;--hwg:#58e89a}
+/* Deko überall (nur solange das Event läuft und die Jahreszeiten-Deko an ist) */
+body.hw .alogo::after{content:" 🎃"}
+body.hw .brand::after{content:"🎃";display:inline-block;font-size:.78em;margin-left:6px;animation:hwbob 3.2s ease-in-out infinite;vertical-align:1px}
+body.hw header.top{border-bottom-color:color-mix(in srgb,var(--hwo) 45%,var(--line));box-shadow:0 8px 24px -18px var(--hwo)}
+body.hw header.top::before{content:"";position:absolute;left:0;top:0;width:92px;height:92px;pointer-events:none;opacity:.35;z-index:-1;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%23d8d2ea' stroke-width='1.2'%3E%3Cpath d='M0 0L100 38M0 0L78 78M0 0L38 100'/%3E%3Cpath d='M0 22Q14 20 18 7M0 44Q28 40 36 14M0 66Q42 60 54 21M0 88Q56 80 72 28M13 13Q18 30 9 44M26 26Q34 50 18 66M40 40Q50 70 27 88'/%3E%3C/svg%3E") no-repeat}
+body.hw #sky::after{content:"";position:absolute;top:92px;right:7%;width:74px;height:74px;border-radius:50%;background:radial-gradient(circle at 36% 34%,#fffbe9,#f5dc8f 55%,#d9a441);box-shadow:0 0 60px 16px rgba(255,214,120,.18);opacity:.42}
+:root[data-theme="light"] body.hw #sky::after{opacity:.25}
+body.hw:not(.busy)::after{content:"🦇";position:fixed;top:22%;left:-60px;font-size:26px;pointer-events:none;z-index:2;opacity:.85;animation:hwbat 31s linear infinite}
+@keyframes hwbat{0%{transform:translate(0,0) scaleX(-1)}15%{transform:translate(18vw,-30px) scaleX(-1)}30%{transform:translate(36vw,20px) scaleX(-1)}45%,100%{transform:translate(calc(100vw + 120px),-40px) scaleX(-1)}}
+@keyframes hwbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-3px) rotate(6deg)}}
+body.hw .panel{border-color:color-mix(in srgb,var(--hwo) 12%,var(--line))}
+body.opt-noanim.hw .brand::after,body.opt-noanim.hw::after{animation:none}
+body.opt-noanim.hw::after{display:none}
+@media (prefers-reduced-motion:reduce){body.hw .brand::after{animation:none}body.hw::after{display:none}}
+/* Kürbis-Knopf in der Kopfzeile */
+.hw-btn{position:relative}
+.me-acts .hw-btn{background:color-mix(in srgb,var(--hwo) 16%,transparent);border-color:color-mix(in srgb,var(--hwo) 40%,transparent)}
+.hw-btn .tbadge{position:absolute;top:-6px;right:-6px;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--hwo);color:#1d1100;font-size:11px;font-weight:800;line-height:1}
+.hw-btn .tbadge[hidden]{display:none}
+/* Banner auf Startseite und Spiele-Seite */
+.hw-banner{font:inherit;color:var(--text);width:100%;display:flex;align-items:center;gap:14px;text-align:left;cursor:pointer;margin:0 0 16px;padding:14px 18px;border-radius:16px;
+  border:1px solid color-mix(in srgb,var(--hwo) 55%,var(--line));background:radial-gradient(90% 160% at 0% 0%,color-mix(in srgb,var(--hwo) 22%,transparent),transparent 60%),radial-gradient(70% 140% at 100% 100%,color-mix(in srgb,var(--hwp) 20%,transparent),transparent 60%),var(--surface);transition:transform .15s}
+.hw-banner:hover{transform:translateY(-1px)}
+.hw-b-i{font-size:34px;line-height:1;animation:hwbob 3s ease-in-out infinite}
+.hw-b-t{display:grid;flex:1;min-width:0}
+.hw-b-t b{font-size:17px}
+.hw-b-t span{font-size:13px;color:var(--muted)}
+.hw-b-p{display:grid;gap:5px;font-size:12px;color:var(--muted);min-width:130px}
+.hw-b-p b{color:var(--text)}
+.hw-b-p i{display:block;height:6px;border-radius:3px;background:var(--bg);overflow:hidden;position:relative}
+.hw-b-p i::after{content:"";position:absolute;inset:0;width:var(--p);background:linear-gradient(90deg,var(--hwo),var(--hwp));border-radius:3px}
+.hw-b-go{font-weight:800;color:var(--hwo);white-space:nowrap}
+.hl-row+.hw-banner,.gh+.hw-banner{margin-top:4px}
+/* Event-Seite */
+.hw-page{display:grid;gap:16px}
+.hw-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:22px;border-radius:20px;border:1px solid color-mix(in srgb,var(--hwo) 45%,var(--line));
+  background:radial-gradient(60% 120% at 100% 0%,color-mix(in srgb,var(--hwo) 26%,transparent),transparent 70%),radial-gradient(60% 120% at 0% 100%,color-mix(in srgb,var(--hwp) 24%,transparent),transparent 70%),var(--surface)}
+.hw-hero p{margin:0;max-width:60ch}
+.hw-hero .ph{margin:2px 0 6px}
+.hw-kick{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--hwo)}
+.hw-pts{display:grid;justify-items:center;padding:10px 18px;border-radius:14px;background:color-mix(in srgb,var(--bg) 60%,transparent);border:1px solid var(--line)}
+.hw-pts b{font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.hw-pts span{font-size:13px;color:var(--muted)}
+.hw-games{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.hw-game{font:inherit;color:var(--text);text-align:left;display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;cursor:pointer;border:1px solid var(--line);background:var(--surface);transition:border-color .15s,transform .15s}
+.hw-game:hover{border-color:var(--hwo);transform:translateY(-1px)}
+.hw-g-i{font-size:34px;width:58px;height:58px;display:grid;place-items:center;border-radius:14px;background:color-mix(in srgb,var(--hwp) 18%,transparent);flex:none}
+.hw-g-t{display:grid;gap:2px;flex:1;min-width:0}
+.hw-g-t b{font-size:17px}
+.hw-g-t span{font-size:13px;color:var(--muted)}
+.hw-steps{display:flex;gap:4px;flex:none}
+.hw-steps i{font-style:normal;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:var(--surface2);border:1px solid var(--line);font-size:15px}
+.hw-steps i.ok{background:color-mix(in srgb,var(--hwg) 22%,transparent);border-color:var(--hwg);color:var(--hwg);font-weight:800}
+.hw-pass-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.hw-pass-h h2{margin:0 0 2px}
+.hw-pass-h p{margin:0}
+.hw-bar{height:10px;border-radius:5px;background:var(--bg);margin:12px 0 14px;overflow:hidden;position:relative}
+.hw-bar i{position:absolute;inset:0;width:var(--p);border-radius:5px;background:linear-gradient(90deg,var(--hwo),var(--hwp));transition:width .6s}
+.hw-bar.lock i{background:var(--muted)}
+.hw-tiers{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.hw-tiers.locked{opacity:.55;filter:saturate(.4)}
+.hw-tier{display:grid;justify-items:center;text-align:center;gap:4px;padding:12px 8px 10px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);position:relative;min-height:128px;align-content:start}
+.hw-tier.item{border-color:color-mix(in srgb,var(--hwp) 45%,var(--line))}
+.hw-tier.ready{border-color:var(--hwo);box-shadow:0 0 0 1px var(--hwo),0 0 18px -6px var(--hwo);animation:hwready 1.8s ease-in-out infinite}
+@keyframes hwready{50%{box-shadow:0 0 0 1px var(--hwo),0 0 26px -4px var(--hwo)}}
+.hw-tier.got{opacity:.62}
+.hw-n{position:absolute;top:6px;left:8px;font-size:11px;font-weight:800;color:var(--muted)}
+.hw-r{font-size:30px;line-height:1.2;min-height:40px;display:grid;place-items:center}
+.hw-r .ava{font-size:22px}
+.hw-rt{font-size:12px;color:var(--muted);line-height:1.3;min-height:2.6em}
+.hw-s{font-size:12px;font-weight:700;color:var(--hwg)}
+.hw-s.lock{color:var(--muted);font-weight:600}
+.hw-tip{margin:12px 0 0}
+.hw-shop h3{margin:0 0 10px}
+.hw-shop-r{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hw-shop-r>span:not(.ava){display:grid;margin-right:14px}
+.hw-shop-r .btn{margin-left:auto}
+.hw-ghosts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.hw-ghost{font:inherit;color:var(--text);display:grid;justify-items:center;gap:3px;padding:14px 8px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);cursor:pointer}
+.hw-ghost:hover{border-color:var(--hwo)}
+.hw-ghost>span:first-child{font-size:34px;animation:hwbob 2.6s ease-in-out infinite}
+.hw-intro{text-align:center}
+.hw-intro-i{font-size:64px;line-height:1;animation:hwbob 2.4s ease-in-out infinite}
+.hw-intro .acts{justify-content:center}
+.hw-gain{color:var(--hwo);font-weight:800}
+.xpgain .n.hw-gain{color:var(--hwo)}
+.hw-auth{margin:0 0 4px;padding:9px 12px;border-radius:12px;font-size:14px;color:var(--text);border:1px solid color-mix(in srgb,var(--hwo) 50%,var(--line));background:color-mix(in srgb,var(--hwo) 12%,var(--surface))}
+.hw-auth[hidden]{display:none}
+.hw-over{text-align:center;padding:30px}
+.track.hwtrack .road{background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--hwp) 14%,var(--surface2)) 0 22px,var(--surface2) 22px 44px)}
+/* Exklusive Rahmen und Namenseffekt */
+.fr-pumpkin{box-shadow:0 0 0 2px #ff8a1f,0 0 0 4px #3a2208,0 0 14px rgba(255,138,31,.7)}
+.fr-spooky{box-shadow:0 0 0 2px #9b5cff,0 0 14px rgba(88,232,154,.6);animation:frspooky 2.4s ease-in-out infinite alternate}
+@keyframes frspooky{to{box-shadow:0 0 0 2px #58e89a,0 0 20px rgba(155,92,255,.75)}}
+.fr-cobweb{box-shadow:0 0 0 2px #d8d2ea,0 0 0 4px transparent,0 0 0 5px rgba(216,210,234,.45)}
+.nfx-spooky{background-image:linear-gradient(90deg,#9b5cff,#58e89a,#ff8a1f,#9b5cff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;animation:nfshine 4s linear infinite;filter:drop-shadow(0 0 5px rgba(155,92,255,.45))}
+@media (max-width:640px){.hw-game{flex-wrap:wrap;gap:10px 12px;padding:14px}.hw-g-i{width:46px;height:46px;font-size:26px}.hw-g-t{flex:1 1 calc(100% - 60px)}.hw-steps{padding-left:58px}.hw-hero{padding:18px}.hw-banner{flex-wrap:wrap;gap:10px 12px}.hw-b-p{order:3;flex:1}.hw-b-go{order:4}.hw-ghosts{grid-template-columns:1fr}.hw-tiers{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
+@media (prefers-reduced-motion:reduce){.hw-b-i,.hw-intro-i,.hw-ghost>span:first-child,.hw-tier.ready,.fr-spooky{animation:none}}
+
 /* Entwickler: Schummler */
 #admbody>.panel+.panel{margin-top:14px}
 #admbody>.panel h3{margin:0 0 8px}
@@ -2787,6 +2888,7 @@ button.comm-card{cursor:pointer}
     <div class="alogo" id="authLogo">Zehnfinger</div>
     <h1 id="authTitle">Willkommen zurück</h1>
     <p class="wlead" id="authLead">Melde dich an, um dort weiterzumachen, wo du aufgehört hast.</p>
+    <p class="hw-auth" id="hwAuth" hidden>🎃 <b>Halloween-Event:</b> Kürbis-Boss, Geister-Rennen und Belohnungen, die es nur bis 31.10. gibt!</p>
 
     <div class="seg" role="tablist">
       <button id="tabLogin" data-mode="login" aria-pressed="true">Anmelden</button>
@@ -2827,7 +2929,7 @@ button.comm-card{cursor:pointer}
     <button class="btn big guest-btn" id="guestBtn">🎮 Erst mal ohne Konto ausprobieren</button>
     <p class="ahint" style="margin-top:6px">Als Gast spielst du sofort los. Später kannst du ein Konto erstellen – dein Fortschritt wird übernommen.</p>
     <a class="donate inline" href="https://www.paypal.com/paypalme/maxgrimberg" target="_blank" rel="noopener" aria-label="Mit PayPal spenden"><span class="dn-heart" aria-hidden="true">❤️</span><span class="dn-txt"><b>Gefällt dir Zehnfinger?</b><em>Unterstütze die Entwicklung</em></span><span class="dn-pp"><img src="img/paypal-logo.png" alt="PayPal" onerror="this.parentNode.textContent='PayPal'"></span></a>
-    <p class="alegal"><a href="tipptest.html">⌨️ Schneller Tipp-Test ohne Anmeldung</a> · <a href="zehnfinger-system.html">📖 Zehnfinger-System lernen</a> · <a href="tippen-ueben-schule.html">🏫 Für Schulen</a> ·<a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
+    <p class="alegal"><a href="tipptest.html">⌨️ Schneller Tipp-Test ohne Anmeldung</a> · <a href="zehnfinger-system.html">📖 Zehnfinger-System lernen</a> · <a href="tippen-ueben-schule.html">🏫 Für Schulen</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
   </div>
 </div>
 <textarea id="cap" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Eingabe"></textarea>
@@ -2850,6 +2952,7 @@ button.comm-card{cursor:pointer}
     </div>
     <div class="me-acts">
       <span class="onl" id="onl" hidden role="status"><i aria-hidden="true"></i><b>0</b><span class="onl-t">online</span></span>
+      <button class="icon hw-btn" id="hwb" hidden aria-label="Halloween-Event" title="Halloween-Event">🎃<span class="tbadge" id="hwc" hidden></span></button>
       <button class="icon inbox-btn" id="inbox" aria-label="Posteingang" title="Posteingang">📬<span class="tbadge" id="inbc" hidden></span></button>
       <button class="icon" id="gear" aria-label="Einstellungen" title="Einstellungen">⚙️</button>
       <button class="icon" id="logout" aria-label="Abmelden" title="Abmelden">🚪</button>
@@ -3461,6 +3564,7 @@ function recordSession(mode,label,st,extra={}){
   d.xp=(d.xp||0)+xp;const s=streak(d);d.bestStreak=Math.max(d.bestStreak||0,s);
   const newAch=checkAch(Object.assign({mode,label,st},extra));
   if(newAch.length){d.xp+=newAch.length*20;xp+=newAch.length*20}
+  try{hwOnRound(xp)}catch(e){console.warn('Halloween:',e)}
   if(window.zfGuest&&window.fbGuest)window.fbGuest.round().catch(()=>{});
   wkAdd(xp);wkcAdd(st.ok||0);d.hours=d.hours&&d.hours.length===24?d.hours:Array(24).fill(0);d.hours[new Date().getHours()]++;d.plays=d.plays||{};d.plays[mode]=(d.plays[mode]||0)+1;
   const mast=checkMastery(),wq=wqTrack({mode,st,xp,extra,goalMet:d.days[today]>=g}),chWon=chCheck(mode,extra);
@@ -3495,7 +3599,7 @@ function confetti(n=130){
   const c=document.createElement('canvas');c.className='confetti';document.body.appendChild(c);
   const dpr=devicePixelRatio||1,W=innerWidth,H=innerHeight;c.width=W*dpr;c.height=H*dpr;const x=c.getContext('2d');x.scale(dpr,dpr);
   const cols=['--f1','--f2','--f3','--f4','--f5','--caret'].map(css);
-  const st=Store.data.settings.confettiStyle||'classic',emo=['stars','hearts','coins','snow','party'].includes(st)?CONF_EMO[st]:null,fw=st==='fireworks',px=st==='pixel',snow=st==='snow';
+  const st=Store.data.settings.confettiStyle||'classic',emo=['stars','hearts','coins','snow','party'].includes(st)?CONF_EMO[st]:st==='classic'&&hwActive()?['🎃','🦇','👻','🍬']:null,fw=st==='fireworks',px=st==='pixel',snow=st==='snow';
   const origins=fw?[[W*.25,H*.35],[W*.5,H*.25],[W*.75,H*.38]]:null;
   const ps=Array.from({length:n},(_,k)=>{if(fw){const o=origins[k%3],a=Math.random()*Math.PI*2,s=150+Math.random()*350;return{x:o[0],y:o[1],vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:3+Math.random()*2,c:pick(cols),fw:1}}
     return{x:snow?Math.random()*W:W/2+(Math.random()-.5)*W*.35,y:snow?-20-Math.random()*H*.5:H*.4,vx:snow?(Math.random()-.5)*60:(Math.random()-.5)*1000,vy:snow?60+Math.random()*80:-Math.random()*800-250,r:Math.random()*7+5,a:Math.random()*6,va:(Math.random()-.5)*14,c:pick(cols),e:emo?pick(emo):null}});
@@ -3738,12 +3842,12 @@ $$('.tab').forEach(b=>b.onclick=()=>go(b.dataset.tab));
 let profSub='ach';
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(b&&b.closest('.subtabs')){profSub=b.dataset.p;go(profSub)}});
 function profileHead(sub){profSub=sub;currentTab=sub;}
-function setTab(t){currentTab=t;const gb=$('#gear');if(gb)gb.classList.toggle('on',t==='settings');const nt=(t==='ach'||t==='stats'||t==='admin')?'profile':t==='online'?'games':t;$$('.tab').forEach(b=>{if(b.dataset.tab===nt){b.setAttribute("aria-current","page");const n=b.parentNode;if(n.scrollWidth>n.clientWidth)n.scrollLeft+=b.getBoundingClientRect().left-n.getBoundingClientRect().left-n.clientWidth/2+b.offsetWidth/2;tabsEnd()}else b.removeAttribute('aria-current')})}
+function setTab(t){currentTab=t;const gb=$('#gear');if(gb)gb.classList.toggle('on',t==='settings');const nt=(t==='ach'||t==='stats'||t==='admin')?'profile':t==='online'||t==='halloween'?'games':t;$$('.tab').forEach(b=>{if(b.dataset.tab===nt){b.setAttribute("aria-current","page");const n=b.parentNode;if(n.scrollWidth>n.clientWidth)n.scrollLeft+=b.getBoundingClientRect().left-n.getBoundingClientRect().left-n.clientWidth/2+b.offsetWidth/2;tabsEnd()}else b.removeAttribute('aria-current')})}
 /* Handy: Reiter wischbar; der Rand blendet aus, solange rechts noch weitere Reiter kommen */
 function tabsEnd(){const n=$('nav.tabs');if(n)n.classList.toggle('at-end',n.scrollLeft+n.clientWidth>=n.scrollWidth-4)}
 $('nav.tabs').addEventListener('scroll',tabsEnd,{passive:true});addEventListener('resize',tabsEnd);
 function show(fn){if(cleanup){cleanup();cleanup=null}$$('.modal').forEach(m=>m.remove());setHandler(null);activity=false;main.innerHTML='';fn();document.body.classList.toggle('busy',activity);window.scrollTo(0,0);if(!activity&&Store.data.league.pending&&Store.data.welcomed)setTimeout(showLeaguePending,300)}
-function go(tab){if(window.zfGuest&&(tab==='friends'||tab==='online')){needAccount(tab==='online'?'Online-Duelle':'Freunde, Teams und Geschenke');return}leagueRollover();show(()=>{setTab(tab);({lessons:viewLessons,free:viewFree,games:viewGames,ach:()=>{profileHead('ach');viewAch()},stats:()=>{profileHead('stats');viewStats()},league:()=>{main.innerHTML='';viewLeague()},admin:()=>{profileHead('admin');viewAdmin()},profile:()=>{profileHead(profSub);(profSub==='stats'?viewStats:profSub==='admin'?viewAdmin:viewAch)()},settings:viewSettings,shop:viewShop,friends:viewFriends,online:viewOnline})[tab]()})}
+function go(tab){if(window.zfGuest&&(tab==='friends'||tab==='online')){needAccount(tab==='online'?'Online-Duelle':'Freunde, Teams und Geschenke');return}leagueRollover();show(()=>{setTab(tab);({lessons:viewLessons,free:viewFree,games:viewGames,ach:()=>{profileHead('ach');viewAch()},stats:()=>{profileHead('stats');viewStats()},league:()=>{main.innerHTML='';viewLeague()},admin:()=>{profileHead('admin');viewAdmin()},profile:()=>{profileHead(profSub);(profSub==='stats'?viewStats:profSub==='admin'?viewAdmin:viewAch)()},settings:viewSettings,shop:viewShop,friends:viewFriends,online:viewOnline,halloween:viewHalloween})[tab]()})}
 function onRemoteLoaded(){applySettings();refreshMe();if(!activity)go(currentTab)}
 function modal(html){const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="dlg" role="dialog" aria-modal="true">${html}</div>`;document.body.appendChild(m);return m}
 const starsHTML=(n,cls='stars')=>`<span class="${cls}" aria-label="${n} von 3 Sternen">${[0,1,2].map(i=>`<span class="${i<n?'':'off'}" style="--d:${.25+i*.18}s">★</span>`).join('')}</span>`;
@@ -3752,7 +3856,7 @@ const todaySecs=()=>Store.data.days[dayKey()]||0;
 const bestWpm=()=>Store.data.history.reduce((a,h)=>Math.max(a,TYPING.includes(h.mode)&&h.mode!=='sudden'?h.wpm:0),0);
 
 /* ---------- Header status ---------- */
-$('#hc').onclick=()=>go('shop');$('#inbox').onclick=()=>inboxModal();
+$('#hc').onclick=()=>go('shop');$('#hwb').onclick=()=>go('halloween');$('#inbox').onclick=()=>inboxModal();
 $('#hl').onclick=()=>go('ach');$('#gear').onclick=()=>go('settings');$('#hsk').onclick=()=>go('ach');
 $('#logout').onclick=()=>logout();
 /* Spendenfläche: ✕ verkleinert sie zu einem Herz, ein Klick auf das Herz klappt sie wieder auf */
@@ -3813,7 +3917,7 @@ function viewLessons(){
       <h3>${esc(l.t)}</h3>${keys?`<div class="keys">${keys}</div>`:`<p>${esc(l.d)}</p>`}
       <span class="foot">${starsHTML(p.stars||0)}<span>${p.wpm?`${p.wpm} WPM`:`Ziel ${l.target}`}</span></span></button>`};
   const sec=secStats.find(x=>x.id===courseSel);
-  main.innerHTML=`<section class="home${firstLoad?' intro':''}">
+  main.innerHTML=`<section class="home${firstLoad?' intro':''}">${hwBanner()}
     <div class="home-top">
       <h1>${colorize('Zehn Finger. Null Langeweile.')}</h1>
       <button class="next-card" id="cont"><span class="muted small">Weiter mit</span><b>Lektion ${ri+1}: ${esc(R.t)}</b><span class="go">Starten</span></button>
@@ -3850,7 +3954,7 @@ function practice(cfg){
       ghostAt=g?(el,len)=>{const ms=el*1000;let lo=0,hi=g.times.length;while(lo<hi){const m=(lo+hi)>>1;if(g.times[m]<=ms)lo=m+1;else hi=m}return lo/len}:null}
     main.innerHTML=`<section${cfg.blind?' class="blindsec"':''}>
       <div class="prac-head"><button class="btn ghost small" id="back">Zurück</button><div><h2>${esc(cfg.title)}${cfg.tab==='games'&&cfg.mode!=='code'&&cfg.mode!=='tour'?langBadge():''}</h2><p class="muted">${esc(cfg.sub||'')}</p></div></div>
-      ${cfg.mode==='race'||cfg.mode==='ghost'||cfg.mode==='duel'||cfg.mode==='online'?`<div class="track${cfg.mode==='online'?' online':''}"><div class="lane"><span class="who">Du</span><div class="road"><i class="car" id="cy">${esc(S.car)}</i></div></div><div class="lane"><span class="who">${esc(laneLabel)}</span><div class="road"><i class="car${cfg.mode==='ghost'?' ghostcar':''}" id="cg">${cfg.mode==='ghost'?'👻':cfg.mode==='duel'?'🤖':cfg.mode==='online'?esc(cfg.oppCar||'🚙'):'🚙'}</i></div></div></div>`:''}
+      ${cfg.mode==='race'||cfg.mode==='hwrace'||cfg.mode==='ghost'||cfg.mode==='duel'||cfg.mode==='online'?`<div class="track${cfg.mode==='hwrace'?' hwtrack':''}${cfg.mode==='online'?' online':''}"><div class="lane"><span class="who">Du</span><div class="road"><i class="car" id="cy">${esc(S.car)}</i></div></div><div class="lane"><span class="who">${esc(laneLabel)}</span><div class="road"><i class="car${cfg.mode==='ghost'||cfg.mode==='hwrace'?' ghostcar':''}" id="cg">${cfg.mode==='hwrace'?esc(cfg.oppIcon||'👻'):cfg.mode==='ghost'?'👻':cfg.mode==='duel'?'🤖':cfg.mode==='online'?esc(cfg.oppCar||'🚙'):'🚙'}</i></div></div></div>`:''}
       <div class="live"><div class="st-wpm"><b id="lw">0</b><span>WPM</span></div><div class="st-cpm"><b id="lc">0</b><span>Anschläge/Min</span></div><div class="st-acc"><b id="la">100</b><span>% Genauigkeit</span></div><div class="combo st-combo"><b id="lcb">0</b><span>Serie</span></div><div class="st-time"><b id="lt">${cfg.timeLimit?fmtTime(cfg.timeLimit):'0:00'}</b><span>${cfg.timeLimit?'übrig':'Zeit'}</span></div><div class="bar st-bar"><i id="lp"></i></div>${S.pet&&S.pet!=='none'?`<div class="pet" id="pet" title="${esc(PET_NAMES[S.pet]||'')}">${esc(S.pet)}</div>`:''}</div>
       <div class="typebox${cfg.code?' codebox':''}${cfg.blind?' blind':''}" id="tb"><div id="tv"></div><div class="focus-hint">Klicke hier und tippe los</div></div>
       <div class="toggles">${cfg.hideHelp?'<span>In dieser Übung ohne Tastatur und Hände</span>':`<label><input type="checkbox" id="tkb" ${S.kb?'checked':''}> Tastatur anzeigen</label><label><input type="checkbox" id="thd" ${S.hands?'checked':''}> Hände anzeigen</label>`}
@@ -3895,7 +3999,7 @@ function practice(cfg){
       upd(st);if(cfg.onTick)cfg.onTick(typer.i/text.length,st);
     },200);
     let raf=0;
-    if(cfg.mode==='race'||cfg.mode==='ghost'||cfg.mode==='duel'||cfg.mode==='online'){
+    if(cfg.mode==='race'||cfg.mode==='hwrace'||cfg.mode==='ghost'||cfg.mode==='duel'||cfg.mode==='online'){
       const cy=$('#cy'),cg=$('#cg');
       const pos=(el,p)=>el.style.left=`calc(${p*100}% - ${p*2.2}em)`;
       if(!ghostAt&&!cfg.oppPos)cg.style.opacity=.25;
@@ -3986,6 +4090,13 @@ function practice(cfg){
         title=celebrate?'Neuer Rekord!':st.acc>=95?'Kein Knoten in den Fingern!':st.acc>=85?'Fast ohne Verknoten':'Da haben sich die Finger verknotet';
         note=`Dein Rekord: ${d.high.tongue||0} WPM${st.acc<90?' (Rekorde zählen ab 90 % Genauigkeit)':''}. Jetzt einmal laut vorlesen – schaffst du es ohne Versprecher?`;
         btns=[['Nächster Zungenbrecher',()=>practice(tongueCfg())]];
+      }else if(cfg.mode==='hwrace'){
+        const ghostSecs=text.length/(cfg.opp*5/60),valid=st.acc>=85,won=valid&&st.secs<=ghostSecs&&st.progress>=1,h=hwData(),first=won&&!h.ghosts[cfg.ghostId];
+        if(won){if(first)h.ghosts[cfg.ghostId]=1;if(hwActive())hwAdd(first?cfg.ghostPts:15)}
+        extra.bonus=won?Math.round(cfg.opp/2):0;celebrate=won;
+        title=!valid?'Der Geist lacht dich aus':won?(first?'Geist besiegt!':'Wieder gewonnen!'):'Der Geist war schneller';
+        note=!valid?`Unter 85 % Genauigkeit zählt das Rennen nicht. Du hattest ${st.acc.toFixed(0)} %.`:won?`Du warst ${(ghostSecs-st.secs).toFixed(1)} Sekunden schneller. ${first?`Erster Sieg gegen diesen Geist: +${cfg.ghostPts} 🎃`:'+15 🎃'}`:`Der Geist war ${(st.secs-ghostSecs).toFixed(1)} Sekunden vorn. Versuch es nochmal!`;
+        btns=[['Nochmal',()=>practice(cfg)],['Anderer Geist',()=>{$('.modal').forEach(x=>x.remove());go('halloween');setTimeout(hwRaceSetup,80)}]];
       }else if(cfg.mode==='race'){
         const ghostSecs=text.length/(cfg.opp*5/60);const valid=st.acc>=85,won=valid&&st.secs<=ghostSecs&&st.progress>=1;
         title=!valid?'Rennen ungültig':won?'Gewonnen!':'Knapp verloren';note=!valid?`Unter 85 % Genauigkeit zählt ein Rennen nicht. Du hattest ${st.acc.toFixed(0)} %.`:won?`Du warst ${(ghostSecs-st.secs).toFixed(1)} Sekunden schneller.`:`Dein Gegner war ${(st.secs-ghostSecs).toFixed(1)} Sekunden vorn.`;
@@ -4003,7 +4114,7 @@ function practice(cfg){
       const li=levelInfo(d.xp);
       const m=modal(`<h3>${title}</h3>${stars!==null?starsHTML(stars,'big-stars'):''}
         <div class="res"><div><b id="r1">0</b><span>WPM</span></div><div><b id="r2">0</b><span>Anschläge/Min</span></div><div><b id="r3">0</b><span>Genauigkeit</span></div><div><b>${fmtTime(st.secs)}</b><span>Zeit</span></div></div>
-        ${info?`<div class="xpgain"><span class="n">+<span id="rxp">0</span> XP</span><span class="n coins">+${info.coins} 🪙</span><span class="xpbar"><i id="rbar" style="--p:${info.levelUp?0:info.beforeInto.into/info.beforeInto.need*100}%"></i></span><span class="muted small">Lv ${li.level}</span>${info.levelUp?`<span class="lvup">Level ${info.level}!</span>`:''}</div>`:''}
+        ${info?`<div class="xpgain"><span class="n">+<span id="rxp">0</span> XP</span><span class="n coins">+${info.coins} 🪙</span>${hwGainTake().replace('hw-gain','n hw-gain')}<span class="xpbar"><i id="rbar" style="--p:${info.levelUp?0:info.beforeInto.into/info.beforeInto.need*100}%"></i></span><span class="muted small">Lv ${li.level}</span>${info.levelUp?`<span class="lvup">Level ${info.level}!</span>`:''}</div>`:''}
         ${note?`<p class="note" style="margin-top:14px">${note}</p>`:''}
         ${info&&info.newAch.length?`<div class="ach-mini">${info.newAch.map(a=>`<span>${a.i} ${esc(a.n)}</span>`).join('')}</div>`:''}
         <div class="acts">${btns.map((b,i)=>`<button class="btn${i===primary?' primary':''}" data-b="${i}">${b[0]}</button>`).join('')}</div>
@@ -4318,6 +4429,7 @@ function viewGames(){
       <div><h1 class="ph">Spiele</h1><p class="muted small">${pool.length+GAMES_TOP.size-1} Spiele · 🏅 ${medalCount()} Medaillen</p></div>
       <div class="gh-r"><label class="gsearch"><span aria-hidden="true">🔍</span><input id="gq" type="search" placeholder="Spiel suchen …" autocomplete="off" value="${esc(gameQuery)}"></label>
         <div class="seg small" id="glang"><button data-l="de" aria-pressed="${!isEN()}" title="Deutsche Spieltexte">DE</button><button data-l="en" aria-pressed="${isEN()}" title="Englische Spieltexte">EN</button></div></div></div>
+    ${hwBanner()}
     <div class="hl-row">
       ${hi('hdaily','hl-daily','📅','Tägliche Challenge',done?`Heute: ${D.rec(d).replace('Heute ','')}`:'Neuer Text wartet',done?'Nochmal':'Spielen',done?' done':'')}
       ${hi('htd','hl-td','🟩','Tippdle',tdT&&tdT.done?(tdT.won?`Gelöst in ${tdT.g.length}/6`:'Heute nicht geschafft'):'Wort des Tages',tdT&&tdT.done?'Ansehen':'Raten',tdT&&tdT.done?' done':'')}
@@ -4607,11 +4719,11 @@ function gameShell(title,desc,hud){
 }
 function floatText(host,text,cls=''){const f=document.createElement('span');f.className='floaty '+cls;f.textContent=text;f.style.left=(35+Math.random()*30)+'%';host.appendChild(f);setTimeout(()=>f.remove(),1100)}
 function bump(el,cls='hitfx'){if(!el||reduced())return;el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
-function gameOverModal(title,lines,xp,again){
-  const m=modal(`<h3>${title}</h3>${lines.map(l=>`<p class="muted" style="margin:4px 0">${l}</p>`).join('')}${xp?`<p style="color:var(--caret);font-weight:700;margin-top:10px">+${xp} XP, +${coinsFor(xp)} 🪙</p>`:''}
-    <div class="acts"><button class="btn primary" id="ga">Nochmal</button><button class="btn" id="gb">Zu den Spielen</button><button class="btn ghost" id="gsh">📤 Teilen</button></div>`);
-  $('#ga',m).onclick=again;$('#gb',m).onclick=()=>go('games');$('#gsh',m).onclick=()=>shareFromLines(curGameName||'Zehnfinger',lines);
-  setHandler({char(){},enter:again,esc:()=>go('games')});
+function gameOverModal(title,lines,xp,again,back='games'){
+  const m=modal(`<h3>${title}</h3>${lines.map(l=>`<p class="muted" style="margin:4px 0">${l}</p>`).join('')}${xp?`<p style="color:var(--caret);font-weight:700;margin-top:10px">+${xp} XP, +${coinsFor(xp)} 🪙${hwGainTake()}</p>`:''}
+    <div class="acts"><button class="btn primary" id="ga">Nochmal</button><button class="btn" id="gb">${back==='halloween'?'Zum Event':'Zu den Spielen'}</button><button class="btn ghost" id="gsh">📤 Teilen</button></div>`);
+  $('#ga',m).onclick=again;$('#gb',m).onclick=()=>go(back);$('#gsh',m).onclick=()=>shareFromLines(curGameName||'Zehnfinger',lines);
+  setHandler({char(){},enter:again,esc:()=>go(back)});
 }
 
 /* ---------- Boss-Kampf ---------- */
@@ -4622,11 +4734,13 @@ const BOSSES=[
   {n:'Satzzeichen-Drache',e:'🐉',hp:300,atk:14,every:5.5,punct:true},
   {n:'Der Endgegner',e:'🤖',hp:400,atk:16,every:5,caps:true,punct:true}
 ];
-function bossGame(){
+/* o: eigene Boss-Liste (z. B. Halloween) mit Titel, Wörtern, Modus und onEnd(besiegte Bosse) */
+function bossGame(o={}){
   show(()=>{
-    activity=true;setTab('games');const d=Store.data;
-    const body=gameShell('Boss-Kampf','Jedes fehlerfrei getippte Wort trifft den Boss. Fehler kosten Lebenspunkte, und der Boss greift regelmäßig an. Ab einer Serie von 15 blockst du die Hälfte des Schadens.',
-      `<span>Boss <b id="bst">1</b>/5</span><span>Serie <b id="bcb">0</b></span><span>Schaden <b id="bdm">0</b></span><span class="rec">Rekord <b>${d.high.boss||0}/5</b></span>`);
+    activity=true;setTab(o.back||'games');const d=Store.data,LIST=o.list||BOSSES,NB=LIST.length,TITLE=o.title||'Boss-Kampf';
+    const body=gameShell(TITLE,o.desc||'Jedes fehlerfrei getippte Wort trifft den Boss. Fehler kosten Lebenspunkte, und der Boss greift regelmäßig an. Ab einer Serie von 15 blockst du die Hälfte des Schadens.',
+      `<span>Boss <b id="bst">1</b>/${NB}</span><span>Serie <b id="bcb">0</b></span><span>Schaden <b id="bdm">0</b></span>${o.list?'':`<span class="rec">Rekord <b>${d.high.boss||0}/5</b></span>`}`);
+    if(o.back)$('#back').onclick=()=>go(o.back);
     body.innerHTML=`<div class="arena" id="arena">
       <div class="fighter"><div class="avatar">${avaHTML('big')}</div><b>Du</b><div class="hpbar"><i id="php"></i></div><span class="muted small" id="phpt">100 / 100</span></div>
       <div class="vs">VS</div>
@@ -4634,8 +4748,8 @@ function bossGame(){
     </div>
     <div class="typebox" id="tb"><div id="tv"></div><div class="focus-hint">Klicke hier und tippe los</div></div>`;
     let stage=0,php=100,bhp=0,charge=0,ok=0,err=0,maxC=0,secs=0,curLen=0,bad=false,dmgT=0,running=false,ended=false;
-    const B=()=>BOSSES[stage];
-    const words=()=>{const b=B();return fill(()=>{let w=pick(gWordsBase(!!b.caps));if(b.punct&&Math.random()<.3)w+=pick([',','.','!','?',':']);return w},400)};
+    const B=()=>LIST[stage];
+    const words=()=>{const b=B();return fill(()=>{let w=pick((o.words||gWordsBase)(!!b.caps));if(b.punct&&Math.random()<.3)w+=pick([',','.','!','?',':']);return w},400)};
     const typer=new Typer($('#tv'),{errMode:()=>'continue',onKey});
     const ui=()=>{$('#php').style.width=Math.max(0,php)+'%';$('#phpt').textContent=`${Math.max(0,Math.round(php))} / 100`;
       $('#bhp').style.width=Math.max(0,bhp/B().hp*100)+'%';$('#bhpt').textContent=`${Math.max(0,Math.round(bhp))} / ${B().hp}`;$('#bch').style.width=charge*100+'%';
@@ -4654,18 +4768,19 @@ function bossGame(){
     const iv=setInterval(()=>{if(!running||!focused||!typer.start)return;secs+=.1;charge+=.1/B().every;
       if(charge>=1){charge=0;const block=(typer.combo||0)>=15;const dmg=block?Math.round(B().atk/2):B().atk;php-=dmg;floatText($('#arena').firstElementChild,'-'+dmg+(block?' geblockt':''),'bad');bump($('#arena'),'shake');Sound.hurt()}
       ui();if(php<=0)lose()},100);
-    function finishRun(title,lines){running=false;ended=true;d.high.boss=Math.max(d.high.boss||0,stage);
+    function finishRun(title,lines){running=false;ended=true;if(!o.list)d.high.boss=Math.max(d.high.boss||0,stage);
       const st={wpm:ok/5/(Math.max(secs,1)/60),acc:ok+err?ok/(ok+err)*100:100,secs,ok,err,typed:ok+err};
-      const info=ok>0?recordSession('boss','Boss-Kampf',st,{chars:ok,bonus:stage*40,maxCombo:maxC}):null;
-      gameOverModal(title,[...lines,`${Math.round(st.wpm)} WPM, ${st.acc.toFixed(0)} % Genauigkeit, ${dmgT} Schaden`],info&&info.xp,()=>bossGame())}
+      const info=ok>0?recordSession(o.mode||'boss',TITLE,st,{chars:ok,bonus:stage*40,maxCombo:maxC}):null;
+      const extra=o.onEnd?o.onEnd(stage):'';
+      gameOverModal(title,[...lines,`${Math.round(st.wpm)} WPM, ${st.acc.toFixed(0)} % Genauigkeit, ${dmgT} Schaden`,...(extra?[extra]:[])],info&&info.xp,()=>bossGame(o),o.back)}
     function win(){running=false;Sound.win();confetti(130);bump($('#bface'),'defeat');
-      if(stage===BOSSES.length-1){stage++;return setTimeout(()=>finishRun('Alle Bosse besiegt!',['Du hast den Endgegner geschlagen.']),700)}
-      const m=modal(`<h3>${B().n} besiegt!</h3><p class="muted">Du erholst dich um 30 Lebenspunkte. Der nächste Boss wartet: ${BOSSES[stage+1].e} ${BOSSES[stage+1].n}.</p><div class="acts"><button class="btn primary" id="nx">Weiterkämpfen</button></div>`);
-      const next=()=>{m.remove();stage++;php=Math.min(100,php+30);setup();setHandler({char:ch=>typer.input(ch),esc:()=>go('games')})};
-      $('#nx',m).onclick=next;setHandler({char(){},enter:next,esc:()=>go('games')})}
-    function lose(){if(ended)return;Sound.hurt();finishRun('Niederlage',[`${B().e} ${B().n} war zu stark. Du hast ${stage} von 5 Bossen besiegt.`])}
+      if(stage===NB-1){stage++;return setTimeout(()=>finishRun(o.list?`${LIST[NB-1].n} besiegt!`:'Alle Bosse besiegt!',[o.list?'Du hast alle Gegner geschlagen.':'Du hast den Endgegner geschlagen.']),700)}
+      const m=modal(`<h3>${B().n} besiegt!</h3><p class="muted">Du erholst dich um 30 Lebenspunkte. Der nächste Boss wartet: ${LIST[stage+1].e} ${LIST[stage+1].n}.</p><div class="acts"><button class="btn primary" id="nx">Weiterkämpfen</button></div>`);
+      const next=()=>{m.remove();stage++;php=Math.min(100,php+30);setup();setHandler({char:ch=>typer.input(ch),esc:()=>go(o.back||'games')})};
+      $('#nx',m).onclick=next;setHandler({char(){},enter:next,esc:()=>go(o.back||'games')})}
+    function lose(){if(ended)return;Sound.hurt();finishRun('Niederlage',[`${B().e} ${B().n} war zu stark. Du hast ${stage} von ${NB} Bossen besiegt.`])}
     setup();cleanup=()=>clearInterval(iv);
-    setHandler({char:ch=>typer.input(ch),esc:()=>go('games')});
+    setHandler({char:ch=>typer.input(ch),esc:()=>go(o.back||'games')});
   });
 }
 
@@ -5589,7 +5704,7 @@ function hangmanGame(){
 
 /* ---------- Views: Achievements & Level ---------- */
 /* ---------- Views: Stats ---------- */
-const MODE_LABEL={tongue:'Zungenbrecher',capital:'Hauptstadt-Quiz',reverse:'Rückwärts',escape:'Escape Room',coop:'Koop-Modus',isleboss:'Insel-Boss',tippdle:'Tippdle',dungeon:'Tipp-Dungeon',abc:'Alphabet-Sprint',emoji:'Emoji-Rätsel',detective:'Tipp-Detektiv',piano:'Tastatur-Klavier',blind:'Blindflug',chain:'Wortkette',typo:'Fehlerjagd',tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
+const MODE_LABEL={hwboss:'Kürbis-Boss',hwrace:'Geister-Rennen',tongue:'Zungenbrecher',capital:'Hauptstadt-Quiz',reverse:'Rückwärts',escape:'Escape Room',coop:'Koop-Modus',isleboss:'Insel-Boss',tippdle:'Tippdle',dungeon:'Tipp-Dungeon',abc:'Alphabet-Sprint',emoji:'Emoji-Rätsel',detective:'Tipp-Detektiv',piano:'Tastatur-Klavier',blind:'Blindflug',chain:'Wortkette',typo:'Fehlerjagd',tour:'Wochen-Turnier',bomb:'Bombe entschärfen',mole:'Maulwurf-Jagd',hangman:'Galgenraten',lesson:'Lektion',free:'Freies Üben',sixty:'60 Sekunden',timed:'Zeit-Challenge',sudden:'Sudden Death',race:'Rennen',rain:'Wortregen',blaster:'Wort-Blaster',code:'Code-Tippen',zombie:'Zombie-Angriff',tower:'Burgverteidigung',balloon:'Ballon-Platzen',duel:'KI-Duell',kitchen:'Küchen-Chaos',puzzle:'Satz-Puzzle',math:'Kopfrechnen',runner:'Endlos-Läufer',ladder:'Tempo-Leiter',anagram:'Buchstabensalat',gaps:'Lückentext',ghost:'Ghost-Rennen',daily:'Tägliche Challenge',boss:'Boss-Kampf',rhythm:'Rhythmus',blitz:'Blitztasten',memory:'Gedächtnis',story:'Story-Modus'};
 function chartSVG(h){
   const pts=h.slice(-40);if(pts.length<2)return '<p class="muted">Nach zwei Übungen erscheint hier dein Verlauf.</p>';
   const W=680,H=220,PL=34,PR=10,PT=12,PB=26;const max=Math.ceil(Math.max(20,...pts.map(p=>p.wpm))*1.15/10)*10;
@@ -5963,7 +6078,7 @@ function applyBgFx(){
 /* ---------- Shop & Economy ---------- */
 const RARITY={c:['Gewöhnlich','#9aa3b2'],r:['Selten','#6fb6ff'],e:['Episch','#b98cff'],l:['Legendär','#ffc857']};
 const SHOP_CATS=[
- {id:'pet',i:'🐾',n:'Haustiere',set:'pet',items:[['none','c',0,1],['🐶','c',200,2],['🐱','c',200,2],['🐰','c',300,3],['🐹','c',300,4],['🐤','c',350,5],['🦊','r',700,6],['🐧','r',700,7],['🐢','r',800,8],['🦜','r',900,9],['🐙','e',1500,11],['🐉','e',1600,12],['🦄','e',1800,14],['🦖','l',3000,16],['🐲','l',3200,18]]},
+ {id:'pet',i:'🐾',n:'Haustiere',set:'pet',items:[['none','c',0,1],['🐶','c',200,2],['🐱','c',200,2],['🐰','c',300,3],['🐹','c',300,4],['🐤','c',350,5],['🦊','r',700,6],['🐧','r',700,7],['🐢','r',800,8],['🦜','r',900,9],['🐙','e',1500,11],['🐉','e',1600,12],['🦄','e',1800,14],['🦖','l',3000,16],['🐲','l',3200,18],['🐈‍⬛','e',0,1,'hw']]},
  {id:'kb',i:'⌨️',n:'Tastaturen',set:'kbTheme',items:[['finger','c',0,1],['mono','c',300,3],['outline','r',600,5],['pastel','r',800,7],['retro','r',1000,9],['gameboy','e',1600,12],['wood','e',1800,14],['mech','e',2200,16],['neon','l',3500,20],['rgb','l',3800,17],['vintage','e',2400,1,'crate'],['crystal','l',4200,1,'crate'],['steampunk','l',4500,1,'crate']]},
  {id:'errorSound',i:'🔔',n:'Fehler-Sounds',set:'errSound',items:[['buzz','c',0,1],['knock','c',0,1],['beep','c',0,1],['none','c',0,1],['showbuzz','r',500,3],['airhorn','r',700,4],['wupwup','r',750,6],['glass','e',1100,8],['meow','e',1200,9],['trombone','e',1300,11],['yeet','l',2200,14]]},
  {id:'wordSkin',i:'🌈',n:'Wort-Effekte',set:'wordSkin',items:[['classic','c',0,1],['candy','r',600,3],['glow','r',650,4],['neon','r',700,5],['fire','e',1100,8],['rainbow','e',1200,9],['glitch','l',2400,14]]},
@@ -5976,22 +6091,22 @@ const SHOP_CATS=[
    ['snowfall','r',1200,6],['bubbles2','r',1300,7],['nebula','e',1900,10],['rgbwave','e',2000,11],['polar','e',2100,12],['lava','e',2300,13],['fireflies','e',2400,14],['synth','l',3200,15],['keyrain','l',3400,16],['warp','l',3800,18],['matrix','l',4200,20]]},
  {id:'trail',i:'✨',n:'Tipp-Effekte',set:'trail',items:[['none','c',0,1],['sparks','r',600,5],['bubbles','r',600,6],['pixels','e',1200,10],['hearts','e',1200,12],['notes','r',700,7],['stars','e',1300,13],['flames','l',2400,18]]},
  {id:'conf',i:'🎉',n:'Konfetti',set:'confettiStyle',items:[['classic','c',0,1],['stars','c',300,3],['hearts','c',300,4],['coins','r',700,7],['snow','r',700,8],['leaves','r',800,9],['pixel','e',1300,11],['party','e',1500,14],['fireworks','l',2500,1,'s14']]},
- {id:'car',i:'🚗',n:'Fahrzeuge',set:'car',items:[['🚗','c',0,1],['🛵','c',200,2],['🚲','c',200,3],['🚜','c',300,4],['🏎️','r',700,6],['🛹','r',700,7],['🏍️','r',800,8],['🚁','r',900,9],['⛵','e',1400,11],['🚂','e',1500,13],['🚀','e',1600,12],['🛸','e',1800,15],['🐉','l',3200,20],['🦄','l',2800,1,3]]},
- {id:'ava',i:'🙂',n:'Avatare',set:'avatar',items:[['🙂','c',0,1],['🧑‍💻','c',150,2],['🦊','c',250,3],['🐼','c',250,4],['🐸','c',300,5],['🐱','c',300,5],['🦉','r',600,6],['🐙','r',650,8],['🤖','r',700,7],['🧙','r',800,9],['🥷','r',900,10],['🦸','e',1500,13],['🦖','e',1600,14],['🐲','e',1700,16],['👽','e',1800,1,'boss5'],['👑','l',3000,1,9]]},
- {id:'frame',i:'🖼️',n:'Rahmen',set:'frame',items:[['none','c',0,1],['silver','c',300,3],['gold','r',800,7],['neon','r',900,9],['rainbow','e',1600,12],['fire','e',1900,15],['diamond','l',3000,1,9],['pulse','r',1100,6],['orbit','e',2200,11],['galaxy','l',3400,16]]},
- {id:'nfx',i:'💫',n:'Namenseffekte',set:'nameFx',items:[['none','c',0,1],['gold','r',900,5],['neon','r',1000,7],['ice','r',1100,8],['fire','e',1800,10],['rainbow','e',2200,12],['galaxy','l',3200,15],['glitch','l',3600,17]]},
+ {id:'car',i:'🚗',n:'Fahrzeuge',set:'car',items:[['🚗','c',0,1],['🛵','c',200,2],['🚲','c',200,3],['🚜','c',300,4],['🏎️','r',700,6],['🛹','r',700,7],['🏍️','r',800,8],['🚁','r',900,9],['⛵','e',1400,11],['🚂','e',1500,13],['🚀','e',1600,12],['🛸','e',1800,15],['🐉','l',3200,20],['🦄','l',2800,1,3],['🧹','e',0,1,'hw']]},
+ {id:'ava',i:'🙂',n:'Avatare',set:'avatar',items:[['🙂','c',0,1],['🧑‍💻','c',150,2],['🦊','c',250,3],['🐼','c',250,4],['🐸','c',300,5],['🐱','c',300,5],['🦉','r',600,6],['🐙','r',650,8],['🤖','r',700,7],['🧙','r',800,9],['🥷','r',900,10],['🦸','e',1500,13],['🦖','e',1600,14],['🐲','e',1700,16],['👽','e',1800,1,'boss5'],['👑','l',3000,1,9],['👻','r',800,1,'hwshop'],['🦇','r',0,1,'hw'],['🎃','e',0,1,'hw'],['🧛','e',0,1,'hw'],['🧟','l',0,1,'hw'],['💀','l',0,1,'hwboss']]},
+ {id:'frame',i:'🖼️',n:'Rahmen',set:'frame',items:[['none','c',0,1],['silver','c',300,3],['gold','r',800,7],['neon','r',900,9],['rainbow','e',1600,12],['fire','e',1900,15],['diamond','l',3000,1,9],['pulse','r',1100,6],['orbit','e',2200,11],['galaxy','l',3400,16],['cobweb','r',1200,1,'hwshop'],['pumpkin','e',0,1,'hw'],['spooky','l',0,1,'hw']]},
+ {id:'nfx',i:'💫',n:'Namenseffekte',set:'nameFx',items:[['none','c',0,1],['gold','r',900,5],['neon','r',1000,7],['ice','r',1100,8],['fire','e',1800,10],['rainbow','e',2200,12],['galaxy','l',3200,15],['glitch','l',3600,17],['spooky','e',0,1,'hw']]},
  {id:'unbox',i:'🎆',n:'Unbox-Effekte',set:'unboxFx',items:[['classic','c',0,1],['sparkles','r',900,1,'crate'],['confetti','e',1800,1,'crate'],['goldshower','l',3500,1,'crate']]},
  {id:'fan',i:'🎺',n:'Siegesklänge',set:'fanfare',items:[['classic','c',0,1],['chime','c',250,3],['arcade','r',600,6],['bells','r',700,8],['orchestra','e',1500,12],['synth','l',2600,18]]},
- {id:'title',i:'🏷️',n:'Titel',set:'title',items:[['auto','c',0,1],['Tastenflüsterer','c',300,3],['Frühaufsteher','r',600,1,'early'],['Nachteule','r',600,1,'night'],['Blitzfinger','r',800,8],['Wortakrobat','r',900,10],['Code-Magier','e',1500,1,'polyglot'],['Bossjäger','e',1600,1,'boss5'],['Unaufhaltsam','e',1800,1,'s14'],['Wortschmied','r',900,12],['Tippmaschine','e',1800,15],['Rhythmusgott','e',1600,1,'rhythm'],['Geisterjäger','e',1500,1,'ghost'],['Legende der Tasten','l',4000,1,13]]},
+ {id:'title',i:'🏷️',n:'Titel',set:'title',items:[['auto','c',0,1],['Tastenflüsterer','c',300,3],['Frühaufsteher','r',600,1,'early'],['Nachteule','r',600,1,'night'],['Blitzfinger','r',800,8],['Wortakrobat','r',900,10],['Code-Magier','e',1500,1,'polyglot'],['Bossjäger','e',1600,1,'boss5'],['Unaufhaltsam','e',1800,1,'s14'],['Wortschmied','r',900,12],['Tippmaschine','e',1800,15],['Rhythmusgott','e',1600,1,'rhythm'],['Geisterjäger','e',1500,1,'ghost'],['Legende der Tasten','l',4000,1,13],['Gruselfinger','r',0,1,'hw'],['Kürbiskönig','l',0,1,'hw']]},
 ];
-const PET_NAMES={none:'Kein Haustier','🐶':'Hund','🐱':'Katze','🐰':'Hase','🐹':'Hamster','🐤':'Küken','🦊':'Fuchs','🐧':'Pinguin','🐢':'Schildkröte','🦜':'Papagei','🐙':'Oktopus','🐉':'Drache','🦄':'Einhorn','🦖':'T-Rex','🐲':'Drachenbaby'};
-const CAR_NAMES={'🏍️':'Motorrad','⛵':'Segelboot','🚂':'Dampflok','🚗':'Kompaktwagen','🛵':'Roller','🚲':'Fahrrad','🚜':'Traktor','🏎️':'Rennwagen','🛹':'Skateboard','🚁':'Helikopter','🚀':'Rakete','🛸':'Ufo','🐉':'Drache','🦄':'Einhorn'};
-const AVA_NAMES={'🐱':'Katze','🦉':'Eule','🐙':'Krake','🦖':'Dino','🙂':'Standard','🧑‍💻':'Coder','🦊':'Fuchs','🐼':'Panda','🐸':'Frosch','🤖':'Roboter','🧙':'Magier','🥷':'Ninja','🦸':'Held','🐲':'Drachling','👽':'Alien','👑':'Krone'};
+const PET_NAMES={none:'Kein Haustier','🐶':'Hund','🐱':'Katze','🐰':'Hase','🐹':'Hamster','🐤':'Küken','🦊':'Fuchs','🐧':'Pinguin','🐢':'Schildkröte','🦜':'Papagei','🐙':'Oktopus','🐉':'Drache','🦄':'Einhorn','🦖':'T-Rex','🐲':'Drachenbaby','🐈‍⬛':'Schwarze Katze'};
+const CAR_NAMES={'🏍️':'Motorrad','⛵':'Segelboot','🚂':'Dampflok','🚗':'Kompaktwagen','🛵':'Roller','🚲':'Fahrrad','🚜':'Traktor','🏎️':'Rennwagen','🛹':'Skateboard','🚁':'Helikopter','🚀':'Rakete','🛸':'Ufo','🐉':'Drache','🦄':'Einhorn','🧹':'Hexenbesen'};
+const AVA_NAMES={'🐱':'Katze','🦉':'Eule','🐙':'Krake','🦖':'Dino','🙂':'Standard','🧑‍💻':'Coder','🦊':'Fuchs','🐼':'Panda','🐸':'Frosch','🤖':'Roboter','🧙':'Magier','🥷':'Ninja','🦸':'Held','🐲':'Drachling','👽':'Alien','👑':'Krone','👻':'Gespenst','🦇':'Fledermaus','🎃':'Kürbis','🧛':'Vampir','🧟':'Zombie','💀':'Knochenkönig'};
 const BG_NAMES={snowfall:'Schneefall',bubbles2:'Aufsteigende Blasen',nebula:'Nebula',rgbwave:'Farbrausch',polar:'Nordlicht',lava:'Lavalampe',fireflies:'Glühwürmchen',synth:'Synthwave',keyrain:'Tastenregen',warp:'Warp-Speed',matrix:'Code-Regen',waves:'Wellen',hex:'Waben',none:'Schlicht',dots:'Punkte',grid:'Raster',lines:'Streifen',stars:'Sternenhimmel',aurora:'Polarlicht',keys:'Tastenmuster'};
 const TRAIL_NAMES={notes:'Noten',stars:'Sterne',none:'Kein Effekt',sparks:'Funken',bubbles:'Blasen',pixels:'Pixel',hearts:'Herzen',flames:'Flammen'};
 const CONF_NAMES={leaves:'Herbstlaub',classic:'Klassisch',stars:'Sterne',hearts:'Herzen',coins:'Münzregen',snow:'Schnee',pixel:'Pixel',party:'Party',fireworks:'Feuerwerk'};
-const NFX_NAMES={none:'Kein Effekt',gold:'Goldglanz',neon:'Neon-Puls',ice:'Eiskristall',fire:'Feuerschrift',rainbow:'Regenbogen',galaxy:'Galaxie',glitch:'Glitch'};
-const FRAME_NAMES={pulse:'Puls',orbit:'Orbit',galaxy:'Galaxie',none:'Kein Rahmen',silver:'Silber',gold:'Gold',neon:'Neon',rainbow:'Regenbogen',fire:'Feuer',diamond:'Diamant'};
+const NFX_NAMES={none:'Kein Effekt',gold:'Goldglanz',neon:'Neon-Puls',ice:'Eiskristall',fire:'Feuerschrift',rainbow:'Regenbogen',galaxy:'Galaxie',glitch:'Glitch',spooky:'Spuk'};
+const FRAME_NAMES={pulse:'Puls',orbit:'Orbit',galaxy:'Galaxie',none:'Kein Rahmen',silver:'Silber',gold:'Gold',neon:'Neon',rainbow:'Regenbogen',fire:'Feuer',diamond:'Diamant',cobweb:'Spinnennetz',pumpkin:'Kürbisglut',spooky:'Geisternebel'};
 const UNBOX_NAMES={classic:'Klassisch',sparkles:'Funkenregen',confetti:'Konfetti-Kanone',goldshower:'Goldregen'};
 const WSKIN_NAMES={classic:'Classic',candy:'Candy',glow:'Glühwürmchen',neon:'Neon',fire:'Fire',rainbow:'Rainbow',glitch:'Glitch'};
 const WFX_NAMES={none:'Kein Effekt',sparkles:'Sparkles',bubbles:'Blasen',hearts:'Herzen',confetti:'Konfetti',stars:'Sternenkreis',explosion:'Explosion',pixels:'Pixelzerfall',smoke:'Rauch'};
@@ -6204,10 +6319,12 @@ function nextUnlock(){
 const SHOP_GROUPS=[['Tastaturen','⌨️',['kb']],['Kisten','📦',['crates','unbox']],['Tippen','✍️',['wordSkin','wordFx','trail','errorSound','hand','font']],['Look','🎨',['acc','bg','cursor','conf']],['Profil','🙂',['ava','frame','nfx','car','title','fan']],['Haustiere','🐾',['pet']]];
 let shopFilter='all';
 function itemState(C,it){
-  const d=Store.data,lv=levelInfo(d.xp).level,[id,r,price,reqLv,req]=it,reqLg=typeof req==='number'?req:null,reqAch=typeof req==='string'&&req!=='crate'?req:null,crateOnly=req==='crate';
+  const d=Store.data,lv=levelInfo(d.xp).level,[id,r,price,reqLv,req]=it,reqLg=typeof req==='number'?req:null,reqAch=typeof req==='string'&&!['crate','hw','hwboss','hwshop'].includes(req)?req:null,crateOnly=req==='crate';
+  // Halloween: Pass-Belohnungen gibt es nur im Kürbis-Pass, Event-Artikel nur während des Events im Shop
+  const hwOnly=req==='hw'||req==='hwboss',hwOff=req==='hwshop'&&!hwActive();
   const own=owns(C.id,id),eq=d.settings[C.set]===id,lockLv=lv<reqLv,lockLg=reqLg!=null&&d.league.idx<reqLg,lockAch=!!reqAch&&!d.ach[reqAch];
-  const locked=!own&&(crateOnly||lockLv||lockLg||lockAch),poor=!own&&!locked&&d.coins<price;
-  const why=crateOnly?'Nur aus Kisten':lockAch?`Erfolg „${(ACH.find(a=>a.id===reqAch)||{n:'?'}).n}"`:lockLg?`Liga ${LEAGUES[reqLg][0]}`:`Level ${reqLv}`;
+  const locked=!own&&(crateOnly||hwOnly||hwOff||lockLv||lockLg||lockAch),poor=!own&&!locked&&d.coins<price;
+  const why=crateOnly?'Nur aus Kisten':req==='hw'?'🎃 Kürbis-Pass':req==='hwboss'?'👑 Kürbiskönig besiegen':hwOff?'🎃 Nur an Halloween':lockAch?`Erfolg „${(ACH.find(a=>a.id===reqAch)||{n:'?'}).n}"`:lockLg?`Liga ${LEAGUES[reqLg][0]}`:`Level ${reqLv}`;
   return{id,r,price,own,eq,locked,poor,why,reqAch};
 }
 function viewShop(){
@@ -6553,6 +6670,13 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-24.7',d:'24.09.2026',items:[
+    '🎃 Das große Halloween-Event ist da – nur bis zum 31. Oktober!',
+    '👑 Kürbis-Boss: Besiege Kürbiskopf, Graf Tippula und den Kürbiskönig',
+    '👻 Geister-Rennen: Tippe schneller, als drei Geister schweben',
+    '🎟️ Kürbis-Pass mit 20 Stufen: Sammle Kürbisse mit jeder Runde und hol dir exklusive Avatare, Rahmen, einen Hexenbesen und mehr',
+    '🦇 Gruselige Deko überall – abschaltbar unter Einstellungen → Jahreszeiten-Deko'
+  ]},
   {v:'2026-09-24.6',d:'24.09.2026',items:[
     '📚 8 neue Lektionen: Erste Wörter, Alle Buchstaben, Umlaute, @ und €, Chatnachrichten, Schule und Referate, Adressen und Formulare und die große Abschlussprüfung',
     '🎮 3 neue Spiele: Hauptstadt-Quiz, Rückwärts und Zungenbrecher',
@@ -6938,18 +7062,126 @@ function skyPhase(h=new Date().getHours()){return h>=5&&h<9?'morning':h>=9&&h<17
 function easterDate(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da)}
 function seasonNow(t=new Date()){const m=t.getMonth()+1,d=t.getDate();
   if((m===12)||(m===1&&d<=6))return{k:'winter',e:['❄️','❅','❆'],n:'Winter'};
-  if((m===10&&d>=20)||(m===11&&d<=2))return{k:'halloween',e:['🎃','🦇','🍂','👻'],n:'Halloween'};
+  if(hwActive(t))return{k:'halloween',e:['🎃','🦇','🍂','👻','🦇'],n:'Halloween'};
   const es=easterDate(t.getFullYear()),diff=(t-es)/864e5;if(diff>-8&&diff<3)return{k:'easter',e:['🐣','🌷','🥚','🐰'],n:'Ostern'};
   return null}
 function applyAmbience(){
   const S=Store.data.settings,b=document.body;let sky=$('#sky'),sea=$('#season');
   if(!sky){b.insertAdjacentHTML('afterbegin','<div id="sky" aria-hidden="true"></div><div id="season" aria-hidden="true"></div>');sky=$('#sky');sea=$('#season')}
   const on=S.sky!==false&&(!S.bg||S.bg==='none');sky.className=on?'sky-'+skyPhase():'';
+  b.classList.toggle('hw',hwActive()&&S.season!==false);
   const s=S.season!==false&&!reduced()?seasonNow():null;
   if(!s){sea.innerHTML='';sea.dataset.k='';return}
   if(sea.dataset.k===s.k)return;sea.dataset.k=s.k;
   sea.innerHTML=Array.from({length:16},(_,i)=>`<i class="sp sp-${s.k}" style="left:${Math.round(Math.random()*100)}%;animation-delay:-${(Math.random()*18).toFixed(1)}s;animation-duration:${(14+Math.random()*10).toFixed(1)}s;font-size:${(12+Math.random()*14).toFixed(0)}px">${s.e[i%s.e.length]}</i>`).join('')}
-setInterval(()=>{if(Store.data&&Store.data.settings)applyAmbience()},6e5);
+setInterval(()=>{if(Store.data&&Store.data.settings){applyAmbience();updHw()}},6e5);
+
+/* ---------- 🎃 Halloween-Event ----------
+   Startet und endet von selbst: 2026 ab dem 24.09., in späteren Jahren ab dem 01.10. – Schluss ist immer am 01.11. um 0 Uhr.
+   Danach verschwinden Deko, Event-Seite, Pass und Event-Shop. Gewonnene Belohnungen bleiben für immer. */
+function hwWin(t=new Date()){const y=t.getFullYear();return{y,start:y===2026?new Date(2026,8,24):new Date(y,9,1),end:new Date(y,10,1)}}
+function hwActive(t=new Date()){const w=hwWin(t);return t>=w.start&&t<w.end}
+function hwLeft(){const ms=Math.max(0,hwWin().end-Date.now()),dd=Math.floor(ms/864e5),hh=Math.floor(ms%864e5/36e5);return dd>1?`noch ${dd} Tage`:dd===1?`noch 1 Tag ${hh} Std.`:`nur noch ${hh} Std.`}
+function hwData(){const d=Store.data,y=hwWin().y;if(!d.hw||d.hw.y!==y)d.hw={y,pts:0,rounds:0,claimed:[],boss:0,ghosts:{},day:'',intro:0};return d.hw}
+const HW_UNLOCK=5,HW_TIER=60;
+/* Der Kürbis-Pass: 20 Stufen, je 60 Kürbisse. Freigeschaltet wird er nach 5 gespielten Runden im Event. */
+const HW_PASS=[{c:150},{it:['ava','🦇']},{c:200},{it:['title','Gruselfinger']},{it:['ava','🎃']},{c:250},{it:['frame','pumpkin']},{c:300},{it:['car','🧹']},{it:['nfx','spooky']},
+  {c:350},{it:['ava','🧛']},{c:400},{it:['pet','🐈‍⬛']},{c:450},{it:['frame','spooky']},{c:500},{it:['ava','🧟']},{c:600},{it:['title','Kürbiskönig'],c:1000}];
+const hwTier=p=>Math.min(HW_PASS.length,Math.floor(p/HW_TIER));
+const hwOpen=()=>hwData().rounds>=HW_UNLOCK;
+const hwClaimable=()=>{if(!hwActive()||!hwOpen())return 0;const h=hwData();let n=0;for(let i=0;i<hwTier(h.pts);i++)if(!h.claimed.includes(i))n++;return n};
+const hwItemIcon=([cat,id])=>cat==='frame'?`<span class="ava fr-${id}">${esc(Store.data.settings.avatar||'🙂')}</span>`:cat==='title'?'🏷️':cat==='nfx'?'✨':esc(id);
+const hwRewardText=r=>[r.it?`${itemName(r.it[0],r.it[1])}${r.it[0]==='title'?' (Titel)':r.it[0]==='frame'?' (Rahmen)':r.it[0]==='car'?' (Fahrzeug)':r.it[0]==='pet'?' (Haustier)':r.it[0]==='nfx'?' (Namenseffekt)':' (Avatar)'}`:'',r.c?`${fmtN(r.c)} 🪙`:''].filter(Boolean).join(' + ');
+const HW_SENT={de:["In der Geisterstunde knarrt die alte Treppe im Schloss.","Die Kürbislaterne leuchtet orange in der dunklen Nacht.","Eine schwarze Katze schleicht lautlos über den Friedhof.",
+  "Der Vampir trinkt seinen Tomatensaft am liebsten um Mitternacht.","Im Kessel der Hexe blubbert ein grüner Zaubertrank.","Fledermäuse flattern über dem nebligen Moor.",
+  "Süßes oder Saures? Die Kinder klingeln an jeder Tür.","Das Gespenst im Keller rasselt mit seinen Ketten.","Unter dem Vollmond heult ein einsamer Werwolf.",
+  "Die Mumie wickelt sich langsam aus ihren Binden.","Spinnweben hängen in jeder Ecke des alten Hauses.","Der Zombie hat heute leider seinen Arm vergessen.",
+  "Ein Rabe krächzt dreimal auf dem Dach der Gruft.","Mit dem Besen fliegt die Hexe schneller als der Wind.","Wer sich traut, geht allein durch den Geisterwald.","Das Skelett tanzt fröhlich zur schaurigen Musik."],
+  en:["At the witching hour the old stairs creak in the castle.","The pumpkin lantern glows orange in the dark night.","A black cat sneaks silently across the graveyard.",
+  "The vampire prefers his tomato juice at midnight.","A green potion bubbles in the witch's cauldron.","Bats flutter over the foggy moor.","Trick or treat? The children ring every doorbell.",
+  "The ghost in the cellar rattles its chains.","A lonely werewolf howls under the full moon.","The skeleton dances happily to the spooky music."]};
+const HW_WORDS={de:'Kürbis Gespenst Vampir Hexe Besen Fledermaus Spinne Spinnennetz Grusel Gruft Friedhof Mumie Zombie Skelett Laterne Kerze Nebel Vollmond Eule Schatten Geist Spuk Gänsehaut Süßes Saures Kostüm Maske Zauber Trank Kessel Rabe Schloss Kerker Knochen Werwolf Mitternacht Hexenhaus Zaubertrank Geisterstunde Grabstein Kürbislaterne Umhang Sarg Graf Moor gruselig schaurig finster unheimlich dunkel spukt heult flüstert knarrt schleicht leuchtet'.split(' '),
+  en:'pumpkin ghost vampire witch broom bat spider web haunted grave zombie skeleton candle fog moon owl shadow spooky costume mask spell potion cauldron raven castle bones skull werewolf howl midnight candy treat trick creepy dark lantern coffin'.split(' ')};
+const hwWords=caps=>{const L=isEN()?HW_WORDS.en:HW_WORDS.de;return caps?L:L.map(w=>w.toLowerCase())};
+const HW_BOSSES=[{n:'Kürbiskopf',e:'🎃',hp:150,atk:9,every:7,p:40},{n:'Graf Tippula',e:'🧛',hp:230,atk:12,every:6,caps:true,p:60},{n:'Der Kürbiskönig',e:'👑',hp:320,atk:15,every:5.2,caps:true,punct:true,p:100}];
+const HW_GHOSTS=()=>[{id:'g1',e:'👻',n:'Kleines Gespenst',w:25,p:40},{id:'g2',e:'👻',n:'Poltergeist',w:40,p:60},{id:'g3',e:'💀',n:'Geisterfürst',w:Math.max(55,Math.round(bestWpm()*1.05)),p:100}];
+
+/* Kürbisse sammeln: jede Runde im Event bringt welche, die erste Runde des Tages 25 extra */
+let hwLast=0;
+/* Kürbisse der letzten Runde einmal im Ergebnisfenster zeigen */
+const hwGainTake=()=>{const p=hwLast;hwLast=0;return p?` <span class="hw-gain">+${p} 🎃</span>`:''};
+function hwOnRound(xp){if(!hwActive())return;const h=hwData(),was=hwOpen();h.rounds++;
+  let p=Math.max(3,Math.round(xp/4));const today=dayKey();if(h.day!==today){h.day=today;p+=25}
+  hwAdd(p);if(!was&&hwOpen())setTimeout(()=>{toast('🎃','Kürbis-Pass freigeschaltet!','Hol dir deine Belohnungen auf der Halloween-Seite.');Sound.ach()},1400);updHw()}
+function hwAdd(p){const h=hwData(),t0=hwTier(h.pts);h.pts+=p;hwLast+=p;const t1=hwTier(h.pts);
+  if(t1>t0&&hwOpen())setTimeout(()=>{toast('🎃',`Pass-Stufe ${t1} erreicht!`,hwRewardText(HW_PASS[t1-1]));Sound.level()},1800);updHw();return p}
+function hwClaim(i){const h=hwData(),r=HW_PASS[i],d=Store.data;if(!hwActive()||!hwOpen()||h.claimed.includes(i)||hwTier(h.pts)<=i)return false;
+  h.claimed.push(i);if(r.c)d.coins+=r.c;if(r.it){const[cat,id]=r.it;d.owned[cat]=d.owned[cat]||[];if(!d.owned[cat].includes(id))d.owned[cat].push(id)}
+  Store.save();refreshMe(true);updHw();return true}
+function updHw(){const on=hwActive(),b=$('#hwb'),c=$('#hwc');if(!b)return;b.hidden=!on||!Store.data.account;if(!on)return;const n=hwClaimable();c.hidden=!n;c.textContent=n;
+  document.body.classList.toggle('hw',Store.data.settings.season!==false)}
+function hwBanner(){if(!hwActive())return '';const h=hwData(),open=hwOpen(),t=hwTier(h.pts),n=hwClaimable();
+  return `<button class="hw-banner" data-hw="1"><span class="hw-b-i" aria-hidden="true">🎃</span><span class="hw-b-t"><b>Halloween-Event</b><span>Kürbis-Boss, Geister-Rennen und Belohnungen, die es nur jetzt gibt · ${hwLeft()}</span></span>
+    <span class="hw-b-p">${open?`Pass-Stufe <b>${t}</b>/${HW_PASS.length}`:`Pass: <b>${h.rounds}</b>/${HW_UNLOCK} Runden`}<i style="--p:${open?Math.min(100,h.pts%HW_TIER/HW_TIER*100):h.rounds/HW_UNLOCK*100}%"></i></span>
+    <span class="hw-b-go">${n?`🎁 ${n} abholen`:'Zum Event →'}</span></button>`}
+document.addEventListener('click',e=>{if(e.target.closest('[data-hw]'))go('halloween')});
+
+/* Die Event-Seite */
+function viewHalloween(){
+  if(!hwActive()){main.innerHTML=`<div class="panel hw-over"><h2>🎃 Das Halloween-Event ist vorbei</h2><p class="muted">Deine gewonnenen Belohnungen bleiben dir. Bis zum nächsten Jahr!</p><button class="btn primary" onclick="go('lessons')">Zurück</button></div>`;return}
+  const h=hwData(),open=hwOpen(),t=hwTier(h.pts),n=hwClaimable(),G=HW_GHOSTS();
+  main.innerHTML=`<section class="hw-page">
+    <div class="hw-hero"><div><p class="hw-kick">🦇 Event · ${hwLeft()}</p><h1 class="ph">Halloween</h1><p class="muted">Sammle Kürbisse mit jeder Runde, besiege den Kürbiskönig und hol dir Belohnungen, die es nur bis zum 31. Oktober gibt.</p></div>
+      <div class="hw-pts"><b>${fmtN(h.pts)}</b><span>🎃 Kürbisse</span></div></div>
+    <div class="hw-games">
+      <button class="hw-game" id="hwboss"><span class="hw-g-i">👑</span><span class="hw-g-t"><b>Kürbis-Boss</b><span>Drei gruselige Gegner, einer stärker als der andere. Der Kürbiskönig hütet einen exklusiven Avatar.</span></span>
+        <span class="hw-steps">${HW_BOSSES.map((b,i)=>`<i class="${h.boss>i?'ok':''}" title="${esc(b.n)}">${h.boss>i?'✓':b.e}</i>`).join('')}</span></button>
+      <button class="hw-game" id="hwrace"><span class="hw-g-i">👻</span><span class="hw-g-t"><b>Geister-Rennen</b><span>Schneller tippen, als die Geister schweben. Jeder Geist bringt beim ersten Sieg extra Kürbisse.</span></span>
+        <span class="hw-steps">${G.map(g=>`<i class="${h.ghosts[g.id]?'ok':''}" title="${esc(g.n)}">${h.ghosts[g.id]?'✓':g.e}</i>`).join('')}</span></button>
+    </div>
+    <div class="panel hw-pass">
+      <div class="hw-pass-h"><div><h2>🎟️ Kürbis-Pass</h2><p class="muted small">${open?`Stufe ${t} von ${HW_PASS.length} · ${t<HW_PASS.length?`noch ${HW_TIER-h.pts%HW_TIER} 🎃 bis Stufe ${t+1}`:'alle Stufen geschafft!'}`:`Gesperrt – spiele noch ${HW_UNLOCK-h.rounds} ${HW_UNLOCK-h.rounds===1?'Runde':'Runden'}, dann ist er frei. Deine Kürbisse werden schon gesammelt.`}</p></div>
+        ${n>1?`<button class="btn primary" id="hwall">🎁 Alle ${n} abholen</button>`:''}</div>
+      ${open?`<div class="hw-bar"><i style="--p:${t>=HW_PASS.length?100:h.pts%HW_TIER/HW_TIER*100}%"></i></div>`:`<div class="hw-bar lock"><i style="--p:${h.rounds/HW_UNLOCK*100}%"></i></div>`}
+      <div class="hw-tiers${open?'':' locked'}">${HW_PASS.map((r,i)=>{const got=h.claimed.includes(i),ready=open&&!got&&t>i;
+        return `<div class="hw-tier${got?' got':ready?' ready':''}${r.it?' item':''}"><span class="hw-n">${i+1}</span><span class="hw-r">${r.it?hwItemIcon(r.it):'🪙'}</span><span class="hw-rt">${esc(hwRewardText(r))}</span>
+          ${got?'<span class="hw-s">✓</span>':ready?`<button class="btn primary small" data-hwc="${i}">Abholen</button>`:`<span class="hw-s lock">${open?`${(i+1)*HW_TIER} 🎃`:'🔒'}</span>`}</div>`}).join('')}</div>
+      <p class="muted small hw-tip">💡 Jede Runde bringt Kürbisse – die erste Runde des Tages 25 extra. Boss-Siege und Geister-Rennen geben besonders viele.</p>
+    </div>
+    <div class="panel hw-shop"><h3>🛍️ Nur bis 31.10. im Shop</h3><div class="hw-shop-r"><span class="ava big">👻</span><span><b>Gespenst</b><span class="muted small">Avatar · 800 🪙</span></span><span class="ava big fr-cobweb">${esc(Store.data.settings.avatar||'🙂')}</span><span><b>Spinnennetz</b><span class="muted small">Rahmen · 1.200 🪙</span></span>
+      <button class="btn" id="hwshopgo">Zum Shop</button></div></div>
+  </section>`;
+  $('#hwboss').onclick=hwBoss;$('#hwrace').onclick=hwRaceSetup;
+  $('#hwshopgo').onclick=()=>{shopCat='ava';shopFilter='all';go('shop')};
+  $$('[data-hwc]').forEach(b=>b.onclick=()=>{if(hwClaim(+b.dataset.hwc)){Sound.ach();confetti(90);viewHalloween()}});
+  const all=$('#hwall');if(all)all.onclick=()=>{for(let i=0;i<HW_PASS.length;i++)hwClaim(i);Sound.level();confetti(160);viewHalloween()};
+  if(!h.intro){h.intro=1;Store.save()}
+  updHw();
+}
+function hwBoss(){bossGame({list:HW_BOSSES,title:'Kürbis-Boss',mode:'hwboss',back:'halloween',words:hwWords,
+  desc:'Jedes fehlerfrei getippte Wort trifft. Besiege Kürbiskopf, Graf Tippula und den Kürbiskönig. Ab einer Serie von 15 blockst du die Hälfte des Schadens.',
+  onEnd:stage=>{const h=hwData();let p=0;for(let i=h.boss;i<stage;i++)p+=HW_BOSSES[i].p;
+    if(stage>h.boss){h.boss=stage;if(p)hwAdd(p);if(stage>=HW_BOSSES.length&&!owns('ava','💀')){Store.data.owned.ava.push('💀');setTimeout(()=>{toast('💀','Neuer Avatar: Knochenkönig','Nur wer den Kürbiskönig besiegt, bekommt ihn.');Sound.ach()},900)}}
+    Store.save();return p?`🎃 +${p} Kürbisse für neue Boss-Siege`:''}})}
+function hwRaceSetup(){
+  const G=HW_GHOSTS(),h=hwData();
+  const m=modal(`<h3>👻 Wähle deinen Geist</h3><p class="muted">Der Geist startet mit deinem ersten Anschlag und schwebt mit gleichbleibendem Tempo. Der erste Sieg gegen jeden Geist bringt extra Kürbisse.</p>
+    <div class="hw-ghosts">${G.map(g=>`<button class="hw-ghost" data-gh="${g.id}"><span>${g.e}</span><b>${esc(g.n)}</b><span class="muted small">${g.w} WPM · ${h.ghosts[g.id]?'✓ besiegt':`+${g.p} 🎃`}</span></button>`).join('')}</div>
+    <div class="acts"><button class="btn ghost" id="ghx">Abbrechen</button></div>`);
+  $('#ghx',m).onclick=()=>m.remove();
+  $$('[data-gh]',m).forEach(b=>b.onclick=()=>{const g=G.find(x=>x.id===b.dataset.gh),cps=g.w*5/60;m.remove();
+    practice({tab:'games',mode:'hwrace',opp:g.w,oppIcon:g.e,ghostId:g.id,ghostPts:g.p,lane2:`${g.n} ${g.w} WPM`,ghostAt:(el,len)=>Math.min(1,el*cps/len),label:'Geister-Rennen',title:`Geister-Rennen: ${g.n}`,
+      sub:`${g.e} ${g.n} schwebt mit ${g.w} WPM. Tippe schneller!`,text:()=>pickN(isEN()?HW_SENT.en:HW_SENT.de,3).join(' '),back:()=>go('halloween')})});
+  setHandler({char(){},esc:()=>m.remove()})}
+/* Einmalige Begrüßung, sobald das Event läuft (wartet, bis andere Fenster zu sind) */
+function hwIntro(n=0){if(!hwActive()||!Store.data.account)return;const h=hwData();if(h.intro)return;
+  if($('.modal')||$('.welcome')||activity||!Store.data.welcomed){if(n<30)setTimeout(()=>hwIntro(n+1),3000);return}
+  h.intro=1;Store.save();
+  const m=modal(`<div class="hw-intro"><div class="hw-intro-i">🎃</div><h3>Halloween ist da!</h3><p class="muted">Bis zum 31. Oktober: Kürbis-Boss, Geister-Rennen und ein Kürbis-Pass mit 20 Stufen voller Belohnungen, die es nur jetzt gibt.</p>
+    <div class="acts"><button class="btn primary" id="hwgo">🎃 Zum Event</button><button class="btn ghost" id="hwlater">Später</button></div></div>`);
+  $('#hwgo',m).onclick=()=>{m.remove();go('halloween')};$('#hwlater',m).onclick=()=>m.remove();setHandler({char(){},enter:()=>{m.remove();go('halloween')},esc:()=>m.remove()})}
+// Deko schon auf dem Anmeldebildschirm
+if(hwActive()){document.body.classList.add('hw');const a=document.getElementById('hwAuth');if(a)a.hidden=false}
 
 /* ---------- Haustier beim Üben ---------- */
 function petReact(kind){const p=$('#pet');if(!p||reduced())return;p.classList.remove('happy','oops');void p.offsetWidth;p.classList.add(kind);
@@ -8061,6 +8293,7 @@ window.startApp=async function(user,regName){
   if(!Store.data.welcomed)Store.data.seenV=CHANGELOG[0].v;
   const tryNew=n=>{if(Store.data.seenV===CHANGELOG[0].v)return;if($('.modal')||$('.welcome')||activity){if(n<20)setTimeout(()=>tryNew(n+1),3000);return}whatsNew()};
   setTimeout(()=>tryNew(0),1200);
+  updHw();setTimeout(()=>hwIntro(0),4000);
   refreshMe();
   go('lessons');
   if(Store.data.notice){const n=Store.data.notice;delete Store.data.notice;setTimeout(()=>toast(n.i,n.t,n.s),900)}
