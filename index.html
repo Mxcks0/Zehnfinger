@@ -72,11 +72,13 @@
     /* Jede XP-Steigerung bekommt einen Server-Zeitstempel (xpAt). Die Datenbank-Regeln prüfen damit,
        ob jemand unmöglich schnell aufsteigt. Wird ein Speichern abgelehnt, klappt es später automatisch. */
     let lastXpAll = null, retryT = 0;
-    window.fbSaveProgress = async (json, updatedAt, summary) => {
+    window.fbSaveProgress = async (json, updatedAt, summary, best) => {
       const u = auth.currentUser; if(!u) return;
       const xpChanged = summary.xpAll !== lastXpAll;
       await Promise.all([
-        setDoc(doc(db, 'progress', u.uid), { data: json, updatedAt }),
+        // Neben dem aktuellen Stand gibt es eine Sicherungskopie des Stands mit dem meisten Fortschritt.
+        // Sie wird nur ersetzt, wenn der neue Stand mindestens genauso viele gespielte Runden hat.
+        setDoc(doc(db, 'progress', u.uid), { data: json, updatedAt, ...(best ? { best: json, bestN: best, bestAt: updatedAt } : {}) }, { merge: true }),
         setDoc(doc(db, 'players', u.uid), {
           ...summary,
           nameLower: (summary.name || '').toLowerCase(),
@@ -3451,7 +3453,7 @@ const Store={data:DEFAULT(),ref:null,chain:Promise.resolve(),timer:null,
       const back=(d.owned.snd||[]).reduce((a,id)=>a+(P[id]||0),0);if(back){d.coins=(d.coins||0)+back;d.notice={i:'🪙',t:'Sounds gehören jetzt zur Tastatur',s:`Du bekommst ${back.toLocaleString('de-DE')} Münzen für deine gekauften Sounds zurück.`}}
       d.owned.snd=['membrane'];d.v5=1}
     return d},
-  key:LS_KEY,uid:null,sync:false,cloudCount:null,
+  key:LS_KEY,uid:null,sync:false,cloudCount:null,cloudBestN:0,cloudBest:null,
   load(){try{const raw=localStorage.getItem(this.key);if(raw)this.data=this.merge(JSON.parse(raw));}catch(e){}},
   /* Lokal speichern – und zusätzlich eine Sicherung des Stands mit dem meisten Fortschritt auf diesem Gerät behalten */
   writeLocal(){try{localStorage.setItem(this.key,JSON.stringify(this.data));
@@ -3464,8 +3466,8 @@ const Store={data:DEFAULT(),ref:null,chain:Promise.resolve(),timer:null,
     clearTimeout(this.timer);if(!this.sync||!window.fbSaveProgress)return;
     if(this.cloudCount!=null&&progCount(this.data)<this.cloudCount){console.warn('Nicht gespeichert: In der Cloud liegt mehr Fortschritt als auf diesem Gerät.');return}
     let json,sum;try{json=JSON.stringify(this.data);sum=publicSummary()}catch(e){console.warn('Zusammenfassung:',e);return}
-    const at=this.data.updatedAt||Date.now(),n=progCount(this.data);
-    this.chain=this.chain.then(()=>window.fbSaveProgress(json,at,sum)).then(()=>{this.cloudCount=Math.max(this.cloudCount||0,n)}).catch(e=>console.warn('Cloud-Speichern fehlgeschlagen:',e));
+    const at=this.data.updatedAt||Date.now(),n=progCount(this.data),best=n>=(this.cloudBestN||0)?Math.max(1,n):0;
+    this.chain=this.chain.then(()=>window.fbSaveProgress(json,at,sum,best)).then(()=>{this.cloudCount=Math.max(this.cloudCount||0,n);if(best)this.cloudBestN=Math.max(this.cloudBestN||0,n)}).catch(e=>console.warn('Cloud-Speichern fehlgeschlagen:',e));
   },
   /* Cloud-Stand lesen und mit dem Gerät abgleichen. Es gewinnt IMMER der Stand mit mehr gespielten Runden
      (bei Gleichstand mehr XP, dann der neuere). So kann ein leerer oder alter Stand nie einen vollen überschreiben. */
@@ -3474,6 +3476,8 @@ const Store={data:DEFAULT(),ref:null,chain:Promise.resolve(),timer:null,
     if(this.uid!==uid)return 'fail';
     let R=null;if(remote&&remote.data){try{R=this.merge(JSON.parse(remote.data));R.updatedAt=remote.updatedAt||R.updatedAt||0}catch(e){R=null}}
     let res='same';
+    // Sicherungskopie merken – nur wenn sie mehr Fortschritt hat als der normale Cloud-Stand (für die Rettung)
+    this.cloudBestN=Math.max(+(remote&&remote.bestN)||0,R?progCount(R):0);this.cloudBest=remote&&remote.best&&(+remote.bestN||0)>(R?progCount(R):0)?remote.best:null;
     if(R){this.cloudCount=progCount(R);if(progBetter(R,this.data)){const acc=this.data.account;this.data=R;if(acc)this.data.account=acc;res='newer'}}
     else this.cloudCount=0;
     this.sync=true;   // nur synchronisieren, wenn der Cloud-Stand sicher gelesen wurde
@@ -3484,7 +3488,7 @@ const Store={data:DEFAULT(),ref:null,chain:Promise.resolve(),timer:null,
      solange wird nichts in die Cloud geschrieben. */
   async useAccount(uid){
     const keepSettings=this.data.settings;
-    this.sync=false;this.uid=uid;this.key=LS_KEY+':'+uid;this.cloudCount=null;
+    this.sync=false;this.uid=uid;this.key=LS_KEY+':'+uid;this.cloudCount=null;this.cloudBestN=0;this.cloudBest=null;
     let raw=null;try{raw=localStorage.getItem(this.key)}catch(e){}
     if(raw){try{this.data=this.merge(JSON.parse(raw))}catch(e){this.data=DEFAULT()}}
     else{
@@ -3493,8 +3497,9 @@ const Store={data:DEFAULT(),ref:null,chain:Promise.resolve(),timer:null,
       if(legacy&&!owner){try{this.data=this.merge(JSON.parse(legacy))}catch(e){this.data=DEFAULT()}try{localStorage.setItem(LS_KEY+':owner',uid)}catch(e){}}
       else{this.data=DEFAULT();this.data.settings=Object.assign(this.data.settings,keepSettings);this.data.updatedAt=0}
     }
-    const retry=(n)=>setTimeout(async()=>{if(this.uid!==uid||this.sync)return;const r=await this.pull(uid);
-      if(r==='fail'){if(n<5)retry(n+1);return}if(r==='newer')try{onRemoteLoaded()}catch(e){}else this.push()},[4e3,1e4,2e4,4e4,9e4][n]||9e4);
+    const retry=(n)=>{if(n===0)setTimeout(()=>{if(!this.sync&&this.uid===uid)try{toast('☁️','Keine Verbindung zur Cloud','Dein Fortschritt ist auf diesem Gerät sicher und wird hochgeladen, sobald die Verbindung wieder steht.')}catch(e){}},1500);
+      setTimeout(async()=>{if(this.uid!==uid||this.sync)return;const r=await this.pull(uid);
+      if(r==='fail'){if(n<5)retry(n+1);return}if(r==='newer')try{onRemoteLoaded()}catch(e){}else this.push()},[4e3,1e4,2e4,4e4,9e4][n]||9e4)};
     if(!raw){const r=await this.pull(uid);if(r==='fail')retry(0);return}
     this.pull(uid).then(r=>{if(r==='fail')retry(0);else if(r==='newer')try{onRemoteLoaded()}catch(e){}else this.push()});
   }
@@ -3516,12 +3521,13 @@ async function rescueCheck(n=0){
   const cur=progCount(d),no=rescueNo();
   const loc=rescueCandidates().find(c=>c.n>cur+3&&!no[c.k+':'+c.n]);
   if(loc)return rescueOffer({src:'local',d:loc.d,key:loc.k+':'+loc.n,n:loc.n,lv:levelInfo(loc.d.xp).level,pr:loc.d.prestige||0,at:loc.d.updatedAt});
+  if(Store.cloudBest){try{const b=JSON.parse(Store.cloudBest),bn=progCount(b);if(bn>cur+3&&!no['cloud:'+bn])return rescueOffer({src:'cloud',d:b,key:'cloud:'+bn,n:bn,lv:levelInfo(b.xp).level,pr:b.prestige||0,at:b.updatedAt})}catch(e){}}
   try{const p=window.fbMyPublic?await window.fbMyPublic():null,s=(p&&p.stats)||{},pn=+s.count||0;
     if(pn>progCount(Store.data)+3&&!no['public:'+pn])rescueOffer({src:'public',p,key:'public:'+pn,n:pn,lv:p.level||1,pr:p.prestige||0,at:0})}catch(e){console.warn('Rettung:',e)}
 }
 function rescueOffer(c){
   const cur=progCount(Store.data),m=modal(`<div class="secret"><div class="sk">🛟</div><h3>Älteren Spielstand gefunden</h3>
-    <p class="muted">Wir haben ${c.src==='local'?'auf diesem Gerät':'in deinem Profil'} einen Spielstand mit mehr Fortschritt gefunden als deinen aktuellen:</p>
+    <p class="muted">Wir haben ${c.src==='local'?'auf diesem Gerät':c.src==='cloud'?'in deiner Sicherungskopie':'in deinem Profil'} einen Spielstand mit mehr Fortschritt gefunden als deinen aktuellen:</p>
     <div class="rescue-cmp"><div><span>Gefunden</span><b>${c.pr?`★${c.pr} `:''}Level ${c.lv}</b><small>${fmtN(c.n)} Runden${c.at?` · ${new Date(c.at).toLocaleDateString('de-DE')}`:''}</small></div>
       <div><span>Jetzt</span><b>${Store.data.prestige?`★${Store.data.prestige} `:''}Level ${levelInfo(Store.data.xp).level}</b><small>${fmtN(cur)} Runden</small></div></div>
     ${c.src==='public'?'<p class="muted small">Aus dem Profil lassen sich Level, XP, Sterne und Rekorde zurückholen. Münzen und Shop-Gegenstände sind dort nicht gespeichert – als Ausgleich bekommst du Münzen passend zu deinen XP.</p>':''}
@@ -3532,7 +3538,7 @@ function rescueOffer(c){
   setHandler({char(){},esc:()=>$('#rsno',m).click()})}
 function rescueApply(c){
   const D=Store.data,acc=D.account;
-  if(c.src==='local'){Store.data=Store.merge(JSON.parse(JSON.stringify(c.d)));Store.data.account=acc}
+  if(c.src==='local'||c.src==='cloud'){Store.data=Store.merge(JSON.parse(JSON.stringify(c.d)));Store.data.account=acc}
   else{const p=c.p,s=p.stats||{},mx=(a,b)=>Math.max(+a||0,+b||0);
     D.xp=mx(D.xp,s.xp);D.prestige=mx(D.prestige,p.prestige);D.prestigeXp=mx(D.prestigeXp,(+p.xpAll||0)-(+s.xp||0));
     Object.entries(s.lessons||{}).forEach(([k,v])=>{const o=D.lessons[k];if(!o||(v&&(v.stars||0)>(o.stars||0)))D.lessons[k]=v});
