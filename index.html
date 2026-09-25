@@ -288,6 +288,7 @@
       delFeedback: id => deleteDoc(doc(db, 'feedback', id))
     };
 
+    window.fbMyPublic = async () => { const u = auth.currentUser; if(!u || u.isAnonymous) return null; const s = await getDoc(doc(db, 'players', u.uid)); return s.exists() ? s.data() : null };
     window.fbAmBanned = async () => { const u = auth.currentUser; if(!u || u.isAnonymous) return false; return (await getDoc(doc(db, 'banned', u.uid))).exists() };
 
     window.fbInvites = async () => (await pl([where('refBy', '==', auth.currentUser.uid), limit(100)])).docs.map(plain);
@@ -2823,6 +2824,13 @@ button.comm-card{cursor:pointer}
 .adm-guests h3{margin:0 0 8px}
 .adm-guests .cards{margin-bottom:0}
 .adm-guests small{font-size:12px;color:var(--muted);font-weight:600}
+/* ---- Spielstand-Rettung ---- */
+.rescue-cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.rescue-cmp>div{display:grid;gap:2px;padding:10px;border-radius:12px;background:var(--surface2);border:1px solid var(--line)}
+.rescue-cmp>div:first-child{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,var(--surface2))}
+.rescue-cmp span{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.rescue-cmp b{font-size:18px}
+.rescue-cmp small{color:var(--muted)}
 /* ---- Neue Shop-Artikel ---- */
 .newb{position:absolute;top:10px;right:10px;z-index:1;font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;color:#082014;background:var(--good)}
 .fr-sunset{box-shadow:0 0 0 2px #ff7a59,0 0 0 4px #ffb86b,0 0 12px rgba(255,122,89,.55)}
@@ -3443,21 +3451,40 @@ const Store={data:DEFAULT(),ref:null,chain:Promise.resolve(),timer:null,
       const back=(d.owned.snd||[]).reduce((a,id)=>a+(P[id]||0),0);if(back){d.coins=(d.coins||0)+back;d.notice={i:'🪙',t:'Sounds gehören jetzt zur Tastatur',s:`Du bekommst ${back.toLocaleString('de-DE')} Münzen für deine gekauften Sounds zurück.`}}
       d.owned.snd=['membrane'];d.v5=1}
     return d},
-  key:LS_KEY,uid:null,sync:false,
+  key:LS_KEY,uid:null,sync:false,cloudCount:null,
   load(){try{const raw=localStorage.getItem(this.key);if(raw)this.data=this.merge(JSON.parse(raw));}catch(e){}},
-  writeLocal(){try{localStorage.setItem(this.key,JSON.stringify(this.data))}catch(e){}},
+  /* Lokal speichern – und zusätzlich eine Sicherung des Stands mit dem meisten Fortschritt auf diesem Gerät behalten */
+  writeLocal(){try{localStorage.setItem(this.key,JSON.stringify(this.data));
+    if(this.uid){const sk=LS_KEY+':safe:'+this.uid,best=+(localStorage.getItem(sk+':n')||0),n=progCount(this.data);
+      if(n>best){localStorage.setItem(sk,JSON.stringify(this.data));localStorage.setItem(sk+':n',String(n))}}}catch(e){}},
   save(){this.data.updatedAt=Date.now();this.writeLocal();if(this.sync){clearTimeout(this.timer);this.timer=setTimeout(()=>this.push(),1500)}},
-  /* Spielstand + öffentliche Zusammenfassung (für Freunde & Liga) in Firestore schreiben */
+  /* Spielstand + öffentliche Zusammenfassung (für Freunde & Liga) in Firestore schreiben.
+     Schutz: Hat die Cloud nachweislich mehr gespielte Runden als dieses Gerät, wird NICHT überschrieben. */
   push(){
     clearTimeout(this.timer);if(!this.sync||!window.fbSaveProgress)return;
+    if(this.cloudCount!=null&&progCount(this.data)<this.cloudCount){console.warn('Nicht gespeichert: In der Cloud liegt mehr Fortschritt als auf diesem Gerät.');return}
     let json,sum;try{json=JSON.stringify(this.data);sum=publicSummary()}catch(e){console.warn('Zusammenfassung:',e);return}
-    const at=this.data.updatedAt||Date.now();
-    this.chain=this.chain.then(()=>window.fbSaveProgress(json,at,sum)).catch(e=>console.warn('Cloud-Speichern fehlgeschlagen:',e));
+    const at=this.data.updatedAt||Date.now(),n=progCount(this.data);
+    this.chain=this.chain.then(()=>window.fbSaveProgress(json,at,sum)).then(()=>{this.cloudCount=Math.max(this.cloudCount||0,n)}).catch(e=>console.warn('Cloud-Speichern fehlgeschlagen:',e));
   },
-  /* Nach dem Login: eigenen Spielstand dieses Accounts laden (lokal + Cloud, der neuere gewinnt) */
+  /* Cloud-Stand lesen und mit dem Gerät abgleichen. Es gewinnt IMMER der Stand mit mehr gespielten Runden
+     (bei Gleichstand mehr XP, dann der neuere). So kann ein leerer oder alter Stand nie einen vollen überschreiben. */
+  async pull(uid){
+    let remote;try{remote=window.fbLoadProgress?await window.fbLoadProgress():null}catch(e){console.warn('Cloud-Spielstand nicht geladen:',e);return 'fail'}
+    if(this.uid!==uid)return 'fail';
+    let R=null;if(remote&&remote.data){try{R=this.merge(JSON.parse(remote.data));R.updatedAt=remote.updatedAt||R.updatedAt||0}catch(e){R=null}}
+    let res='same';
+    if(R){this.cloudCount=progCount(R);if(progBetter(R,this.data)){const acc=this.data.account;this.data=R;if(acc)this.data.account=acc;res='newer'}}
+    else this.cloudCount=0;
+    this.sync=true;   // nur synchronisieren, wenn der Cloud-Stand sicher gelesen wurde
+    this.writeLocal();return res;
+  },
+  /* Nach dem Login: eigenen Spielstand dieses Accounts laden. Liegt schon einer auf dem Gerät, geht es sofort los
+     und die Cloud wird im Hintergrund abgeglichen. Schlägt das Lesen fehl, wird es mehrmals erneut versucht –
+     solange wird nichts in die Cloud geschrieben. */
   async useAccount(uid){
     const keepSettings=this.data.settings;
-    this.sync=false;this.uid=uid;this.key=LS_KEY+':'+uid;
+    this.sync=false;this.uid=uid;this.key=LS_KEY+':'+uid;this.cloudCount=null;
     let raw=null;try{raw=localStorage.getItem(this.key)}catch(e){}
     if(raw){try{this.data=this.merge(JSON.parse(raw))}catch(e){this.data=DEFAULT()}}
     else{
@@ -3466,24 +3493,56 @@ const Store={data:DEFAULT(),ref:null,chain:Promise.resolve(),timer:null,
       if(legacy&&!owner){try{this.data=this.merge(JSON.parse(legacy))}catch(e){this.data=DEFAULT()}try{localStorage.setItem(LS_KEY+':owner',uid)}catch(e){}}
       else{this.data=DEFAULT();this.data.settings=Object.assign(this.data.settings,keepSettings);this.data.updatedAt=0}
     }
-    // Schneller Start: Gibt es schon einen Spielstand auf diesem Gerät, geht es sofort los,
-    // und der Cloud-Stand wird im Hintergrund nachgeladen. Nur beim allerersten Mal wird gewartet.
-    const base=this.data.updatedAt||0;   // Stand vor dem Start – spätere lokale Speicherungen zählen nicht als „neuer“
-    const baseCount=this.data.count||0;   // wurde in der Zwischenzeit schon gespielt, bleibt der lokale Stand
-    const cloud=(async()=>{
-      try{
-        const remote=window.fbLoadProgress?await window.fbLoadProgress():null;
-        if(this.uid!==uid)return false;
-        let newer=false;
-        if(remote&&remote.data&&(remote.updatedAt||0)>base&&(this.data.count||0)===baseCount){const acc=this.data.account;this.data=this.merge(JSON.parse(remote.data));if(acc)this.data.account=acc;newer=true}
-        this.sync=true;   // nur synchronisieren, wenn der Cloud-Stand sicher gelesen wurde
-        this.writeLocal();return newer;
-      }catch(e){console.warn('Cloud-Spielstand nicht geladen – es wird nur lokal gespeichert:',e);return false}
-    })();
-    if(!raw){await cloud;this.writeLocal();return}
-    cloud.then(newer=>{if(newer)try{onRemoteLoaded()}catch(e){}else if(this.sync)this.push()});
+    const retry=(n)=>setTimeout(async()=>{if(this.uid!==uid||this.sync)return;const r=await this.pull(uid);
+      if(r==='fail'){if(n<5)retry(n+1);return}if(r==='newer')try{onRemoteLoaded()}catch(e){}else this.push()},[4e3,1e4,2e4,4e4,9e4][n]||9e4);
+    if(!raw){const r=await this.pull(uid);if(r==='fail')retry(0);return}
+    this.pull(uid).then(r=>{if(r==='fail')retry(0);else if(r==='newer')try{onRemoteLoaded()}catch(e){}else this.push()});
   }
 };
+/* Wie viel wurde gespielt? Gespielte Runden zählen nur nach oben – daran erkennt man den „volleren“ Spielstand. */
+function progCount(d){return Math.max(+(d&&d.count)||0,((d&&d.history)||[]).length)}
+function progXp(d){return (+(d&&d.xp)||0)+(+(d&&d.prestigeXp)||0)}
+function progBetter(a,b){const ca=progCount(a),cb=progCount(b);if(ca!==cb)return ca>cb;const xa=progXp(a),xb=progXp(b);if(xa!==xb)return xa>xb;return (a.updatedAt||0)>(b.updatedAt||0)}
+/* ---------- Spielstand-Rettung ----------
+   Findet das Spiel auf diesem Gerät oder im eigenen öffentlichen Profil einen Stand mit deutlich mehr Fortschritt
+   als den aktuellen, bietet es an, ihn zurückzuholen. Das eigene öffentliche Profil enthält XP, Level, Sterne und Rekorde. */
+function rescueCandidates(){const out=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
+  if(!k||!k.startsWith(LS_KEY)||/:(n|owner)$/.test(k))continue;try{const d=JSON.parse(localStorage.getItem(k));if(d&&typeof d==='object'&&d.settings)out.push({k,d,n:progCount(d)})}catch(e){}}}catch(e){}
+  return out.sort((a,b)=>b.n-a.n)}
+const rescueNo=()=>{try{return JSON.parse(localStorage.getItem('zf-rescue-no')||'{}')}catch(e){return {}}};
+async function rescueCheck(n=0){
+  const d=Store.data;if(!d.account||d.account.guest||!Store.uid)return;
+  if($('.modal')||$('.welcome')||activity){if(n<40)setTimeout(()=>rescueCheck(n+1),3000);return}
+  const cur=progCount(d),no=rescueNo();
+  const loc=rescueCandidates().find(c=>c.n>cur+3&&!no[c.k+':'+c.n]);
+  if(loc)return rescueOffer({src:'local',d:loc.d,key:loc.k+':'+loc.n,n:loc.n,lv:levelInfo(loc.d.xp).level,pr:loc.d.prestige||0,at:loc.d.updatedAt});
+  try{const p=window.fbMyPublic?await window.fbMyPublic():null,s=(p&&p.stats)||{},pn=+s.count||0;
+    if(pn>progCount(Store.data)+3&&!no['public:'+pn])rescueOffer({src:'public',p,key:'public:'+pn,n:pn,lv:p.level||1,pr:p.prestige||0,at:0})}catch(e){console.warn('Rettung:',e)}
+}
+function rescueOffer(c){
+  const cur=progCount(Store.data),m=modal(`<div class="secret"><div class="sk">🛟</div><h3>Älteren Spielstand gefunden</h3>
+    <p class="muted">Wir haben ${c.src==='local'?'auf diesem Gerät':'in deinem Profil'} einen Spielstand mit mehr Fortschritt gefunden als deinen aktuellen:</p>
+    <div class="rescue-cmp"><div><span>Gefunden</span><b>${c.pr?`★${c.pr} `:''}Level ${c.lv}</b><small>${fmtN(c.n)} Runden${c.at?` · ${new Date(c.at).toLocaleDateString('de-DE')}`:''}</small></div>
+      <div><span>Jetzt</span><b>${Store.data.prestige?`★${Store.data.prestige} `:''}Level ${levelInfo(Store.data.xp).level}</b><small>${fmtN(cur)} Runden</small></div></div>
+    ${c.src==='public'?'<p class="muted small">Aus dem Profil lassen sich Level, XP, Sterne und Rekorde zurückholen. Münzen und Shop-Gegenstände sind dort nicht gespeichert – als Ausgleich bekommst du Münzen passend zu deinen XP.</p>':''}
+    <div class="acts"><button class="btn primary" id="rsyes">🛟 Wiederherstellen</button><button class="btn ghost" id="rsno">Nein, danke</button></div></div>`);
+  const close=()=>{m.remove();setHandler(null)};
+  $('#rsno',m).onclick=()=>{const no=rescueNo();no[c.key]=1;try{localStorage.setItem('zf-rescue-no',JSON.stringify(no))}catch(e){}close()};
+  $('#rsyes',m).onclick=()=>{rescueApply(c);close();applySettings();refreshMe(true);go('lessons');Sound.level();confetti(160);toast('🛟','Spielstand wiederhergestellt',`Willkommen zurück auf Level ${levelInfo(Store.data.xp).level}!`)};
+  setHandler({char(){},esc:()=>$('#rsno',m).click()})}
+function rescueApply(c){
+  const D=Store.data,acc=D.account;
+  if(c.src==='local'){Store.data=Store.merge(JSON.parse(JSON.stringify(c.d)));Store.data.account=acc}
+  else{const p=c.p,s=p.stats||{},mx=(a,b)=>Math.max(+a||0,+b||0);
+    D.xp=mx(D.xp,s.xp);D.prestige=mx(D.prestige,p.prestige);D.prestigeXp=mx(D.prestigeXp,(+p.xpAll||0)-(+s.xp||0));
+    Object.entries(s.lessons||{}).forEach(([k,v])=>{const o=D.lessons[k];if(!o||(v&&(v.stars||0)>(o.stars||0)))D.lessons[k]=v});
+    Object.entries(s.high||{}).forEach(([k,v])=>{const o=D.high[k];if(LOWER_BETTER.has(k)){if(v>0&&(!o||v<o))D.high[k]=v}else if(!(o>=v))D.high[k]=v});
+    D.count=mx(D.count,s.count);D.totalSecs=mx(D.totalSecs,s.totalSecs);D.strokes=mx(D.strokes,s.strokes);D.bestStreak=mx(D.bestStreak,s.bestStreak);
+    Object.entries(s.plays||{}).forEach(([k,v])=>{D.plays=D.plays||{};D.plays[k]=mx(D.plays[k],v)});
+    if(s.league)D.league.idx=mx(D.league.idx,s.league.idx);
+    D.coins=mx(D.coins,Math.round(progXp(D)/4))}
+  Store.cloudCount=null;Store.save();Store.push()}
+
 /* Freunde-Zustand, wird live vom Firebase-Modul befüllt (siehe onSocial) */
 const Social={friends:[],incoming:[],outgoing:[],ready:false};
 function recKey(ch,good){const m=CHARMAP[ch];if(!m)return;const d=Store.data,k=d.keys;k[m.k]=k[m.k]||[0,0];k[m.k][0]++;if(!good)k[m.k][1]++;d.strokes=(d.strokes||0)+1;}
@@ -6151,7 +6210,7 @@ async function exportData(){
 }
 function importData(file){
   const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o||typeof o!=='object'||!o.settings)throw 0;
-    {const acc=Store.data.account;Store.data=Store.merge(o);Store.data.account=acc}Store.save();applySettings();refreshMe();toast('📥','Backup geladen','Fortschritt und Einstellungen sind wiederhergestellt.');go('settings')}
+    {const acc=Store.data.account;Store.data=Store.merge(o);Store.data.account=acc}Store.cloudCount=null;Store.save();applySettings();refreshMe();toast('📥','Backup geladen','Fortschritt und Einstellungen sind wiederhergestellt.');go('settings')}
     catch(e){toast('⚠️','Import fehlgeschlagen','Die Datei ist kein Zehnfinger-Backup.')}};rd.readAsText(file);
 }
 let setCat='kb';
@@ -6940,6 +6999,10 @@ function chNotify(){
    (neue Version v, Datum d, kurze Punkte in Spielersprache).
    ===================================================================== */
 const CHANGELOG=[
+  {v:'2026-09-25.1',d:'25.09.2026',items:[
+    '🛟 Sicherer Spielstand: Ein leerer oder älterer Stand kann deinen Fortschritt nicht mehr überschreiben',
+    '🛟 Fortschritt verloren? Das Spiel sucht jetzt automatisch nach deinem alten Spielstand und bietet an, ihn zurückzuholen'
+  ]},
   {v:'2026-09-24.9',d:'24.09.2026',items:[
     '⚡ Das Spiel startet jetzt deutlich schneller – dein Spielstand ist sofort da',
     '🎉 Konfetti läuft flüssig, auch auf älteren Handys',
@@ -8601,7 +8664,7 @@ window.startApp=async function(user,regName){
   if(!Store.data.welcomed)Store.data.seenV=CHANGELOG[0].v;
   const tryNew=n=>{if(Store.data.seenV===CHANGELOG[0].v)return;if($('.modal')||$('.welcome')||activity){if(n<20)setTimeout(()=>tryNew(n+1),3000);return}whatsNew()};
   setTimeout(()=>tryNew(0),1200);
-  updHw();setTimeout(()=>hwIntro(0),4000);setTimeout(()=>loginAuto(0),5500);
+  updHw();setTimeout(()=>hwIntro(0),4000);setTimeout(()=>loginAuto(0),5500);if(user)setTimeout(()=>rescueCheck(0),7000);
   refreshMe();
   go('lessons');
   if(Store.data.notice){const n=Store.data.notice;delete Store.data.notice;setTimeout(()=>toast(n.i,n.t,n.s),900)}
